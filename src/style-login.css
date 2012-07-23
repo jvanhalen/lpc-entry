@@ -1,0 +1,132 @@
+#login {
+    width:400px;
+    height:200px;
+    background-color: #4d5155;  
+    font-family: "Helvetica Neue", Helvetica,Arial,sans-serif;
+}
+
+
+input {
+    background-color: #303030;
+    -webkit-border-radius: .4em;
+    -moz-border-radius: .4em;
+    border-radius: .4em;
+
+    -moz-box-shadow: 0 -1px 0 0 px #000;
+    -webkit-box-shadow: 0 -1px 0 0 px #000;
+    box-shadow: 0 -1px 0 0 px #000;
+    
+    border: none;
+
+    width: 316px;
+    height: 27px;
+    margin:15px 0;
+    color:#fff;
+    padding:0 0 0 10px;
+    font-family: Arial, Helvetica,sans-serif;
+    font-size:8pt;
+    letter-spacing:2px;
+  }
+.password{
+	float:left;
+	
+	margin:8px 0;
+
+	font-family:MisoRegular, Helvetica,Arial,sans-serif;
+
+	text-transform:uppercase;
+
+	letter-spacing:4px;
+
+	font-size:8pt;
+
+	color:#fff;
+
+	}	
+label {
+    font-familu: Helvetica,Arial,sans-serif;
+    text-rtransform:uppercase;
+    letter-spacing: 4px;
+    font-size:8pt;
+    color:#fff;
+}
+button{
+
+	width:79px;
+
+	height:24px;
+
+	text-align:center;
+
+	border:none;
+
+	float:right;
+
+
+
+	background: #363535;
+
+	background: -webkit-gradient(linear, left top, left bottom, from(#3a3a3a), to(#303030));
+
+	background: -moz-linear-gradient(bottom,  #303030,  #3a3a3a);
+
+	filter:  progid:DXImageTransform.Microsoft.gradient(startColorstr='#3a3a3a', endColorstr='#303030');
+
+
+
+	-webkit-border-radius: .2em;
+
+	-moz-border-radius: .2em;
+
+	border-radius: .2em;
+
+
+
+	-webkit-box-shadow: 0 0px 1px rgba(255,255,255,0.1);
+
+	-moz-box-shadow: 0 0px 1px rgba(255,255,255,0.1);
+
+	box-shadow: 0 0px 1px rgba(255,255,255,0.1);
+
+	color:#fff;
+
+	text-align:right;
+
+	}
+
+		
+
+	button:hover{
+
+		background: #363535;
+
+		background: -webkit-gradient(linear, left top, left bottom, from(#4b4b4b), to(#303030));
+
+		background: -moz-linear-gradient(bottom,  #303030,  #4b4b4b);
+
+		filter:  progid:DXImageTransform.Microsoft.gradient(startColorstr='#4b4b4b', endColorstr='#303030');
+
+	}
+
+	
+
+		button:active{
+
+			border:none;
+
+			-webkit-box-shadow: 0 0px 2px rgba(255,255,255,0.2);
+
+			-moz-box-shadow: 0 0px 2px rgba(255,255,255,0.2);
+
+			box-shadow: 0 0px 2px rgba(255,255,255,0.2);
+
+	`	}
+
+	
+
+input:focus:required:invalid {
+
+	color:#000;
+
+}
+
