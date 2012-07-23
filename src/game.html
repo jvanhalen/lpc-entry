@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<head>	
+	<script type="text/javascript" src="./crafty.js"></script>
+	<script type="text/javascript" src="./characters.js"></script>
+</head>
+<body>
+  <div>Galaxy All-Stars : Medieval Edition</div>
+	<script type="text/javascript">
+		Crafty.init(800, 800);
+        Crafty.background('rgb(255,127,0)');
+		// YOUR GAME CODE
+        for (var i = 0; i < 12; i++) {
+             Crafty.e("2D, DOM, LeftControls, Mouse, char" + i)
+             .attr({x:0, y:i*53, z:1})
+             .leftControls(1)
+             .bind("Click", function() {
+                            alert("Clicked");
+                            });
+       }
+
+	</script>
+</body>
+</html>
