@@ -1,0 +1,10 @@
+
+** GAS fantasy edition **
+
+SERVER:
+ - clients should connect to the demo server running at gassrv.dyndns.org:8282
+ - maple.js
+ - couchDB
+ - communicates synchronously with clients (JSON data format)
+
+CLIENT:
