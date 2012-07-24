@@ -4,70 +4,124 @@
  <meta charset="utf-8" />
  <title>Galaxy All-Stars: Medieval Edition Login</title>
  <link rel="stylesheet" href="style-login.css" type="text/css" />
- <!--[if lt IE 9]>
- <script src="html5.js"></script>
- <![endif]-->
+
+    <!-- Maple stuff -->
+	<script type="text/javascript" src="./lib/jquery-1.7.2.js"></script>
+	<script type="text/javascript" src="./lib/jquery-validation-1.9.0/jquery.validate.min.js"></script>
+	<script type="text/javascript" src="./lib/jquery-cookie.js"></script>
+    <script type="text/javascript" charset="utf-8" src="../server/maple/lib/bison.js"></script>
+    <script type="text/javascript" charset="utf-8" src="../server/maple/lib/Class.js"></script>
+    <script type="text/javascript" charset="utf-8" src="../server/maple/lib/Twist.js"></script>
+    <script type="text/javascript" charset="utf-8" src="../server/maple/Maple.js"></script>
+    <script type="text/javascript" charset="utf-8" src="../server/maple/Client.js"></script> 
+    <script type="text/javascript" charset="utf-8" src="./lib/sha-hash.js"></script>
+	<script type="text/javascript" charset="utf-8" src="./lib/crafty.js"></script>
+    <script type="text/javascript" charset="utf-8" src="gas-client.js"></script>
+	<script type="text/javascript" charset="utf-8" src="./characters.js"></script>
+    <script type="text/javascript" charset="utf-8">
+     // ****************************************
+     // validator plugin settings: when submitted, 
+     // we use GAS Maple server for authentication.
+     // ****************************************
+     $.validator.setDefaults({
+	 submitHandler: function() { 
+      var hashPass = Sha1.hash($('#password').val());
+      var login = $('#username').val();
+      gas.send(4, [ '{'+login+':'+hashPass+'}' ]);
+     }
+     });
+     // ****************************************
+     // validator plugin rules for login form
+     // ****************************************
+      $().ready(function(){
+        $('#loginform').validate({
+         rules: {
+         username:"required",
+         password:"required"
+         },
+         messages: {
+           username:"Please enter username or email",
+           password:"Please enter password"
+         }})
+      });
+    </script>
+
+    <script type="text/javascript" charset="utf-8">
+      var teams = ["Warriors of the Sun",
+      "Shark Teeth",
+      "Gray Wolves",
+      "Chaos Power",
+      "Bear Slayers",
+      "Soldiers of the Moon",
+      "Impatients",
+      "Lords of Olor",
+      "Lords of Darkness",
+      "Ring Knights",
+      "Grim Masters",
+      "Dust Biters",
+      "Guardians of Light",
+      "Careless",
+      "Bloodhounds"];
+
+      function displayRanking()
+      {
+      $("#ranking").empty();
+      $("#ranking").width(300);
+      $("#ranking").append('<table>');
+        for( t in teams)
+        {
+        $("#ranking").append('<tr><td>')
+            .append(teams[t])
+            .append('</td><td>')
+            .append(0)
+            .append('</td></tr>');
+        }
+        $("#ranking").append('</table>');
+      }
+
+    </script>
 </head>
-	<script type="text/javascript" src="./jquery-1.7.2.js"></script>
-<script type="text/javascript">
-var teams = ["Warriors of the Sun",
-"Shark Teeth",
-"Gray Wolves",
-"Chaos Power",
-"Bear Slayers",
-"Soldiers of the Moon",
-"Impatients",
-"Lords of Olor",
-"Lords of Darkness",
-"Ring Knights",
-"Grim Masters",
-"Dust Biters",
-"Guardians of Light",
-"Careless",
-"Bloodhounds"];
 
-function displayRanking()
-{
-  $("#ranking").empty();
-  $("#ranking").width(300);
-  $("#ranking").append('<table>');
-  for( t in teams)
-  {
-    $("#ranking").append('<tr><td>')
-        .append(teams[t])
-        .append('</td><td>')
-        .append(0)
-        .append('</td></tr>');
-  }
-  $("#ranking").append('</table>');
-}
-</script>
 <body>
-<div id="title">
-Galaxy All-Stars: Medieval Edition Login
-</div>
-<div id="login">
-<form method="post" action="game.html">
-<fieldset>
-  <label for="username">Username</label>
-  <input type="text" name="username" id="username" required autofocus><br/>
-  <label for="password">Password</label>
-  <input type="password" name="password" id="password" required>
-</fieldset>
-<fieldset>
-  <button type="submit">>>&nbsp;&nbsp;Login</button>
-</fieldset>
-</div>
-<a href="#" id="rank_link">Rankings</a><br/>
-<div id="ranking">
 
-</div>
-<script>
- $("#rank_link").click(function(event){
-   $("#ranking").fadeIn("slow");
-   displayRanking();
-   event.preventDefault();
- });
-</script>
+  <div id="title">
+    Galaxy All-Stars: Medieval Edition Login
+  </div>
+  <div id="login">
+    <form method="post" id="loginform" action="">
+      <fieldset>
+		<div class="form-element">
+          <label for="username">Username</label>
+          <input type="text" name="username" id="username" class="required"><br/>
+        </div>
+		<div class="form-element">
+  	      <label for="password">Password</label>
+		  <input name="password" type="password" id="password" class="required"/>
+		</div>
+      </fieldset>
+      <fieldset>
+        <button type="submit" id="loginbtn"> >>&nbsp;&nbsp;Login</button>
+      </fieldset>
+  </div>
+  <a href="#" id="rank_link">Rankings</a><br/>
+  <div id="ranking">
+
+  </div>
+  <script>
+    // Connect to GAS server
+    var gas = new GAS();
+    //gas.connect('gassrv.dyndns.org', 8282);
+    gas.connect('localhost', 8282);
+
+    // just a jQuery test for fading stuff in
+    $("#rank_link").click(function(event){
+    $("#ranking").fadeIn("slow");
+    displayRanking();
+    event.preventDefault();
+    });
+  </script>
+  
+   
+
 </body>
 </html>

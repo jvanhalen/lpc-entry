@@ -33,8 +33,8 @@ var Test = Maple.Class(function(clientClass) {
     },
 
     update: function(t, tick) {
-        console.log(this.getClients().length, 'client(s) connected', t, tick, this.getRandom());
-        this.broadcast(5, ['GAS leak detected']);
+        //console.log(this.getClients().length, 'client(s) connected', t, tick, this.getRandom());
+        //this.broadcast(5, ['GAS leak detected']);
     },
 
     stopped: function() {
@@ -46,7 +46,14 @@ var Test = Maple.Class(function(clientClass) {
     },
 
     message: function(client, type, tick, data) {
-        console.log('Message:', client, type, tick);
+        //console.log('Message:', client, type, tick);
+        if ( type==4)
+        {
+            console.log("*** User logged *** ");
+            console.log(data);
+            // send acknowledge(here'd be fancy DB query)
+            client.send(6, ['Ok, good to go! w00t!']);
+        }
     },
 
     requested: function(req, res) {
