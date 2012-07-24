@@ -52,7 +52,7 @@ var Test = Maple.Class(function(clientClass) {
             console.log("*** User logged *** ");
             console.log(data);
             // send acknowledge(here'd be fancy DB query)
-            client.send(6, ['Ok, good to go! w00t!']);
+            client.send(6, data);
         }
     },
 

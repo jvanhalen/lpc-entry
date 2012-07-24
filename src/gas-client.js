@@ -46,6 +46,7 @@ var GAS = Class(function() {
         /* Authenticated by server */
         if ( type == 6)
         {
+            $.cookie("gas-login", data);
             $('#login').fadeOut(500, function(){
                 $('#login').empty();
                 DisplayArena();
