@@ -4,7 +4,9 @@
     background-color: #4d5155;  
     font-family: "Helvetica Neue", Helvetica,Arial,sans-serif;
 }
-
+body {
+    background-color: #4d5155;  
+}
 
 input {
     background-color: #303030;
@@ -157,4 +159,4 @@ input:focus:required:invalid {
     width:400px;
 }
 
-
+#cr-stage { border:2px solid black; margin:5px auto; color:white }
