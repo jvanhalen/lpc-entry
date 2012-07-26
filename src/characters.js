@@ -1,16 +1,8 @@
-Crafty.sprite(1, "../pics/arena-characters.png", {
-    char1: [1, 0, 36, 53],
-    char2: [37, 0, 36, 53],
-    char3: [72, 0, 36, 53],
-    char4: [108, 0, 36, 53],
-    char5: [155, 0, 36, 53],
-    char6: [190, 0, 36, 53],
-    char7: [226, 0, 36, 53],
-    char8: [262, 0, 36, 53],
-    char9: [298, 0, 36, 53],
-    char10: [334, 0, 36, 53],
-    char11: [370, 0, 36, 53],
-    char12: [442, 0, 36, 53]
+Crafty.sprite(64, "../pics/walkcycle/BODY_skeleton.png", {
+    skel_walk_back: [0, 0],
+    skel_walk_left: [0, 1],
+    skel_walk_front: [0, 2],
+    skel_walk_right: [0, 3]
 });
 
 Crafty.c("LeftControls", {
@@ -25,6 +17,5 @@ Crafty.c("LeftControls", {
     
 
 });
-
 
 
