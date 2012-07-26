@@ -1,13 +1,55 @@
 var _g_Objects = [];
 
+Crafty.c('Ape', {
+    Ape: function() {
+            //setup animations
+            this.requires("SpriteAnimation, Collision, Grid")
+          
+        //change direction when a direction change event is received
+            .bind("NewDirection",
+                  function (direction) {
+                      if (direction.x < 0) {
+                          if (!this.isPlaying("walk_left"))
+                              this.stop().animate("walk_left", 10, -1);
+                      }
+                      if (direction.x > 0) {
+                          if (!this.isPlaying("walk_right"))
+                              this.stop().animate("walk_right", 10, -1);
+                      }
+                      if (direction.y < 0) {
+                          if (!this.isPlaying("walk_up"))
+                              this.stop().animate("walk_up", 10, -1);
+                      }
+                      if (direction.y > 0) {
+                          if (!this.isPlaying("walk_down"))
+                              this.stop().animate("walk_down", 10, -1);
+                      }
+                      if(!direction.x && !direction.y) {
+                          this.stop();
+                      }
+                  })
+            .bind('Moved', function(from) {
+                if(this.hit('solid')){
+                    this.attr({x: from.x, y:from.y});
+                }
+            })
+            .onHit("fire", function() {
+                this.destroy();
+  			    // Subtract life and play scream sound :-)
+            });
+        return this;
+    }
+});
+
 
 
 /* A very crude code for displaying arena */
 function DisplayArena()
 {
 
-
-
+    var ASSET_PREFIX = '../assets/maps/';
+    var MAP_NAME = "valhalla";
+    
     // try to read json tile map
     $.getJSON('../assets/maps/test.json', function(map) {         
         // process first tileset
@@ -18,78 +60,81 @@ function DisplayArena()
         console.log(tileset.image);
         console.log(map.layers[0].name);
 
-        // register as sprite
-        Crafty.sprite(map.tilewidth, map.tilewidth, '../assets/maps/'+tileset.image, {
-          valhalla: [0, 0]
-        }, tileset.spacing);
+        // add name dynamically so this can be made as proper function
+        var tmp = {};
+        tmp[MAP_NAME] = '[0,0]';
         
-        /*var rows = Math.floor(tileset.imagewidth/(tileset.tileheight+tileset.spacing));
+        // register sprite
+        Crafty.sprite(map.tilewidth, map.tilewidth, ASSET_PREFIX+tileset.image, tmp, tileset.spacing);
+
+        // How many columns does our tileset contain
+        var cols = Math.floor(tileset.imagewidth/(tileset.tileheight+tileset.spacing));
+        var currRow = 0;
+        var currColumn = 0;
+
+        // Process first layer (ground layer)
         for(var i in map.layers[0].data)
         {
-            
-            var x = Math.floor((i/rows));
-            var y = i - (rows*x);
-            console.log(i +' = x:'+x+', y:'+y);
-        }*/
+            // indices in JSON format are:
+            // 0: no tile.
+            // 1: first tile in tileset, coordinates [0,0]
+            var index = map.layers[0].data[i]-1;
+            var yc = Math.floor(index/cols);
+            var xc = index - (cols*yc);
 
-       // TEST top left corner tile
-       Crafty.e("2D, DOM, Sprite, valhalla")
-         .sprite(2,0)
-         .attr({x:0, y:0, z:-1});
-       Crafty.e("2D, DOM, Sprite, valhalla")
-         .sprite(3,0)
-         .attr({x:32, y:0, z:-1});
-    });
+            // Create Crafty entity with plain sprite to be drawn.
+            // attr x,y are expressed in pixels.
+            var GROUND_Z = -1;
+            Crafty.e("2D, DOM, Sprite, "+MAP_NAME)
+                .sprite(xc,yc)
+                .attr({x:currColumn*tileset.tilewidth, y:currRow*tileset.tileheight, z:GROUND_Z});       
 
+            // next tile, take care of indices.
+            currColumn++;
+            if ( currColumn >= map.width ) {
+                currColumn = 0;
+                currRow++;
+            }
 
-        var skel = Crafty.e("2D, DOM, Keyboard, LeftControls, Mouse, SpriteAnimation, skel_walk_back")
-             .attr({x:0, y:0, z:1})
-             .leftControls(1)
-             .animate("walk_back",1,0,8)
-             .animate("walk_left",1,1,8)
-             .animate("walk_front",1,2,8)
-             .animate("walk_right",1,3,8)
-             .animate("stand_back",0,0,0)
-             .animate("stand_left",0,1,1)
-             .animate("stand_front",0,2,2)
-             .animate("stand_right",0,3,3)
-             .bind("Click", function() {
-
-                 alert("Clicked");
-             })
-            .bind('KeyDown', function(){
-                this.stop();
-                if ( this.isDown('W')){
-                    if( !this.isPlaying("walk_back"))
-                        this.animate("walk_back", 15,1);
-                } else if ( this.isDown('S')){
-                    if ( !this.isPlaying("walk_front"))
-                        this.animate("walk_front", 15,1);
-                } else if ( this.isDown('A')){
-                    if ( !this.isPlaying("walk_left"))
-                        this.animate("walk_left", 15,1);
-                } else if ( this.isDown('D')){
-                    if ( !this.isPlaying("walk_right"))
-                        this.animate("walk_right", 15,1);
-                } 
-            })
-        .bind('KeyUp', function(){
-            this.stop();
-            if ( this.isDown('W')){
-                this.animate("stand_back",15,1);
-            } else if ( this.isDown('S')){
-                this.animate("stand_front",15,1);
-            } else if ( this.isDown('A')){
-                this.animate("stand_left ",15,1);
-            } else if ( this.isDown('D')){
-                this.animate("stand_right ",15,1);
-            } 
-
-        });
-        console.log("skel id:"+skel[0]);
-    
-         
+        }
         
+    });
+    // Add a title
+    Crafty.e("2D, DOM, Text").attr({ w: 400, h: 20, x: 150, y: 10 })
+        .text("Kalevala Heroes / GAS Valhalla")
+        .css({ 
+            "text-align": "center",
+            "font-family": "Impact",
+            "font-size": "24pt"
+        });
+    // Add some author info
+    Crafty.e("2D, DOM, Text").attr({ w: 400, h: 20, x: 150, y: 45 })
+        .text("by Team Oldman & Green (c) 2012")
+        .css({ 
+            "text-align": "center",
+            "font-family": "Arial",
+            "font-size": "8pt"
+        });
+    // Our happy skeleton 
+    var skel = Crafty.e("2D, DOM, Keyboard, LeftControls, Mouse, Ape, SpriteAnimation, skel_walk_back")
+        .attr({x:300, y:300, z:1})
+        .leftControls(1)
+        .animate("walk_up",1,0,8)
+        .animate("walk_left",1,1,8)
+        .animate("walk_down",1,2,8)
+        .animate("walk_right",1,3,8)
+        .animate("stand_up",0,0,0)
+        .animate("stand_left",0,1,1)
+        .animate("stand_down",0,2,2)
+        .animate("stand_right",0,3,3)
+        .Ape()
+        .bind("Click", function() {
+            alert("Clicked");
+        });
+    
+        
+    //console.log("skel id:"+skel[0]);
+    
 }
 
 /*global Class, Maple */
