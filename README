@@ -8,3 +8,13 @@ SERVER:
  - communicates synchronously with clients (JSON data format)
 
 CLIENT:
+
+- Game object must contain
+       Body entity (ie. background animation)
+       Head equipment entity (optional)
+       Torso entity (optional)
+       Belt entity (optional)
+       Hands entity (optional)
+       Legs entity (optional)
+       Feet entity (toes) 
+       Weapon entity (optional)
