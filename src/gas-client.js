@@ -251,18 +251,44 @@ var GAS = Class(function() {
 
     message: function(type, tick, data) {
         console.log('message:', type, tick, data);
-        /* Authenticated by server */
-        if ( type == 6)
-        {
-            $.cookie("gas-login", data);
-            $('#login').fadeOut(500, function(){
-                $('#login').empty();
-
-                Crafty.scene("main",DisplayArena());
-            });
-
-        }
+	
+	switch(type) {
+	    // User creation and login
+	    case 2: // User exists, clear fields
+		console.log("User exists");
+		document.getElementById('username').value = '';
+		document.getElementById('password').value = '';
+		break;
+	    
+	    case 5:
+	    case 11:
+		    var hash = Sha1.hash(JSON.parse(data).salt + $('#password').val());
+		    this.send(type, ['{"username":"' + $('#username').val() + '", "pwdhash":"' + hash + '"}']);
+		    console.log('sending: [{"username":"' + $('#username').val() + '", "pwdhash":"' + hash + '"}]');
+	      break;
+	    
+	    case 10: // Request salt
+		    this.send(type, ['{"username":"' + $('#username').val() + '"}']);
+	      break;
+	    
+	    case 12: // Authenticated by the server - proceed to game lobby
+		if(JSON.parse(data).response !== "NOK") {
+		    $.cookie("gas-login", data);
+		    $('#login').fadeOut(500, function(){
+			$('#login').empty();
+			Crafty.scene("main",DisplayArena());
+		    });
+		}
+		else {console.log("Login failed");
+		}
+	    break;
+	    
+	    default:
+	      console.log("Default branch reached in 'message handling'");
+	      break;
+	}
         return true; // return true to mark this message as handled
+
     },
 
     syncedMessage: function(type, tick, data) {
