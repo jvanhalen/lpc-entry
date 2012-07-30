@@ -7,7 +7,22 @@
 body {
     background-color: #4d5155;  
 }
-
+@font-face {
+	font-family: "Fanwood";
+	src: url("../assets/fonts/Fanwood.otf");
+}
+@font-face {
+	font-family: "Fanwood-Italic";
+	src: url("../assets/fonts/Fanwood Italic.otf");
+}
+@font-face {
+	font-family: "Fanwood-Text";
+	src: url("../assets/fonts/Fanwood Text.otf");
+}
+@font-face {
+	font-family: "Fanwood-Text-Italic";
+	src: url("../assets/fonts/Fanwood Text Italic.otf");
+}
 input {
     background-color: #303030;
     -webkit-border-radius: .4em;
@@ -46,7 +61,7 @@ input {
 
 	}	
 label {
-    font-familu: Helvetica,Arial,sans-serif;
+    font-family: Helvetica,Arial,sans-serif;
     text-rtransform:uppercase;
     letter-spacing: 4px;
     font-size:8pt;

@@ -66,6 +66,20 @@ Crafty.c('Ape', {
     }
 });
 
+function GetLoadableAssetsFromTileMap( file, assetArray )
+{
+    var ASSET_PREFIX = '../assets/maps/';
+    // try to read json tile map
+    $.getJSON( ASSET_PREFIX+file, function(map) {                 
+        
+        for ( var i=0;i<map.tilesets.length;i++)
+        {
+            var assetFile = ASSET_PREFIX+map.tilesets[i].image;
+            if ( jQuery.inArray(assetFile, assetArray) == -1)
+                 assetArray.push(assetFile);
+        }
+    });
+}
 
 function LoadTileMap( file)
 {
@@ -135,6 +149,7 @@ function LoadTileMap( file)
                     // attr x,y are expressed in pixels.
                     var GROUND_Z = -1;
                     var spriteName = map.properties.name+tilesetIndex;
+                  
                     Crafty.e("2D, DOM, Sprite, "+spriteName)
                         .sprite(xc,yc)
                         .attr({x:currColumn*tileset.tilewidth, y:currRow*tileset.tileheight, z:GROUND_Z+layer});       
@@ -151,9 +166,233 @@ function LoadTileMap( file)
     });
 }
 
+var text = "Känsä the Skeleton<br>Health: 20<br>Strength:2<br>Dexterity: 5<br>Mana:7<br>Age:5/35<br>Salary:32<br>Fights: 0<br>KOs:2<br>Injury: 0<br>Melee weapon: Fist<br>missile weapon: None<br>Spell: None<br>Dodge: Dart<br>Magic res: 20%<br>Armour: None";
 
+var shopListObjs = [];
+var magicItems = [
+    {
+        name:'Rain Ward',
+        mana:1,
+        duration:10,
+        effect: 'Subtracts damage by 1 point(s)',
+        cost:100,
+        desc:'This spell has made rain capes unnecessary'
+    },
+    {                
+        name:'Punch Ward',
+        mana:2,
+	    duration:10,
+	    effect:'Subtracts damage by 2 point(s)',
+	    cost:200,
+	    desc:'Wards from a punch'
+    }
+];
+var mightItems = [
+    {
+        name:'Sharp Stick',
+        effect:'2-5',
+	    cost:70
+    },
+	{
+        name:'Cheap Spear',
+	    effect:'2-7',
+	    cost:129
+    }
+];
+
+function showMagicView()
+{
+    var _y = 200;
+    for( var i in shopListObjs )
+    {
+        shopListObjs[i].destroy();
+    }
+    shopListObjs = [];
+    for( var i in magicItems )
+    {
+        var item = magicItems[i];
+        _y = _y + 32;
+        shopListObjs.push( 
+            Crafty.e("2D, DOM, Text, Mouse").attr({w:300,h:32, x: 102, y: _y, z: 3 })
+                .text(item.name+' ' + item.mana + ' ' + item.duration + ' ' + item.effect + ' ' + item.cost + ' ' + item.desc)
+                .css({ 
+                    "text-align": "left",
+                    "font-family": "Arial",
+                    "font-size": "8pt",
+                    "color": "#000000"
+                })
+                .bind('Click', function(){
+                    alert('Selected spell'+this[0]);
+                })
+        );
+        shopListObjs.push( 
+            Crafty.e("2D, DOM, Sprite, Mouse, staff"+i)
+                .attr({x: 54, y: _y, z: 3 })
+                .bind('Click', function(){
+                    alert('Selected equipment'+this[0]);
+                }));
+    }
+}
+
+function showMightView()
+{
+    var _y = 200;
+    for( var i in shopListObjs )
+    {
+        shopListObjs[i].destroy();
+    }
+    shopListObjs = [];
+    for( var i in mightItems )
+    {
+        var item = mightItems[i];
+        _y = _y + 32;
+        shopListObjs.push( 
+            Crafty.e("2D, DOM, Text, Mouse").attr({w:200, h:32, x: 102, y: _y, z: 3 })
+                .text(item.name+' ' +item.effect + ' ' + item.cost )
+                .css({ 
+                    "text-align": "left",
+                    "font-family": "Arial",
+                    "font-size": "8pt",
+                    "color": "#000000"
+                })
+                .bind('Click', function(){
+                    alert('Selected equipment'+this[0]);
+                })
+        ); 
+        shopListObjs.push( 
+            Crafty.e("2D, DOM, Sprite, Mouse, spear"+i)
+                .attr({x: 54, y: _y, z: 3 })
+                .bind('Click', function(){
+                    alert('Selected equipment'+this[0]);
+                }));
+    }
+}
+
+function showGladiatorView()
+{
+    LoadTileMap( 'inventory.json');
+    
+
+    Crafty.sprite(64,'../pics/walkcycle/BODY_skeleton.png', {
+        skeleton: [0,0]
+    });
+
+    Crafty.sprite(32, '../assets/maps/items_small.png', {
+        helmet0: [0,0],
+        helmet1: [1,0],
+        helmet2: [2,0],
+        boots0: [0,1],
+        boots1: [1,1],
+        boots2: [2,1],
+        necklace0: [0,3],
+        necklace1: [1,3],
+        necklace2: [2,3],
+        sword0: [0,4],
+        sword1: [1,4],
+        sword2: [2,4],
+        axe0: [0,5],
+        axe1: [1,5],
+        axe2: [2,5],
+        mace0: [0,6],
+        mace1: [1,6],
+        mace2: [2,6],
+        spear0: [0,7],
+        spear1: [1,7],
+        spear2: [2,7],
+        staff0: [0,8],
+        staff1: [1,8],
+        staff2: [2,8],
+        shield0: [0,9],
+        shield1: [1,9],
+        shield2: [2,9]
+    });
+    
+
+    Crafty.e("2D, DOM, Sprite, Mouse, skeleton")
+        .attr({x:450, y:220, z:3})
+        .sprite(0,1)
+        .bind('MouseOver', function(e){
+            this.sprite(0,2);
+        })
+        .bind('MouseOut', function(e){
+            this.sprite(0,1);
+        });
+              
+
+    Crafty.e("2D, DOM, Text").attr({ w: 400, h: 120, x: 520, y: 170, z: 3 })
+        .text(text)
+        .css({ 
+            "text-align": "left",
+            "font-weight":"bold",
+            "font-family": "Fanwood",
+            "font-size": "12pt",
+            "color": "#000000"
+        });
+
+
+    Crafty.e("2D, DOM, Text").attr({ w: 400, h: 120, x: 210, y: 50, z: 3 })
+        .text("Gladiator Properties")
+        .css({ 
+            "text-align": "left",
+            "font-weight": "bold",
+            "font-family": "Fanwood",
+            "font-size": "24pt",
+            "color": "#000000"
+        });
+    Crafty.e("2D, DOM, Text").attr({ w: 400, h: 120, x: 50, y: 150, z: 3 })
+        .text("Shop for Everything")
+        .css({ 
+            "text-align": "left",
+            "font-weight": "bold",
+            "font-family": "Fanwood",
+            "font-size": "24pt",
+            "color": "#000000"
+        });
+
+    Crafty.e("2D, DOM, Text, Mouse").attr({x: 50, y: 200, z: 3 })
+        .text("Might")
+        .css({ 
+            "text-align": "left",
+            "font-family": "Arial",
+            "font-size": "12pt",
+            "color": "#000000"
+        })
+        .areaMap([0,0],[0,60],[60,60],[60,0])
+        .bind('Click', function(e){
+            showMightView();
+        });
+    Crafty.e("2D, DOM, Text, Mouse").attr({x: 150, y: 200, z: 3 })
+        .text("Magic")
+        .css({ 
+            "text-align": "left",
+            "font-family": "Arial",
+            "font-size": "12pt",
+            "color": "#000000"
+        })
+        .areaMap([0,0],[0,60],[60,60],[60,0])
+        .bind('Click', function(e){
+            showMagicView();
+        });
+    
+    
+   
+    
+    Crafty.e("2D, DOM, Text, Mouse").attr({x: 50, y: 50, z: 3 })
+        .text("Back")
+        .css({ 
+            "text-align": "left",
+            "font-family": "Arial",
+            "font-size": "12pt",
+            "color": "#f00"
+        })
+        .areaMap([0,0],[0,60],[60,60],[60,0])
+        .bind('Click', function(e){
+            Crafty.scene("managerView");
+        });
+       
+}
 /* A very crude code for displaying arena */
-function DisplayArena()
+function showManagerView()
 {
 
     LoadTileMap( 'test.json');
@@ -196,7 +435,7 @@ function DisplayArena()
        
         .Ape()
         .bind("Click", function() {
-            alert("Clicked");
+            Crafty.scene("gladiatorView");
         });
 
     skel.head = Crafty.e("2D, DOM, SpriteAnimation, HEAD_hair_blonde_walk")
@@ -216,9 +455,30 @@ function DisplayArena()
 
 
     skel.attach(skel.head,skel.torso);
-    
+    Crafty.sprite(64, '../pics/items.png', {
+        big_boys_do_battle: [0,0]
+    });
+    Crafty.e("2D, DOM, Mouse, Sprite, big_boys_do_battle")
+        .attr({x:367, y:420, z:3})
+        .sprite(1,9)
+        .bind('Click', function(){
+            Crafty.scene("arenaView");
+        });
+            
+
     //console.log("skel id:"+skel[0]);
     
+}
+
+function showArenaView()
+{
+    LoadTileMap( 'arena.json');
+    Crafty.e("2D, DOM, Mouse, Text")
+        .attr({w:200, h:32, x:20, y:10})
+        .text('Quit')
+        .bind('Click', function(){
+            Crafty.scene("managerView");
+        })
 }
 
 /*global Class, Maple */
@@ -258,7 +518,7 @@ var GAS = Class(function() {
             $('#login').fadeOut(500, function(){
                 $('#login').empty();
 
-                Crafty.scene("main",DisplayArena());
+                Crafty.scene("managerView",showManagerView);
             });
 
         }

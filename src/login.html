@@ -77,6 +77,8 @@
             .append('</td></tr>');
         }
         $("#ranking").append('</table>');
+      // let's make Crafty aware of these changes.
+
       }
 
     </script>
@@ -113,21 +115,37 @@
     var gas = new GAS();
     //gas.connect('gassrv.dyndns.org', 8282);
     gas.connect('localhost', 8282);
+    Crafty.scene("managerView", showManagerView);
+    Crafty.scene("gladiatorView", showGladiatorView);
+    Crafty.scene("arenaView", showArenaView);
 
-    Crafty.scene("loading", function(){
-    Crafty.e("2D, DOM, Text").attr({ w: 100, h: 20, x: 150, y: 120 })
-            .text("Loading")
-            .css({ "text-align": "center" });
-    });
-
-    if ( $.cookie("gas-login") ) {
+    var assetArray = [];
+    GetLoadableAssetsFromTileMap( 'test.json',      assetArray);
+    GetLoadableAssetsFromTileMap( 'inventory.json', assetArray);
+    GetLoadableAssetsFromTileMap( 'arena.json', assetArray);
+    Crafty.scene("loadingView", function(){
+       console.log('Loading');
+       for( var i=0;i< assetArray.length;i++)
+       {
+          console.log('About to load'+assetArray[i]);
+       }
+       Crafty.load(assetArray, function(e){ 
+                       console.log('Done loading, starting manager!');
+                       Crafty.scene("managerView"); });
     
+       Crafty.e("2D, DOM, Text").attr({ w: 100, h: 20, x: 150, y: 120 })
+      .text("Loading")
+      .css({ "text-align": "center" });
+    });
+    
+    if ( $.cookie("gas-login") ) {
         $('#login').fadeOut(500, function(){
-                $('#login').empty()});
+           $('#login').empty();
+                       Crafty.scene("loadingView");
 
-        Crafty.scene("main",DisplayArena());
+                       });
+    };
 
-    }
     // just a jQuery test for fading stuff in
     $("#rank_link").click(function(event){
     $("#ranking").fadeIn("slow");

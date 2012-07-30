@@ -18,3 +18,10 @@ CLIENT:
        Legs entity (optional)
        Feet entity (toes) 
        Weapon entity (optional)
+
+
+KNOWN ISSUES:
+
+    If Crafty is initialized and some component is hidden after that from page,
+    Crafty's mouse related coordinates get busted unless you do window resize. 
+    I believe that this is browser-related and _needs_ to be taken into account when designing a page.
