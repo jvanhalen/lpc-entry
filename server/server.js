@@ -19,8 +19,7 @@
   * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
   * THE SOFTWARE.
   */
-var Maple = require('../Maple');
-var eventQueue = [];
+var Maple = require('./maple/Maple');
 
 // Test -----------------------------------------------------------------------
 var Test = Maple.Class(function(clientClass) {
