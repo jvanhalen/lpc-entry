@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.0" orientation="orthogonal" width="25" height="25" tilewidth="32" tileheight="32">
+ <properties>
+  <property name="name" value="arena"/>
+ </properties>
+ <tileset firstgid="1" name="gas-valhalla" tilewidth="32" tileheight="32" spacing="2">
+  <image source="gas-valhalla.png" width="546" height="378"/>
+ </tileset>
+ <layer name="Ground" width="25" height="25">
+  <data encoding="base64" compression="zlib">
+   eJy1lsuqwjAQhrPyQbztzkbd6kJceRTB7rwgKCJ4OQfElYI+gL6BvoE+pH+gA0OYpFNtFx+B6TR/+mcmadEYU8qRMqiBeo40mEYHtEEX/AZGbU5H0IjAEKzBJjBqcyKPxhwcwSkwanO4xoKxzxA+bwsMwDJjjRXogWbs1SzWuIKbkyvFDoG5Kd9qTEDf0biDB/hh7/CYi6RJ+T6NJ3g571OMr1XScfN9GpIvfB6NlxqvKqDq0ZB8o1har3x7K/nmxj71SvI9i7pKMy99M/dOU1dpNb7xitcAf+7WRlZeST3q7tsnPSj5wNdA66aY1qukvpO+La1X0vkjnSN83T6vpuAP/Bu5BzXnFdWsVFdbsANncDG6+yOpnvk+reL5o9grewfn8c9g5y8wDfpnGIFxYNTm2P6x96ztoTfRX/DR
+  </data>
+ </layer>
+ <layer name="Additions" width="25" height="25">
+  <data encoding="base64" compression="zlib">
+   eJxjYKAvMKSRGlEgdgFiZ5JdhB84Q80VA+JgIA6hsvkwEAI1H4ZBIAiIs4A4Gw9NrBoGJLPtgNgfKpYExFVAXI2HJlYNCPgAsS0Q+wFxPMWhgh3EALEv1A5ag4GwAxR+djS2IxaI42hsBy3AYLCDGvFDyA5c6ZsUuwnZgSsNkJI2BkN8jNpBXzvoAUD1VB6UTas2A3JdSwsQzIBZp9PCbACQgCP/
+  </data>
+ </layer>
+</map>
