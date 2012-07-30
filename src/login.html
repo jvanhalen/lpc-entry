@@ -6,18 +6,28 @@
  <link rel="stylesheet" href="style-login.css" type="text/css" />
 
     <!-- Maple stuff -->
-	<script type="text/javascript" src="./lib/jquery-1.7.2.js"></script>
-	<script type="text/javascript" src="./lib/jquery-validation-1.9.0/jquery.validate.min.js"></script>
-	<script type="text/javascript" src="./lib/jquery.cookie.js"></script>
+    <script type="text/javascript" src="./lib/jquery-1.7.2.js"></script>
+    <script type="text/javascript" src="./lib/jquery-validation-1.9.0/jquery.validate.min.js"></script>
+    <script type="text/javascript" src="./lib/jquery.cookie.js"></script>
     <script type="text/javascript" charset="utf-8" src="../server/maple/lib/bison.js"></script>
     <script type="text/javascript" charset="utf-8" src="../server/maple/lib/Class.js"></script>
     <script type="text/javascript" charset="utf-8" src="../server/maple/lib/Twist.js"></script>
     <script type="text/javascript" charset="utf-8" src="../server/maple/Maple.js"></script>
     <script type="text/javascript" charset="utf-8" src="../server/maple/Client.js"></script> 
     <script type="text/javascript" charset="utf-8" src="./lib/sha-hash.js"></script>
-	<script type="text/javascript" charset="utf-8" src="./lib/crafty.js"></script>
+    <script type="text/javascript" charset="utf-8" src="./lib/crafty.js"></script>
     <script type="text/javascript" charset="utf-8" src="gas-client.js"></script>
-	<script type="text/javascript" charset="utf-8" src="./characters.js"></script>
+    <script type="text/javascript" charset="utf-8" src="./characters.js"></script>
+    
+    
+    <script type="text/javascript">
+    var type=10;
+    function setType(value)
+    {
+	    type = value;
+    }
+    </script>
+    
     <script type="text/javascript" charset="utf-8">
      // ****************************************
      // validator plugin settings: when submitted, 
@@ -27,7 +37,7 @@
 	 submitHandler: function() { 
       var hashPass = Sha1.hash($('#password').val());
       var login = $('#username').val();
-      gas.send(4, [ '{'+login+':'+hashPass+'}' ]);
+       gas.send(type, [ '{"username":"'+login+'"}' ]);
      }
      });
      // ****************************************
@@ -92,19 +102,22 @@
   <div id="login">
     <form method="post" id="loginform" action="">
       <fieldset>
-		<div class="form-element">
+	<div class="form-element">
           <label for="username">Username</label>
-          <input type="text" name="username" id="username" class="required"><br/>
+          <input type="text" name="username" id="username" class="required" />
         </div>
-		<div class="form-element">
-  	      <label for="password">Password</label>
-		  <input name="password" type="password" id="password" class="required"/>
-		</div>
+	<div class="form-element">
+  	  <label for="password">Password</label>
+	  <input name="password" type="password" id="password" class="required" />
+	</div>
       </fieldset>
       <fieldset>
-        <button type="submit" id="loginbtn"> >>&nbsp;&nbsp;Login</button>
+        <button type="submit" id="createbtn" title="Create new team" onclick="setType(2);"> >>&nbsp;&nbsp;Create</button>
+        <button type="submit" id="loginbtn" title="Log in to an existing account" onclick="setType(10);"> >>&nbsp;&nbsp;Login</button>
       </fieldset>
+    </form>
   </div>
+  
   <a href="#" id="rank_link">Rankings</a><br/>
   <div id="ranking">
   </div>
@@ -113,11 +126,13 @@
     Crafty.background('#4d5155');
     // Connect to GAS server
     var gas = new GAS();
-    //gas.connect('gassrv.dyndns.org', 8282);
-    gas.connect('localhost', 8282);
+
+    gas.connect('gassrv.dyndns.org', 8282);
+    //gas.connect('localhost', 8282);
     Crafty.scene("managerView", showManagerView);
     Crafty.scene("gladiatorView", showGladiatorView);
     Crafty.scene("arenaView", showArenaView);
+
 
     var assetArray = [];
     GetLoadableAssetsFromTileMap( 'test.json',      assetArray);
