@@ -3,6 +3,15 @@
    "_id": "messages",
    "_rev": "1",
    "message": [{
+         "name": "TEAM_REQUEST",
+         "type": "40" 
+         },
+         {
+         "name": "TEAM_RESPONSE",
+         "type": "41" 
+         /* See team.json for data included in this response*/
+         },
+         {
         "name": "MOVE_REQUEST",
         "type": "50",
         "username": "oldman",
@@ -33,7 +42,7 @@
         "type": "52",
         "username": "oldman",
         "attackerid": "Mauri",
-        "targetid": "Känsä",
+        "targetid": "Kaensae",
         "attackerpos":
             [{"x": "1",
               "y": "1"}],
@@ -46,7 +55,7 @@
         "type": "53",
         "response": "OK/NOK",
         "attackerid": "Mauri",
-        "targetid": "Känsä",
+        "targetid": "Kaensae",
         "attackerpos":
             [{"x": "1",
               "y": "1"}],
