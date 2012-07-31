@@ -16,6 +16,7 @@
     <script type="text/javascript" charset="utf-8" src="../server/maple/Client.js"></script> 
     <script type="text/javascript" charset="utf-8" src="./lib/sha-hash.js"></script>
     <script type="text/javascript" charset="utf-8" src="./lib/crafty.js"></script>
+    <script type="text/javascript" charset="utf-8" src="ape-component.js"></script>
     <script type="text/javascript" charset="utf-8" src="gas-client.js"></script>
     <script type="text/javascript" charset="utf-8" src="./characters.js"></script>
     
@@ -154,13 +155,16 @@
     });
     
     if ( $.cookie("gas-login") ) {
-        $('#login').fadeOut(500, function(){
+          $('#login').fadeOut(500, function(){
+             $('#login').empty();
+             Crafty.scene("loadingView");
+          });
+    }
+    // Ignore login for development..
+    /*     $('#login').fadeOut(500, function(){
            $('#login').empty();
                        Crafty.scene("loadingView");
-
-                       });
-    };
-
+                       });*/
     // just a jQuery test for fading stuff in
     $("#rank_link").click(function(event){
     $("#ranking").fadeIn("slow");

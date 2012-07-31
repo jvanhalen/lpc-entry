@@ -1,70 +1,4 @@
-var _g_Objects = [];
 
-
-
-Crafty.c('Ape', {
-    head:{},
-    torso:{},
-    weapon:{},
-    Ape: function() {
-            //setup animations
-            this.requires("SpriteAnimation, Collision, Grid")
-          
-        //change direction when a direction change event is received
-            .bind("NewDirection",
-                  function (direction) {
-                      if (direction.x < 0) {
-                          if (!this.isPlaying("walk_left")){
-                              this.stop().animate("walk_left", 10, -1);
-                              if ( this.head ) this.head.stop().animate("walk_left", 10, -1);
-                              if ( this.torso ) this.torso.stop().animate("walk_left", 10, -1);
-                              if ( this.weapon ) this.weapon.stop().animate("walk_left", 10, -1);
-                          }
-                      }
-                      if (direction.x > 0) {
-                          if (!this.isPlaying("walk_right")){
-                              this.stop().animate("walk_right", 10, -1);
-                              if ( this.head )this.head.stop().animate("walk_right", 10, -1);
-                              if ( this.torso )this.torso.stop().animate("walk_right", 10, -1);
-                              if ( this.weapon )this.weapon.stop().animate("walk_right", 10, -1);
-                          }
-                      }
-                      if (direction.y < 0) {
-                          if (!this.isPlaying("walk_up")){
-                              this.stop().animate("walk_up", 10, -1);
-                              if ( this.head ) this.head.stop().animate("walk_up", 10, -1);
-                              if ( this.torso ) this.torso.stop().animate("walk_up", 10, -1);
-                              if ( this.weapon ) this.weapon.stop().animate("walk_up", 10, -1);
-                          }
-                      }
-                      if (direction.y > 0) {
-                          if (!this.isPlaying("walk_down")){
-                              this.stop().animate("walk_down", 10, -1);
-                              if ( this.head ) this.head.stop().animate("walk_down", 10, -1);
-                              if ( this.weapon ) this.weapon.stop().animate("walk_down", 10, -1);
-                          }
-                      }
-                      if(!direction.x && !direction.y) {
-                          this.stop();
-                          if ( this.head ) this.head.stop();
-                          if ( this.torso ) this.torso.stop();
-                          if ( this.weapon) this.weapon.stop();
-                      }
-                  })
-            .bind('Moved', function(from) {
-
-                if(this.hit('solid')){
-                    this.attr({x: from.x, y:from.y});
-                } 
-
-            })
-            .onHit("fire", function() {
-                this.destroy();
-  			    // Subtract life and play scream sound :-)
-            });
-        return this;
-    }
-});
 
 function GetLoadableAssetsFromTileMap( file, assetArray )
 {
@@ -111,9 +45,6 @@ function LoadTileMap( file)
         console.log('Map is called: '+map.properties.name);*/
  
        // add name dynamically so this can be made as proper function
-
-
-        
         for( var layer=0; layer<map.layers.length;layer++)
         {
             var currRow = 0;
@@ -413,48 +344,71 @@ function showManagerView()
             "font-family": "Arial",
             "font-size": "8pt"
         });
-    // Our happy skeleton 
-    /*Crafty.sprite(64, "../pics/walkcycle/BODY_skeleton.png", {
-      skel_walk_back: [0, 0],
-      skel_walk_left: [0, 1],
-      skel_walk_front: [0, 2],
-      skel_walk_right: [0, 3]
-      });*/
-
-    LoadObjectAsset( 'BODY', 'skeleton');
-    LoadObjectAsset( 'HEAD', 'hair_blonde');
-    LoadObjectAsset( 'TORSO', 'chain_armor_torso');
-
-    var skel = Crafty.e("2D, DOM, Multiway, Keyboard, LeftControls, Mouse, Ape, SpriteAnimation, BODY_skeleton_walk")
-        .attr({x:300, y:300, z:1})
-        .leftControls(1)
-        .animate("walk_up",1,0,8)
-        .animate("walk_left",1,1,8)
-        .animate("walk_down",1,2,8)
-        .animate("walk_right",1,3,8)
-       
-        .Ape()
-        .bind("Click", function() {
-            Crafty.scene("gladiatorView");
+    // Testing info
+    Crafty.e("2D, DOM, Text").attr({ w: 140, h: 20, x: 42, y: 220, z:8 })
+        .text("~Legend~")
+        .css({ 
+            "text-align": "center",
+            "font-family": "Fanwood",
+            "font-size": "18pt",
+            "color":"#734212"
         });
+    Crafty.e("2D, DOM, Text").attr({ w: 130, h: 300, x:52 , y: 260, z:8 })
+        .text("F1: Wear Robe<br>F2: Wear Leather<br>F3: Wear Plate<br>F4: Go Nude<br>X: Bones <br>H: Flesh<br>Arrow keys: Slash!<br>WASD: move")
+        .css({ 
+            "text-align": "left",
+            "font-family": "Fanwood-Text",
+            "font-size": "10pt",
+            "color": "#5c3111"
+        });
+    var tmpObj = Crafty.e("2D, DOM, Multiway, Keyboard, LeftControls, Mouse, Ape, Sprite, transparent")
+        .attr({x:370, y:300, z:5})
+        .leftControls(1)
+        .loadAnimation("skeleton-body.json")
+        .Ape()
+        .bind("Click", function(){
+            Crafty.scene("gladiatorView");
+        })
+        .bind('KeyDown', function(){
+            if ( this.isDown('LEFT_ARROW')) {
+                this.slashAttack('left');
+            }
+            if ( this.isDown('RIGHT_ARROW')) {
+                this.slashAttack('right');
+            }
+            if ( this.isDown('DOWN_ARROW')) {
+                this.slashAttack('down');
+            }
+            if ( this.isDown('UP_ARROW')) {
+                this.slashAttack('up');
+            }
+            if ( this.isDown('F1'))
+            {
+                this.loadAnimation("robe.json");
+            }
+            if ( this.isDown('F2'))
+            {
+                this.loadAnimation("leather-armor.json");
+            }
+            if ( this.isDown('F3'))
+            {
+                this.loadAnimation("plate-armor.json");
+            }
+            if ( this.isDown('F4'))
+            {
+                this.loadAnimation("no-armor.json");
+            }
+            if ( this.isDown('X'))
+            {
+                this.loadAnimation("skeleton-body.json");
+            }
+            if ( this.isDown('H'))
+            {
+                this.loadAnimation("human-body.json");
+            }
+        })
 
-    skel.head = Crafty.e("2D, DOM, SpriteAnimation, HEAD_hair_blonde_walk")
-        .attr({x:300, y:300, z:2})
-        .animate("walk_up",1,0,8)
-        .animate("walk_left",1,1,8)
-        .animate("walk_down",1,2,8)
-        .animate("walk_right",1,3,8)
-       
-    skel.torso = Crafty.e("2D, DOM, SpriteAnimation, TORSO_chain_armor_torso_walk")
-        .attr({x:300, y:300, z:2})
-        .animate("walk_up",1,0,8)
-        .animate("walk_left",1,1,8)
-        .animate("walk_down",1,2,8)
-        .animate("walk_right",1,3,8)
 
-
-
-    skel.attach(skel.head,skel.torso);
     Crafty.sprite(64, '../pics/items.png', {
         big_boys_do_battle: [0,0]
     });
@@ -464,7 +418,7 @@ function showManagerView()
         .bind('Click', function(){
             Crafty.scene("arenaView");
         });
-            
+
 
     //console.log("skel id:"+skel[0]);
     
