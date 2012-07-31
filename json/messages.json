@@ -1,0 +1,78 @@
+
+{
+   "_id": "messages",
+   "_rev": "1",
+   "message": [{
+         "name": "TEAM_REQUEST",
+         "type": "40" 
+         },
+         {
+         "name": "TEAM_RESPONSE",
+         "type": "41" 
+         /* See team.json for data included in this response*/
+         },
+         {
+         "name": "MATCH_SYNC",
+         "type": "42",
+         "team1": [{"name": "My team", "gladiator": [{"name": "Mauri", "pos": [{"x": "1", "y": "1"}]},
+                                                     {"name": "Kaensae", "pos": [{"x": "1", "y": "1"}]}]}], // Include all the gladiator data
+         "team2": [{"name": "Your team", "gladiator": [{"name": "Mauri", "pos": [{"x": "1", "y": "1"}]},
+                                                     {"name": "Kaensae", "pos": [{"x": "1", "y": "1"}]}]}], // Include all the gladiator data
+         },
+         {
+        "name": "MOVE_REQUEST",
+        "type": "50",
+        "username": "oldman",
+        "oldpos":
+            [{"x": "1",
+              "y": "1"}],
+        "newpos":
+            [{"x": "1",
+              "y": "1"}],
+        "id":"objectid"
+        },
+        {
+        "name": "MOVE_RESPONSE",
+        "type": "51",
+        "response": "OK/NOK",
+        "oldpos":
+            [{"x": "1",
+              "y": "1"}],
+        "newpos":
+            [{"x": "2",
+              "y": "1"}],
+        "id":"objectid",
+        "attack": [{"damage": "0", "target": "name"}]
+        },
+
+        {
+        "name": "ATTACK_REQUEST",
+        "type": "52",
+        "username": "oldman",
+        "attackerid": "Mauri",
+        "targetid": "Kaensae",
+        "attackerpos":
+            [{"x": "1",
+              "y": "1"}],
+        "targetpos":
+            [{"x": "1",
+              "y": "1"}],
+        },
+        {
+        "name": "ATTACK_RESPONSE",
+        "type": "53",
+        "response": "OK/NOK",
+        "attackerid": "Mauri",
+        "targetid": "Kaensae",
+        "attackerpos":
+            [{"x": "1",
+              "y": "1"}],
+        "targetpos":
+            [{"x": "2",
+              "y": "1"}],
+        "damage": "damagetaken",
+        "newtargetpos":
+            [{"x": "1",
+              "y": "1"}]        
+         }]
+}

@@ -1,0 +1,11 @@
+{
+
+    "_id": "configs",
+    "_rev": "1",
+    "teamsizemax": "8",
+    "teamsizematch": "4",
+    "rankdifference": "10",
+    "allowgamechat": "false",
+    "allowlobbychat": "true"
+    
+}
