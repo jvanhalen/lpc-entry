@@ -36,8 +36,28 @@ var Test = Maple.Class(function(clientClass) {
     update: function(t, tick) {
         //console.log(this.getClients().length, 'client(s) connected', t, tick, this.getRandom());
         //this.broadcast(5, ['GAS leak detected']);
-    },
 
+        // make object move on client side.
+        /*if ( this.getClients().length > 0 ) 
+        {
+            var moveCmd = {
+                "name": "MOVE_REQUEST",
+                "type": 50,
+                "username": "oldman",
+                "oldpos":
+                [{"x": 1,
+                  "y": 1}],
+                "newpos":
+                [{"x": 1,
+                  "y": 1}],
+                "id":"objectid"
+            }
+            var data = [];
+            data[0] = moveCmd;
+            this.getClients().getAt(0).send(moveCmd.type, data );
+        }*/
+    },
+    
     stopped: function() {
         console.log('Server stopped');
 	this.broadcast(0, ['-- server halted --']);
@@ -308,7 +328,7 @@ var Test = Maple.Class(function(clientClass) {
 		   //Connection OK / NOK
 			if(JSON.parse(data).pwdhash === JSON.parse(response).password) {
 				console.log("User", JSON.parse(data).username, "logged in.");
-				client.send(12, ['{"response":"OK - Connection established"}']);
+				client.send(12, ['{"username":"'+JSON.parse(data).username+'","password":"'+JSON.parse(response).password+'"}']);
 			}
 			else {
 				console.log("User", JSON.parse(data).username, "login failed (password mismatch).");
