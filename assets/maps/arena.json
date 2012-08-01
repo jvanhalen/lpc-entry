@@ -21,6 +21,17 @@
          "width":25,
          "x":0,
          "y":0
+        }, 
+        {
+         "height":25,
+         "name":"Object Layer 1",
+         "objects":[],
+         "opacity":1,
+         "type":"objectgroup",
+         "visible":true,
+         "width":25,
+         "x":0,
+         "y":0
         }],
  "orientation":"orthogonal",
  "properties":
@@ -42,6 +53,37 @@
             },
          "spacing":2,
          "tileheight":32,
+         "tileproperties":
+            {
+             "36":
+                {
+                 "solid":"true"
+                },
+             "60":
+                {
+                 "solid":"true"
+                },
+             "61":
+                {
+                 "solid":"true"
+                },
+             "76":
+                {
+                 "solid":"true"
+                },
+             "77":
+                {
+                 "solid":"true"
+                },
+             "92":
+                {
+                 "solid":"true"
+                },
+             "93":
+                {
+                 "solid":"true"
+                }
+            },
          "tilewidth":32
         }],
  "tilewidth":32,

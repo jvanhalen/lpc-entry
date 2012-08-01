@@ -1,8 +1,18 @@
 #login {
-    width:400px;
+    min-width:350px;
     height:200px;
-    background-color: #4d5155;  
-    font-family: "Helvetica Neue", Helvetica,Arial,sans-serif;
+    background-color: #2e1a20;  
+    color: white;
+    font-family: 'Fanwood';
+    font-size: 24pt;
+    float:right;
+    padding: 1cm 1cm 1cm 1cm;
+    border: dashed;
+    border-color: #eec06a;
+    border-width: 2px;
+}
+#login-nav {
+    display: none;
 }
 body {
     background-color: #4d5155;  
@@ -174,4 +184,4 @@ input:focus:required:invalid {
     width:400px;
 }
 
-#cr-stage { border:2px solid black; margin:5px auto; color:white }
+#cr-stage { border:2px solid black; margin:5px auto; color:white; float:left }

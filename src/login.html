@@ -88,15 +88,34 @@
             .append('</td></tr>');
         }
         $("#ranking").append('</table>');
-      // let's make Crafty aware of these changes.
+
 
       }
+      function logout()
+      {
+        $.cookie('gas-login',null);
+      
+      }
+      function displayLogin()
+      {
+           $('#login').fadeOut(500, function(){
+                $('#login').empty();
+                $('#login').html('Welcome back, '+JSON.parse($.cookie("gas-login")).username+'!').append($('#login-nav').html());
+                $('#login').fadeIn('fast', function(){
+                    Crafty.scene("loadingView");
+                });
+
+           });
+      }
+
 
     </script>
 </head>
 
 <body>
-
+  <div id="login-nav">
+    <button type="submit" id="logout" onclick=""> >>&nbsp;&nbsp;Logout</button>
+  </div>
   <div id="title">
     Galaxy All-Stars: Medieval Edition Login
   </div>
@@ -118,7 +137,7 @@
       </fieldset>
     </form>
   </div>
-  
+
   <a href="#" id="rank_link">Rankings</a><br/>
   <div id="ranking">
   </div>
@@ -133,7 +152,8 @@
     Crafty.scene("managerView", showManagerView);
     Crafty.scene("gladiatorView", showGladiatorView);
     Crafty.scene("arenaView", showArenaView);
-
+    Crafty.scene("gladiatorPitView", showGladiatorPitView);
+    Crafty.scene("loginView", showLoginView);
 
     var assetArray = [];
     GetLoadableAssetsFromTileMap( 'test.json',      assetArray);
@@ -153,19 +173,18 @@
       .text("Loading")
       .css({ "text-align": "center" });
     });
-    
-    if ( $.cookie("gas-login") ) {
-          $('#login').fadeOut(500, function(){
-             $('#login').empty();
-             Crafty.scene("loadingView");
-          });
+    Crafty.scene("loginView");
+    if ( $.cookie("gas-login")) {
+       displayLogin();
     }
+
     // Ignore login for development..
-    /*     $('#login').fadeOut(500, function(){
+/*    $('#login').fadeOut(500, function(){
            $('#login').empty();
                        Crafty.scene("loadingView");
-                       });*/
-    // just a jQuery test for fading stuff in
+                       });
+*/  
+  // just a jQuery test for fading stuff in
     $("#rank_link").click(function(event){
     $("#ranking").fadeIn("slow");
     displayRanking();

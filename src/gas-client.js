@@ -10,7 +10,7 @@ function GetLoadableAssetsFromTileMap( file, assetArray )
         {
             var assetFile = ASSET_PREFIX+map.tilesets[i].image;
             if ( jQuery.inArray(assetFile, assetArray) == -1)
-                 assetArray.push(assetFile);
+                assetArray.push(assetFile);
         }
     });
 }
@@ -197,6 +197,21 @@ function showMightView()
                     alert('Selected equipment'+this[0]);
                 }));
     }
+}
+
+function showLoginView()
+{
+    var tmpObj = Crafty.e("2D, DOM, Delay, Mouse, Ape, Sprite, transparent")
+        .attr({x:414, y:170, z:5})
+        .loadAnimation("skeleton-body.json")
+        .Ape()
+        .delay(function(){
+            // a quick hack to make it look like it's standing right from the beginning.
+            this.enableAnimation(this.spellcast);
+            this.disableAnimation(this.walk);
+            this.spellcast.body.stop().animate("spellcast_down", 100, -1);
+        },100);
+
 }
 
 function showGladiatorView()
@@ -416,7 +431,7 @@ function showManagerView()
         .attr({x:367, y:420, z:3})
         .sprite(1,9)
         .bind('Click', function(){
-            Crafty.scene("arenaView");
+            Crafty.scene("gladiatorPitView");
         });
 
 
@@ -432,7 +447,54 @@ function showArenaView()
         .text('Quit')
         .bind('Click', function(){
             Crafty.scene("managerView");
+        });
+}
+
+function showGladiatorPitView()
+{
+    console.log('loading tile map');
+    
+    LoadTileMap( 'gladiatorpit.json' );
+
+    console.log('loading tile map done!');
+
+    Crafty.e("2D, DOM, Mouse, Text")
+        .attr({w:200, h:32, x:20, y:10})
+        .text('Quit')
+        .bind('Click', function(){
+            Crafty.scene("managerView");
+        }); 
+    Crafty.e("2D, DOM, Mouse, Text")
+        .attr({w:200, h:232, x:100, y:200, z:8})
+        .css({ 
+            "text-align": "left",
+            "font-family": "Fanwood-Text",
+            "font-size": "10pt",
+            "color": "#5c3111"
         })
+        .text('Welcome to the Pit! Our finest warriors are at your disposal...for a price. ');
+    console.log('Creating gladiator');
+    var tmpObj = Crafty.e("2D, DOM, Delay, Mouse, Ape, Sprite, transparent")
+        .attr({x:414, y:170, z:5})
+        .loadAnimation("skeleton-body.json")
+        .Ape()
+        .bind("MouseOver", function(){
+            console.log('what?');
+            this.walk.body.stop().animate("walk_left", 20, -1);
+        })
+        .bind("MouseOut", function(){
+            console.log('Out');
+            this.walk.body.stop().sprite(0,3);
+        })
+        .delay(function(){
+            // a quick hack to make it look like it's standing right from the beginning.
+            this.walk.body.stop().sprite(0,3);
+        },100);
+    
+    console.log('Gladiator done');
+
+
+
 }
 
 /*global Class, Maple */
@@ -490,16 +552,21 @@ var GAS = Class(function() {
 		if(JSON.parse(data).response !== "NOK") {
             
 		    $.cookie("gas-login", data);
-		    $('#login').fadeOut(500, function(){
-			$('#login').empty();
-                Crafty.scene("managerView",showManagerView);
-
-		    });
+		    displayLogin();
+            /*$('#login').fadeOut(500, function(){
+			    $('#login').empty();
+                $('#login').text('<h1>Welcome back, '+data.username+'!</h1>');
+                $('#login').fadeIn('slow', function(){
+                    Crafty.scene("managerView");
+                });
+		    });*/
 		}
 		else {console.log("Login failed");
 		}
 	    break;
-	    
+	    case 50:
+           console.log("Received: " + data[0].name);
+        break;
 	    default:
 	      console.log("Default branch reached in 'message handling'");
 	      break;

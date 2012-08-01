@@ -5,6 +5,41 @@
  </properties>
  <tileset firstgid="1" name="gas-valhalla" tilewidth="32" tileheight="32" spacing="2">
   <image source="gas-valhalla.png" width="546" height="378"/>
+  <tile id="36">
+   <properties>
+    <property name="solid" value="true"/>
+   </properties>
+  </tile>
+  <tile id="60">
+   <properties>
+    <property name="solid" value="true"/>
+   </properties>
+  </tile>
+  <tile id="61">
+   <properties>
+    <property name="solid" value="true"/>
+   </properties>
+  </tile>
+  <tile id="76">
+   <properties>
+    <property name="solid" value="true"/>
+   </properties>
+  </tile>
+  <tile id="77">
+   <properties>
+    <property name="solid" value="true"/>
+   </properties>
+  </tile>
+  <tile id="92">
+   <properties>
+    <property name="solid" value="true"/>
+   </properties>
+  </tile>
+  <tile id="93">
+   <properties>
+    <property name="solid" value="true"/>
+   </properties>
+  </tile>
  </tileset>
  <layer name="Ground" width="25" height="25">
   <data encoding="base64" compression="zlib">
@@ -16,4 +51,5 @@
    eJxjYKAvMKSRGlEgdgFiZ5JdhB84Q80VA+JgIA6hsvkwEAI1H4ZBIAiIs4A4Gw9NrBoGJLPtgNgfKpYExFVAXI2HJlYNCPgAsS0Q+wFxPMWhgh3EALEv1A5ag4GwAxR+djS2IxaI42hsBy3AYLCDGvFDyA5c6ZsUuwnZgSsNkJI2BkN8jNpBXzvoAUD1VB6UTas2A3JdSwsQzIBZp9PCbACQgCP/
   </data>
  </layer>
+ <objectgroup name="Object Layer 1" width="25" height="25"/>
 </map>

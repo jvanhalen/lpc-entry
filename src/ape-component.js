@@ -107,6 +107,10 @@ Crafty.c('Ape', {
                         .animate("walk_left",1,1,8)
                         .animate("walk_down",1,2,8)
                         .animate("walk_right",1,3,8)
+                        .animate("stand_up",0,0,1)
+                        .animate("stand_left",0,1,1)
+                        .animate("stand_down",0,2,1)
+                        .animate("stand_right",0,3,1)
                         .attr({x:myself.x, y:myself.y, z:val.z});
                     myself.attach(myself.walk[key]);
                 } else {
@@ -260,10 +264,10 @@ Crafty.c('Ape', {
                     // by default, invisible
                     myself.spellcast[key].visible = false;
                     myself.spellcast[key]
-                        .animate("spellcast_up",1,0,7)
-                        .animate("spellcast_left",1,1,7)
-                        .animate("spellcast_down",1,2,7)
-                        .animate("spellcast_right",1,3,7)
+                        .animate("spellcast_up",1,0,6)
+                        .animate("spellcast_left",1,1,6)
+                        .animate("spellcast_down",1,2,6)
+                        .animate("spellcast_right",1,3,6)
                         .attr({x:myself.x, y:myself.y, z:val.z});
                     myself.attach(myself.spellcast[key]);
                 } else {
@@ -272,8 +276,7 @@ Crafty.c('Ape', {
                     }
                 }
             });
-        })
-       
+        });
         return this;
     }, 
     enableAnimation: function(anim){
