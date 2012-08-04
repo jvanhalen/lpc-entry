@@ -31,6 +31,7 @@ var Test = Maple.Class(function(clientClass) {
 	console.log('Server initializing...');
 	this.init();
         console.log('Server startup complete.');
+
     },
 
     update: function(t, tick) {
@@ -97,7 +98,9 @@ var Test = Maple.Class(function(clientClass) {
 		case 11:
 			this.querydb(JSON.parse(data).username + '/login', client, 12, data, undefined);
 		  break;
-			
+		case 13:
+            this.querydb('/gladiators/available', client, 13, data, undefined);
+	        break;
 		default:
 			console.log("message : default branch reached, type: ", type);
         }
@@ -217,12 +220,18 @@ var Test = Maple.Class(function(clientClass) {
 		case 12:
 		  this.handlelogin(url, response, client, type, data);
 		  break;
-		default:
+        case 13:
+          this.handlePitQuery(url, response, client, type, data);
+          break;
+	    default:
 		  console.log("handledbresp : default branch reached, type: ", type);
 		break;
 	}
     },
-
+    handlePitQuery: function(url,response, client, type, data) {
+        console.log('handling PitQuery' + response);
+        client.send(type, [response]);
+    },
     handlenewuser: function(url, response, client, type, data) {
 	console.log("handlenewuser: function(url, response, client, type, data)");
 	//console.log("response", response);

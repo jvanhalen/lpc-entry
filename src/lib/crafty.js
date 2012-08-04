@@ -7011,8 +7011,7 @@ Crafty.c("Image", {
 Crafty.extend({
 	_scenes: [],
 	_current: null,
-
-	/**@
+ 	/**@
 	* #Crafty.scene
 	* @category Scenes, Stage
 	* @trigger SceneChange - when a scene is played - { oldScene:String, newScene:String }

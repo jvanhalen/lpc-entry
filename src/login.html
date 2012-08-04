@@ -147,8 +147,8 @@
     // Connect to GAS server
     var gas = new GAS();
 
-    gas.connect('gassrv.dyndns.org', 8282);
-    //gas.connect('localhost', 8282);
+    //gas.connect('gassrv.dyndns.org', 8282);
+    gas.connect('localhost', 8282);
     Crafty.scene("managerView", showManagerView);
     Crafty.scene("gladiatorView", showGladiatorView);
     Crafty.scene("arenaView", showArenaView);
