@@ -1,8 +1,22 @@
 var g_currentView = '';
 var g_gladiatorPit = {};
+var g_Animations = {}; /* storage of all animations objects used in pre-loading */
+var g_pitMessage = null;
 
+function PreloadAnimation(animFile) {
 
-
+	console.log('calling PreloadAnimation for = '+'../assets/equipment/'+animFile);
+	$.ajax({
+        url: '../assets/equipment/'+animFile,
+        dataType: 'json',
+        data: undefined,
+        async: false,
+        success: function(a) {     
+            g_Animations[a.name] = a;
+            console.log('Preload Done for '+a.name);
+        }
+    });
+}
 
 function GetLoadableAssetsFromTileMap( file, assetArray )
 {
@@ -206,184 +220,24 @@ function showMightView()
 function showLoginView()
 {
 
-    var tmpObj = Crafty.e("2D, DOM, Mouse, Delay, Ape, Sprite, transparent")
-        .attr({x:200, y:100, z:6})
-	.loadAnimation("skeleton-body.json")
-	.disableAnimation(this.walk)
-	.enableAnimation(this.spellcast)
-	.spellcast.body.animate('spellcast_up', 10, -1);
-	
-
-
-    //console.log('Before:'+tmpObj.walk["body"]);
-    //LoadAnimation("skeleton-body.json", tmpObj);
-
+    var tmpObj = Crafty.e("2D, DOM, Mouse, Ape, Sprite, transparent")
+        .attr({x:160, y:100, z:6})
+        .setupAnimation('skeleton_body')
+        .walk.body.animate('walk_right', 10, -1);
     
     var tmpObj2 = Crafty.e("2D, DOM, Mouse, Ape, Sprite, transparent")
-        .attr({x:200, y:300, z:6})
-	.loadAnimation("human-body.json");
-        /*.delay(function(){
-	    console.log('Starting now2' + this[0]);		
-	    this.disableAnimation(this.walk);
-	    this.enableAnimation(this.spellcast);
-	    this.spellcast.body.animate('spellcast_up', 10, -1);
-	},1001)*/;
-    
-    //console.log("tmpObj2 obj"+tmpObj2[0]);
-    //console.log('Before2:'+tmpObj2.walk["body"]);
-    //LoadAnimation("skeleton-body.json",tmpObj2);
-    
-    /*
-    var tmp = Crafty.e( "2D, DOM, Sprite, Ape, Mouse, transparent")
-        .attr({x:200, y:100, z:6});
-    var myself = tmp;
-    
-    $.ajax({
-        url: '../assets/equipment/skeleton-body.json',
-        dataType: 'json',
-        data: undefined,
-        async: false,
-        success: function(a){
-            $.each( a.spellcast, function(key,val){
-                if ( a.spellcast[key] )
-                {
-                   var spriteDef = {};
-                    var propname = a.name + '_' + key + '_spellcast_cycle';
-                    spriteDef[propname] = [0,2];
-                    console.log(spriteDef);
-                    // load sprite
-                    Crafty.sprite(64, '../pics/spellcast/'+val.image, spriteDef);
+        .attr({x:500, y:100, z:6})
+	    .setupAnimation("human_body")
+        .walk.body.animate('walk_left', 10, -1);
 
-                    // remove previous one if it exists.
-                    if ( myself.spellcast[key] ) { 
-                        myself.spellcast[key].destroy();
-                    }
-                    console.log('Final myself id: ' + myself[0]);
-                    // this must contain an entity.
-                    myself.spellcast[key] =  Crafty.e('2D, DOM, SpriteAnimation, Mouse, '+propname);
-                    // by default, invisible
-                    myself.spellcast[key].visible = true;
-                    myself.spellcast[key]
-                        .animate("spellcast_up",1,0,6)
-                        .animate("spellcast_left",1,1,6)
-                        .animate("spellcast_down",1,2,6)
-                        .animate("spellcast_right",1,3,6)
-                        .attr({x:myself.x, y:myself.y, z:val.z});
-                    myself.attach(myself.spellcast[key]);
-                    myself.spellcast.body.stop().animate("spellcast_up",10,-1);
-                } else {
-                    if ( myself.spellcast[key] ) { 
-                        myself.spellcast[key].destroy();
-                    }
-                }
-            });
-            console.log('spellcasts handled');
-        }
-        
-    });
+    Crafty.e("2D, DOM, Text")
+        .text("Waiting for login...")
+        .css({
+            "font-family":"Fanwood",
+            "font-size":"24pt",
+            "text-align":"center"})
+        .attr({x:170, y:100, w:400});
 
-    var tmp2 = Crafty.e( "2D, DOM, Sprite, Ape, Mouse, transparent")
-        .attr({x:200, y:300, z:6});
-    //myself = tmp;
-
-    
-    myself = tmp2;
-    $.ajax({
-        url: '../assets/equipment/skeleton-body.json',
-        dataType: 'json',
-        data: undefined,
-        async: false,
-        success: function(a) {                 
-
-            $.each( a.spellcast, function(key,val){
-                if ( a.spellcast[key] )
-                {
-                   var spriteDef = {};
-                    var propname = a.name + '_' + key + '_spellcast_cycle';
-                    spriteDef[propname] = [0,2];
-                    console.log(spriteDef);
-                    // load sprite
-                    Crafty.sprite(64, '../pics/spellcast/'+val.image, spriteDef);
-
-                    // remove previous one if it exists.
-                    if ( myself.spellcast[key] ) { 
-                        myself.spellcast[key].destroy();
-                        //myself.spellcast[key] = null;
-                        //.destroy(); does something which makes it unsuitable 
-                        // null will have to suffice
-                    }
-                    console.log('Final myself id: ' + myself[0]);
-                    // this must contain an entity.
-                    myself.spellcast[key] =  Crafty.e('2D, DOM, SpriteAnimation, Mouse, '+propname);
-                    // by default, invisible
-                    myself.spellcast[key].visible = true;
-                    myself.spellcast[key]
-                        .animate("spellcast_up",1,0,6)
-                        .animate("spellcast_left",1,1,6)
-                        .animate("spellcast_down",1,2,6)
-                        .animate("spellcast_right",1,3,6)
-                        .attr({x:myself.x, y:myself.y, z:val.z});
-                    myself.attach(myself.spellcast[key]);
-                    myself.spellcast.body.stop().animate("spellcast_down",10,-1);
-                } else {
-                    if ( myself.spellcast[key] ) { 
-                        myself.spellcast[key].destroy();// = null;
-                        //destroy(); apparently does something which makes it unsuitable. 
-                        // null will have to suffice
-                    }
-                }
-
-            });
-            console.log('spellcasts handled2');
-        }
-    });
-
-/*
-    var tmp = Crafty.e( "2D, DOM, Sprite, Ape, Mouse, transparent")
-        .attr({x:200, y:0, z:6});
-    var myself = tmp;
-
-    $.getJSON( '../assets/equipment/skeleton-body.json', function(a) {          
-
-        Crafty.sprite(64, '../pics/spellcast/BODY_skeleton.png', {
-            skeleton_body_body_walk_cycle: [0,0]
-        });
-
-        myself.spellcast.body = Crafty.e( "2D, DOM, SpriteAnimation, Mouse, skeleton_body_body_walk_cycle")
-            .attr({x:myself.x, y:myself.y, z:6})
-            .animate("spellcast_up",1,0,6)
-            .animate("spellcast_left",1,1,6)
-            .animate("spellcast_down",1,2,6)
-            .animate("spellcast_right",1,3,6)
-            .animate("spellcast_up", 10, -1);
-        
-        myself.attach(myself.spellcast.body);
-
-    }).success( function(){
-
-    
-        
-        tmp = Crafty.e( "2D, DOM, Sprite, Ape, Mouse, transparent")
-            .attr({x:200, y:200, z:6});
-        myself = tmp;
-        
-        $.getJSON( '../assets/equipment/skeleton-body.json', function(a) {          
-            
-            Crafty.sprite(64, '../pics/spellcast/BODY_skeleton.png', {
-                skeleton_body_body_walk_cycle: [0,0]
-            });
-            console.log("body is: "+myself.spellcast.body );
-            myself.spellcast.body = Crafty.e( "2D, DOM, SpriteAnimation, Mouse, skeleton_body_body_walk_cycle")
-                .attr({x:myself.x, y:myself.y, z:6})
-                .animate("spellcast_up",1,0,6)
-                .animate("spellcast_left",1,1,6)
-                .animate("spellcast_down",1,2,6)
-                .animate("spellcast_right",1,3,6)
-                .animate("spellcast_down", 10, -1);
-        
-            myself.attach(myself.spellcast.body);
-        }); 
-    });          */
 }
 
 function showGladiatorView()
@@ -552,7 +406,7 @@ function showManagerView()
     var tmpObj = Crafty.e("2D, DOM, Multiway, Keyboard, LeftControls, Mouse, Ape, Sprite, transparent")
         .attr({x:370, y:300, z:5})
         .leftControls(1)
-        .loadAnimation("skeleton-body.json")
+        .setupAnimation("skeleton_body")
         .Ape()
         .bind("Click", function(){
             Crafty.scene("gladiatorView");
@@ -572,27 +426,27 @@ function showManagerView()
             }
             if ( this.isDown('F1'))
             {
-                this.loadAnimation("robe.json");
+                this.setupAnimation("robe");
             }
             if ( this.isDown('F2'))
             {
-                this.loadAnimation("leather-armor.json");
+                this.setupAnimation("leather_armor");
             }
             if ( this.isDown('F3'))
             {
-                this.loadAnimation("plate-armor.json");
+                this.setupAnimation("plate_armor");
             }
             if ( this.isDown('F4'))
             {
-                this.loadAnimation("no-armor.json");
+                this.setupAnimation("no_armor");
             }
             if ( this.isDown('X'))
             {
-                this.loadAnimation("skeleton-body.json");
+                this.setupAnimation("skeleton_body");
             }
             if ( this.isDown('H'))
             {
-                this.loadAnimation("human-body.json");
+                this.setupAnimation("human_body");
             }
         })
 
@@ -638,6 +492,7 @@ function showGladiatorPitView()
         .bind('Click', function(){
             Crafty.scene("managerView");
         }); 
+    // Some info
     Crafty.e("2D, DOM, Mouse, Text")
         .attr({w:200, h:232, x:100, y:200, z:8})
         .css({ 
@@ -647,7 +502,18 @@ function showGladiatorPitView()
             "color": "#5c3111"
         })
         .text('Welcome to the Pit! Our finest warriors are at your disposal...for a price.');
-
+    // Header
+    Crafty.e("2D, DOM, Mouse, Text")
+        .attr({w:340, h:64, x:200, y:50, z:8})
+        .css({ 
+            "text-align": "center",
+            "font-family": "Fanwood",
+            "font-size": "24pt",
+            "color": "#5c3111"
+           
+        })
+        .text('Gladiator Pit');
+    
 
     window.setTimeout(function(){
         // pray tell, server, best deals for today?
@@ -656,42 +522,74 @@ function showGladiatorPitView()
 
 }
 
+function gladiatorHTML(gladiator)
+{
+    var HTMLstr = 
+        'Name:'+gladiator.name+'<br>'+
+        'Age:'+gladiator.age+'<br>'+
+        'Health:'+gladiator.health+'<br>'+
+        'Nimbleness:'+gladiator.nimbleness+'<br>'+
+        'Strength:'+gladiator.strength+'<br>'+
+        'Mana:'+gladiator.mana+'<br>'+
+        'Salary:'+gladiator.salary+'<br>'+
+        'Fights:'+gladiator.fights+'<br>'+
+        'Knockouts:'+gladiator.knockouts+'<br>'+
+        'Injured:'+gladiator.injured;
+
+    return HTMLstr;
+}
+
 function pitCreateGladiators(gladiatorData){
 
 
     var pos = { "x" : 414,
                 "y" : 170 };
-    var offset = { "x": 64, 
+    var offset = { "x": 96, 
                    "y": 128 };
     var count = 0;
+
+    // parse gladiator JSON
     $.each(gladiatorData, function(key,gladiator)
     {
-        
         console.log('Creating gladiator showcase for ' + gladiator.name);
-        var body = "human-body.json";
-        if ( gladiator.race == "skeleton" ) body = "skeleton-body.json";
 
-         
-        
+        var body = "human_body";
+        if ( gladiator.race == "skeleton" ) 
+            body = "skeleton_body";
+
         var xPos = pos.x+(offset.x*count);
-        Crafty.e("2D, DOM, Delay, Mouse, Ape, Sprite, transparent")
+        var obj = Crafty.e("2D, DOM, Delay, Mouse, Ape, Sprite, transparent")
             .attr({x:xPos, y:170, z:5})
-            .Ape()
-            .loadAnimation(body)
-            .bind("MouseOver", function(){
-                console.log('what?');
+            .setupAnimation(body)
+            .bind("MouseOver", function(e){
+                this.hideAll();
+                this.enableAnimation(this.walk);
                 this.walk.body.stop().animate("walk_left", 20, -1);
+
+                // remove previous and replace with new description
+                if ( g_pitMessage ) g_pitMessage.destroy();
+                g_pitMessage = Crafty.e("2D, DOM, Text")
+                    .attr({w:200, h:232, x:100, y:300, z:8})
+                    .css({ 
+                        "text-align": "left",
+                        "font-family": "Fanwood-Text",
+                        "font-size": "10pt",
+                        "color": "#5c3111"
+                    })
+                    .text(gladiatorHTML(gladiator));
             })
-            .bind("MouseOut", function(){
-                console.log('Out');
+            .bind("MouseOut", function(e){
+                this.hideAll();
+                this.enableAnimation(this.walk);
                 this.walk.body.stop().sprite(0,3);
+                // remove message
+                if ( g_pitMessage ) g_pitMessage.destroy();
+                g_pitMessage = null;
             })
-            .delay(function(){
-                // a quick hack to make it look like it's standing right from the beginning.
-                this.walk.body.stop().sprite(0,3);
-                console.log('Showcase done, standing at' + this.x + ',' + this.y);
-            },100);
+            .walk.body.stop().animate('walk_down',10,-1);
+
         count = count + 1;
+
     });
 }
 

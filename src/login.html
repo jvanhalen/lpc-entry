@@ -159,6 +159,14 @@
     GetLoadableAssetsFromTileMap( 'test.json',      assetArray);
     GetLoadableAssetsFromTileMap( 'inventory.json', assetArray);
     GetLoadableAssetsFromTileMap( 'arena.json', assetArray);
+    PreloadAnimation("skeleton-body.json");
+    PreloadAnimation("human-body.json");
+    PreloadAnimation("robe.json");
+    PreloadAnimation("leather-armor.json");
+    PreloadAnimation("plate-armor.json");
+    PreloadAnimation("no-armor.json");
+
+    
     Crafty.scene("loadingView", function(){
        console.log('Loading');
        for( var i=0;i< assetArray.length;i++)

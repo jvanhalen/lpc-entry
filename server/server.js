@@ -128,7 +128,7 @@ var Test = Maple.Class(function(clientClass) {
 	    process.exit();
 	  }
 	});
-	tty.setRawMode(true);
+	    //tty.setRawMode(true);
 	
 	// Query database access
 	this.querydb("/", undefined, undefined, undefined);
