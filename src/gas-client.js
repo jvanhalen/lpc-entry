@@ -2,218 +2,7 @@ var g_currentView = '';
 var g_gladiatorPit = {};
 
 
-function LoadAnimation(animFile, entity){
-    console.log('calling loadAnimation for = '+'../assets/equipment/'+animFile);
-    // this gets pretty weird in javascript... we need, err, 'myself' to keep track.
-    
-    // workaround for async $.getJSON( url, callback);
-    $.ajax({
-        url: '../assets/equipment/'+animFile,
-        dataType: 'json',
-        data: undefined,
-        async: false,
-        success: function(a) {                 
-            
-            $.each( a.walk, function(key,val){
-                if ( a.walk[key] )
-                {
-                    var spriteDef = {};
-                    var propname = a.name + '_' + key + '_walk_cycle';
-                    spriteDef[propname] = [0,2];
-                    console.log('Walky-talky'+spriteDef);
-                    // load sprite
-                    Crafty.sprite(64, '../pics/walkcycle/'+val.image, spriteDef);
-                    var tmp = entity.walk;
-                    console.log("tmp key = "+tmp[key] );
-                    // remove previous one if it exists.
-                    if ( entity.walk[key] ) { 
-                        console.log("Dupe check: "+entity[0] + " is dirty.");
-                        entity.walk[key].destroy();
-                    } else {
-                        console.log("Dupe check: "+entity[0] + " is clean.");
-                    }
-                    // this must contain an entity.
-                    entity.walk[key] =  Crafty.e('2D, DOM, SpriteAnimation, Mouse, '+propname);
-                    entity.walk[key].visible = true;
-                    entity.walk[key]
-                        .animate("walk_up",1,0,8)
-                        .animate("walk_left",1,1,8)
-                        .animate("walk_down",1,2,8)
-                        .animate("walk_right",1,3,8)
-                        .animate("stand_up",0,0,1)
-                        .animate("stand_left",0,1,1)
-                        .animate("stand_down",0,2,1)
-                        .animate("stand_right",0,3,1)
-                        .attr({x:entity.x, y:entity.y, z:val.z});
-                    entity.attach(entity.walk[key]);
-                } else {
-                    if ( entity.walk[key] ) { 
-                        entity.walk[key].destroy();
-                    }
-                }
 
-            })
-            $.each( a.thrust, function(key,val){
-                if ( a.thrust[key] )
-                {
-                   var spriteDef = {};
-                    var propname = a.name + '_' + key + '_thrust_cycle';
-                    spriteDef[propname] = [0,2];
-                    console.log(spriteDef);
-                    // load sprite
-                    Crafty.sprite(64, '../pics/thrust/'+val.image, spriteDef);
-
-                    // remove previous one if it exists.
-                    if ( entity.thrust[key] ) { 
-                        entity.thrust[key].destroy();
-                    }
-                    // this must contain an entity.
-                    entity.thrust[key] =  Crafty.e('2D, DOM, SpriteAnimation, Mouse, '+propname);
-                    // by default, invisible
-                    entity.thrust[key].visible = false;
-                    entity.thrust[key]
-                        .animate("thrust_up",1,0,7)
-                        .animate("thrust_left",1,1,7)
-                        .animate("thrust_down",1,2,7)
-                        .animate("thrust_right",1,3,7)
-                        .attr({x:entity.x, y:entity.y, z:val.z});
-                    entity.attach(entity.thrust[key]);
-                } else {
-                    if ( entity.thrust[key] ) { 
-                        entity.thrust[key].destroy();
-                    }
-                }
-
-            });
-            $.each( a.slash, function(key,val){
-                if ( a.slash[key] )
-                {
-                   var spriteDef = {};
-                    var propname = a.name + '_' + key + '_slash_cycle';
-                    spriteDef[propname] = [0,2];
-                    console.log(spriteDef);
-                    // load sprite
-                    Crafty.sprite(64, '../pics/slash/'+val.image, spriteDef);
-
-                    // remove previous one if it exists.
-                    if ( entity.slash[key] ) { 
-                        entity.slash[key].destroy();
-                    }
-                    // this must contain an entity.
-                    entity.slash[key] =  Crafty.e('2D, DOM, SpriteAnimation, Mouse, '+propname);
-                    // by default, invisible
-                    entity.slash[key].visible = false;
-                    entity.slash[key]
-                        .animate("slash_up",1,0,5)
-                        .animate("slash_left",1,1,5)
-                        .animate("slash_down",1,2,5)
-                        .animate("slash_right",1,3,5)
-                        .attr({x:entity.x, y:entity.y, z:val.z});
-                    entity.attach(entity.slash[key]);
-                } else {
-                    if ( entity.slash[key] ) { 
-                        entity.slash[key].destroy();
-                    }
-                }
-
-            });
-            $.each( a.bow, function(key,val){
-                if ( a.bow[key] )
-                {
-                    var spriteDef = {};
-                    var propname = a.name + '_' + key + '_bow_cycle';
-                    spriteDef[propname] = [0,2];
-                    console.log(spriteDef);
-                    // load sprite
-                    Crafty.sprite(64, '../pics/bow/'+val.image, spriteDef);
-
-                    // remove previous one if it exists.
-                    if ( entity.bow[key] ) { 
-                        entity.bow[key].destroy();
-                    }
-                    // this must contain an entity.
-                    entity.bow[key] =  Crafty.e('2D, DOM, SpriteAnimation, Mouse, '+propname);
-                    // by default, invisible
-                    entity.bow[key].visible = false;
-                    entity.bow[key]
-                        .animate("bow_up",1,0,12)
-                        .animate("bow_left",1,1,12)
-                        .animate("bow_down",1,2,12)
-                        .animate("bow_right",1,3,12)
-                        .attr({x:entity.x, y:entity.y, z:val.z});
-                    entity.attach(entity.bow[key]);
-                } else {
-                    if ( entity.bow[key] ) { 
-                        entity.bow[key].destroy();
-                    }
-                }
-
-            });
-            $.each( a.hurt, function(key,val){
-                if ( a.hurt[key] )
-                {
-                    var spriteDef = {};
-                    var propname = a.name + '_' + key + '_hurt_cycle';
-                    spriteDef[propname] = [0,2];
-                    console.log(spriteDef);
-                    // load sprite
-                    Crafty.sprite(64, '../pics/hurt/'+val.image, spriteDef);
-
-                    // remove previous one if it exists.
-                    if ( entity.hurt[key] ) { 
-                        entity.hurt[key].destroy();
-                    }
-                    // this must contain an entity.
-                    entity.hurt[key] =  Crafty.e('2D, DOM, SpriteAnimation, Mouse, '+propname);
-                    // by default, invisible
-                    entity.hurt[key].visible = false;
-                    entity.hurt[key]
-                        .animate("hurt",1,0,6)
-                        .attr({x:entity.x, y:entity.y, z:val.z});
-                    entity.attach(entity.hurt[key]);
-                } else {
-                    if ( entity.hurt[key] ) { 
-                        entity.hurt[key].destroy();
-                    }
-                }
-
-            });
-            $.each( a.spellcast, function(key,val){
-                if ( a.spellcast[key] )
-                {
-                   var spriteDef = {};
-                    var propname = a.name + '_' + key + '_spellcast_cycle';
-                    spriteDef[propname] = [0,2];
-                    console.log(spriteDef);
-                    // load sprite
-                    Crafty.sprite(64, '../pics/spellcast/'+val.image, spriteDef);
-
-                    // remove previous one if it exists.
-                    if ( entity.spellcast[key] ) { 
-                        entity.spellcast[key].destroy();
-                    }
-                    console.log('Final entity id: ' + entity[0]);
-                    // this must contain an entity.
-                    entity.spellcast[key] =  Crafty.e('2D, DOM, SpriteAnimation, Mouse, '+propname);
-                    // by default, invisible
-                    entity.spellcast[key].visible = false;
-                    entity.spellcast[key]
-                        .animate("spellcast_up",1,0,6)
-                        .animate("spellcast_left",1,1,6)
-                        .animate("spellcast_down",1,2,6)
-                        .animate("spellcast_right",1,3,6)
-                        .attr({x:entity.x, y:entity.y, z:val.z});
-                    entity.attach(entity.spellcast[key]);
-                } else {
-                    if ( entity.spellcast[key] ) { 
-                        entity.spellcast[key].destroy();
-                    }
-                }
-            });
-            } // end ajax callback func
-        }); // end ajax stuff
-        return this;
-    }
 
 function GetLoadableAssetsFromTileMap( file, assetArray )
 {
@@ -417,18 +206,32 @@ function showMightView()
 function showLoginView()
 {
 
-    var tmpObj = Crafty.e("2D, DOM, Mouse, Ape, Sprite, transparent")
-        .attr({x:200, y:100, z:6});
+    var tmpObj = Crafty.e("2D, DOM, Mouse, Delay, Ape, Sprite, transparent")
+        .attr({x:200, y:100, z:6})
+	.loadAnimation("skeleton-body.json")
+	.disableAnimation(this.walk)
+	.enableAnimation(this.spellcast)
+	.spellcast.body.animate('spellcast_up', 10, -1);
+	
 
-    console.log('Before:'+tmpObj.walk["body"]);
-    LoadAnimation("skeleton-body.json", tmpObj);
+
+    //console.log('Before:'+tmpObj.walk["body"]);
+    //LoadAnimation("skeleton-body.json", tmpObj);
 
     
     var tmpObj2 = Crafty.e("2D, DOM, Mouse, Ape, Sprite, transparent")
-        .attr({x:200, y:300, z:6});
-    console.log("tmpObj2 obj"+tmpObj2[0]);
-    console.log('Before2:'+tmpObj2.walk["body"]);
-    LoadAnimation("skeleton-body.json",tmpObj2);
+        .attr({x:200, y:300, z:6})
+	.loadAnimation("human-body.json");
+        /*.delay(function(){
+	    console.log('Starting now2' + this[0]);		
+	    this.disableAnimation(this.walk);
+	    this.enableAnimation(this.spellcast);
+	    this.spellcast.body.animate('spellcast_up', 10, -1);
+	},1001)*/;
+    
+    //console.log("tmpObj2 obj"+tmpObj2[0]);
+    //console.log('Before2:'+tmpObj2.walk["body"]);
+    //LoadAnimation("skeleton-body.json",tmpObj2);
     
     /*
     var tmp = Crafty.e( "2D, DOM, Sprite, Ape, Mouse, transparent")
