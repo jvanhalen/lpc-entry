@@ -65,6 +65,8 @@ function LoadTileMap( file)
        // add name dynamically so this can be made as proper function
         for( var layer=0; layer<map.layers.length;layer++)
         {
+            
+
             var currRow = 0;
             var currColumn = 0;
             // Process layers 
@@ -98,10 +100,17 @@ function LoadTileMap( file)
                     // attr x,y are expressed in pixels.
                     var GROUND_Z = -1;
                     var spriteName = map.properties.name+tilesetIndex;
-                  
-                    Crafty.e("2D, DOM, Sprite, "+spriteName)
-                        .sprite(xc,yc)
-                        .attr({x:currColumn*tileset.tilewidth, y:currRow*tileset.tileheight, z:GROUND_Z+layer});       
+                    // skip collision layer
+                    if ( map.layers[layer].name == "Collision" ) 
+                    {
+                        Crafty.e("2D, DOM, Sprite, solid, "+spriteName)
+                            .sprite(xc,yc)
+                            .attr({x:currColumn*tileset.tilewidth, y:currRow*tileset.tileheight, z:GROUND_Z+layer});       
+                    } else {
+                        Crafty.e("2D, DOM, Sprite, "+spriteName)
+                            .sprite(xc,yc)
+                            .attr({x:currColumn*tileset.tilewidth, y:currRow*tileset.tileheight, z:GROUND_Z+layer});       
+                    }
                 }
                 // next tile, take care of indices.
                 currColumn++;
@@ -369,7 +378,17 @@ function showManagerView()
 {
 
     LoadTileMap( 'test.json');
-    
+    Crafty.e("2D, DOM, Mouse, Text")
+        .attr( {w:130, h:20, x:340, y:100, z:9})
+        .text("To Battle!")
+        .css({ 
+            "text-align": "center",
+            "font-family": "Fanwood",
+            "font-size": "13pt",
+        })
+        .bind('Click', function(){
+            Crafty.scene("arenaView");
+        });
     // Add a title
     Crafty.e("2D, DOM, Text").attr({ w: 400, h: 20, x: 150, y: 10 })
         .text("Kalevala Heroes / GAS Valhalla")
@@ -476,6 +495,14 @@ function showArenaView()
         .bind('Click', function(){
             Crafty.scene("managerView");
         });
+
+    var tmpObj = Crafty.e("2D, DOM, Multiway, Keyboard, LeftControls, Mouse, Ape, Sprite, SolidHitBox, transparent")
+        .attr({x:370, y:300, z:5})
+        .leftControls(1)
+        .setupAnimation("skeleton_body")
+        .Ape()
+        .collision([0,0],[16,0],[16,16],[0,16]);
+        
 }
 
 function showGladiatorPitView()
