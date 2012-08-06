@@ -5,51 +5,45 @@
  </properties>
  <tileset firstgid="1" name="gas-valhalla" tilewidth="32" tileheight="32" spacing="2">
   <image source="gas-valhalla.png" width="546" height="378"/>
-  <tile id="36">
-   <properties>
-    <property name="solid" value="true"/>
-   </properties>
-  </tile>
-  <tile id="60">
-   <properties>
-    <property name="solid" value="true"/>
-   </properties>
-  </tile>
-  <tile id="61">
-   <properties>
-    <property name="solid" value="true"/>
-   </properties>
-  </tile>
-  <tile id="76">
-   <properties>
-    <property name="solid" value="true"/>
-   </properties>
-  </tile>
-  <tile id="77">
-   <properties>
-    <property name="solid" value="true"/>
-   </properties>
-  </tile>
-  <tile id="92">
-   <properties>
-    <property name="solid" value="true"/>
-   </properties>
-  </tile>
-  <tile id="93">
+  <tile id="17">
    <properties>
     <property name="solid" value="true"/>
    </properties>
   </tile>
  </tileset>
+ <tileset firstgid="177" name="scrollsandblocks" tilewidth="32" tileheight="32">
+  <image source="scrollsandblocks.png" width="544" height="320"/>
+ </tileset>
  <layer name="Ground" width="25" height="25">
   <data encoding="base64" compression="zlib">
-   eJy1lsuqwjAQhrPyQbztzkbd6kJceRTB7rwgKCJ4OQfElYI+gL6BvoE+pH+gA0OYpFNtFx+B6TR/+mcmadEYU8qRMqiBeo40mEYHtEEX/AZGbU5H0IjAEKzBJjBqcyKPxhwcwSkwanO4xoKxzxA+bwsMwDJjjRXogWbs1SzWuIKbkyvFDoG5Kd9qTEDf0biDB/hh7/CYi6RJ+T6NJ3g571OMr1XScfN9GpIvfB6NlxqvKqDq0ZB8o1har3x7K/nmxj71SvI9i7pKMy99M/dOU1dpNb7xitcAf+7WRlZeST3q7tsnPSj5wNdA66aY1qukvpO+La1X0vkjnSN83T6vpuAP/Bu5BzXnFdWsVFdbsANncDG6+yOpnvk+reL5o9grewfn8c9g5y8wDfpnGIFxYNTm2P6x96ztoTfRX/DR
+   eJy9lk0KwjAQhbPyIOrWjbrVhXTlD4LdKoIiBX/BulLQA+gN9AZ6SF8hwSFM2mltu/gITKfz0pdJ0qpSqlYgddAErQJpl6zhgR7og0HMKM3xGA0fTMAabGJGaY5fssaSsABncIkZpTm0bheMwQoccyQAQ9DRXs21xh08rFwudoqpbfIjjSkYWRpP8AIN8g6N2XCaJt+l8QYf630To3PldOx8lwbnC60j8VLqVejQ4HwzsbReudaW882OZfWK8z2PvkpT13wz9U7SV2k1/vEqVL8eoM9pPE+vuD1qr1uWPcj5QOdg5m1iUq+S9h33bWm94s4f7hyh83Z5NQN7cFD8HpScV6Znub7agh24gpuS3R9J/UzXKdD1fe1VdD8W8c8Q1a+ALysD7rI=
   </data>
  </layer>
  <layer name="Additions" width="25" height="25">
   <data encoding="base64" compression="zlib">
-   eJxjYKAvMKSRGlEgdgFiZ5JdhB84Q80VA+JgIA6hsvkwEAI1H4ZBIAiIs4A4Gw9NrBoGJLPtgNgfKpYExFVAXI2HJlYNCPgAsS0Q+wFxPMWhgh3EALEv1A5ag4GwAxR+djS2IxaI42hsBy3AYLCDGvFDyA5c6ZsUuwnZgSsNkJI2BkN8jNpBXzvoAUD1VB6UTas2A3JdSwsQzIBZp9PCbACQgCP/
+   eJxjYKA/0GdkYDDAgQ0ZiVeDCxgCcSBQTRAOHMxIvBpkIArELkDsTOXwcIaaKwbEwUAcQmXzYSAEaj4M0wLAzLYDYn8a2eEDxLZA7AfE8TSyIwaIfaF20BoMhB2g8LOjsR2xQBxHYztUgViNxnbQAhCygxrxQ8gOXOmbFLsJ2YErDZCSNgjZgSsNkJI2BkOcj9qBAKA6JI+OdqDX9dgAqWqCGWhX3yKbCwAw8RzP
   </data>
  </layer>
- <objectgroup name="Object Layer 1" width="25" height="25"/>
+ <objectgroup name="SpawnPoints" width="25" height="25" visible="0">
+  <object name="sp1" type="SpawnPoint" x="287" y="305"/>
+  <object name="sp1" type="SpawnPoint" x="123" y="300"/>
+  <object name="sp1" type="SpawnPoint" x="126" y="496"/>
+  <object name="sp1" type="SpawnPoint" x="125" y="591"/>
+  <object name="sp1" type="SpawnPoint" x="127" y="688"/>
+  <object name="sp1" type="SpawnPoint" x="286" y="686"/>
+  <object name="sp1" type="SpawnPoint" x="384" y="588"/>
+  <object name="sp1" type="SpawnPoint" x="542" y="655"/>
+  <object name="sp1" type="SpawnPoint" x="543" y="400"/>
+  <object name="sp1" type="SpawnPoint" x="382" y="398"/>
+  <object name="sp1" type="SpawnPoint" x="672" y="686"/>
+  <object name="sp1" type="SpawnPoint" x="670" y="590"/>
+  <object name="sp1" type="SpawnPoint" x="670" y="493"/>
+  <object name="sp1" type="SpawnPoint" x="671" y="400"/>
+  <object name="sp1" type="SpawnPoint" x="671" y="301"/>
+ </objectgroup>
+ <layer name="Collision" width="25" height="25" visible="0" opacity="0.54">
+  <data encoding="base64" compression="zlib">
+   eJwTYmBgEBrFo3gIY1qA4W4HNe0c7nZQExBrByVuoNQOYuweaXZQAkbtGLWDlhgAUY0UQQ==
+  </data>
+ </layer>
 </map>
