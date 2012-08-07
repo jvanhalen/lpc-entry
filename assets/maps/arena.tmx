@@ -21,7 +21,7 @@
  </layer>
  <layer name="Overlay" width="25" height="25">
   <data encoding="base64" compression="zlib">
-   eJxjYKA/0GdkYDDAgQ0ZiVeDCxgCcSBQTRAOHMxIvBpkIArELkDsTOXwcIaaKwbEwUAcQmXzYSAEaj4M0wLAzLYDYn8a2eEDxLZA7AfE8TSyIwaIfaF20BoMVztigTiOxnaoArEaje2gBRgMduBK36C8ZUclO3ClAVLSBiE7cKUBUtLGYIiPUTsQAFSH5NHRDvS6HhsgVU0wA+3qW2RzAWhuG9k=
+   eJxjYKA/0GdkYDDAgQ0ZiVeDCxgCcSBQTRAOHMxIvBpkIArELkDsTOXwcIaaKwbEwUAcQmXzYSAEaj4M0wLAzLYDYn8a2eEDxLZA7AfE8TSyIwaIfaF20BoMhB2g8LOjsR2xQBxHYztUgViNxnbQAhCygxrxQ8gOXOmbFLsJ2YErDZCSNgjZgSsNkJI2BkOcj9qBAKA6JI+OdqDX9dgAqWqCGWhX3yKbCwAw8RzP
   </data>
  </layer>
  <objectgroup name="SpawnPoints" width="25" height="25" visible="0">
@@ -43,12 +43,12 @@
  </objectgroup>
  <layer name="Collision" width="25" height="25" opacity="0.54">
   <data encoding="base64" compression="zlib">
-   eJwTYmBgEBrFo3gIY1qAUTsot4Oadg6kHdQEg8kOXPLEuG2k2UEJGLVj1A5aYgDrHxP5
+   eJwTYmBgEBrFo3gIY1qA4W4HNe0c7nZQExBrByVuoNQOYuweaXZQAkbtGLWDlhgAUY0UQQ==
   </data>
  </layer>
  <layer name="Front" width="25" height="25">
   <data encoding="base64" compression="zlib">
-   eJxjYBgFo2AUjDRgC8R2A+2IUYATjMbPKBgFo4AYAADSOAD3
+   eJztwQENAAAAwqD3T20ON6AAAHgzCcQAAQ==
   </data>
  </layer>
 </map>
