@@ -103,13 +103,52 @@ function LoadTileMap( file)
                     // skip collision layer
                     if ( map.layers[layer].name == "Collision" ) 
                     {
-                        Crafty.e("2D, DOM, Sprite, solid, "+spriteName)
+                        Crafty.e("2D, DOM, Collision, Sprite, solid, transparent")
                             .sprite(xc,yc)
+                            // custom collisions need this also in ALL other colliding entities in order to work.
+                            .collision([0,0],
+                                       [map.tilewidth,0],
+                                       [map.tilewidth, map.tileheight],
+                                       [0,map.tileheight])
                             .attr({x:currColumn*tileset.tilewidth, y:currRow*tileset.tileheight, z:GROUND_Z+layer});       
                     } else {
+                        // determine which layer does this thing belong to
+                        var layerZ = 0;
+                        switch( map.layers[layer].name )
+                        {
+                        case "Ground":
+                            layerZ = 0;
+                            break;
+                        case "Overlay":
+                            layerZ = 1;
+                            break;
+                        case "Front":
+                            layerZ = 7;
+                            break;
+                            // ones below should not exist in tile map, 
+                            // but let's be prepared.
+                        case "Behind": 
+                            layerZ = 2;
+                            break;
+                        case "Body":
+                            layerZ = 3;
+                            break;
+                        case "Equipment":
+                            layerZ = 4;
+                            break;
+                        case "Weapon":
+                            layerZ = 5;
+                            break;
+                        case "Mouse": 
+                            layerZ = 6;
+                            break;
+                        }
+                        // create tile entity
                         Crafty.e("2D, DOM, Sprite, "+spriteName)
                             .sprite(xc,yc)
-                            .attr({x:currColumn*tileset.tilewidth, y:currRow*tileset.tileheight, z:GROUND_Z+layer});       
+                            .attr({x:currColumn*tileset.tilewidth, 
+                                   y:currRow*tileset.tileheight, 
+                                   z:layerZ});       
                     }
                 }
                 // next tile, take care of indices.
@@ -427,6 +466,7 @@ function showManagerView()
         .leftControls(1)
         .setupAnimation("skeleton_body")
         .Ape()
+        .collision([16,32],[48,32],[48,64],[16,64])
         .bind("Click", function(){
             Crafty.scene("gladiatorView");
         })
@@ -495,13 +535,35 @@ function showArenaView()
         .bind('Click', function(){
             Crafty.scene("managerView");
         });
-
-    var tmpObj = Crafty.e("2D, DOM, Multiway, Keyboard, LeftControls, Mouse, Ape, Sprite, SolidHitBox, transparent")
+    Crafty.e("2D, DOM, Mouse, Text")
+        .attr({w:200, h:32, x:520, y:510, z:9})
+        .text('Compare to this top edge!')
+        .css({
+            "font-family":"Fanwood-Text",
+            "font-size":"16pt"
+        });
+       
+    var tmpObj = Crafty.e("2D, DOM, Multiway, Keyboard, LeftControls, Mouse, Ape, Sprite, transparent")
+        .Ape()
+        .collision([16,32],[48,32],[48,64],[16,64])
         .attr({x:370, y:300, z:5})
         .leftControls(1)
         .setupAnimation("skeleton_body")
-        .Ape()
-        .collision([0,0],[16,0],[16,16],[0,16]);
+        .bind('KeyDown', function(){
+            if ( this.isDown('LEFT_ARROW')) {
+                this.slashAttack('left');
+            }
+            if ( this.isDown('RIGHT_ARROW')) {
+                this.slashAttack('right');
+            }
+            if ( this.isDown('DOWN_ARROW')) {
+                this.slashAttack('down');
+            }
+            if ( this.isDown('UP_ARROW')) {
+                this.slashAttack('up');
+            }
+        });
+
         
 }
 
