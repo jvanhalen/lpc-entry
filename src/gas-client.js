@@ -2,6 +2,7 @@ var g_currentView = '';
 var g_gladiatorPit = {};
 var g_Animations = {}; /* storage of all animations objects used in pre-loading */
 var g_pitMessage = null;
+var g_currentGrid = null;
 
 function PreloadAnimation(animFile) {
 
@@ -33,10 +34,16 @@ function GetLoadableAssetsFromTileMap( file, assetArray )
     });
 }
 
-function LoadTileMap( file)
+function LoadTileMap( file )
 {
     var ASSET_PREFIX = '../assets/maps/';
-
+    var grid = undefined;
+    var useGrid = (arguments.length == 2) ? true : false;
+    console.log("LoadTileMap args: " + arguments.length );
+    for(var i = 0;i<arguments.length;i++)
+    {
+        console.log("arg"+i+"="+arguments[i]);
+    }
     // try to read json tile map
     $.getJSON( ASSET_PREFIX+file, function(map) {
         var tilesetIndices = [];
@@ -54,8 +61,13 @@ function LoadTileMap( file)
             // store first index
             tilesetIndices[i]=tileset.firstgid;
         }
+       
 
-
+        if ( useGrid)
+        {
+            grid = new PF.Grid(map.width, map.height); 
+        } 
+        
         /*console.log('Map:'+map.height+'x'+map.width);
         console.log('Tile size:'+map.tileheight+'x'+map.tilewidth);
         console.log(tileset.image);
@@ -103,6 +115,8 @@ function LoadTileMap( file)
                     // skip collision layer
                     if ( map.layers[layer].name == "Collision" )
                     {
+                        if ( grid )
+                            grid.setWalkable(currColumn, currRow, false);
                         Crafty.e("2D, DOM, Collision, Sprite, solid, transparent")
                             .sprite(xc,yc)
                             // custom collisions need this also in ALL other colliding entities in order to work.
@@ -161,7 +175,11 @@ function LoadTileMap( file)
 
             }
         }
+        // assign grid into second argument (if it existed)
+        if ( useGrid )
+            arguments[1] = grid;
     });
+    
 }
 
 var text = "Känsä the Skeleton<br>Health: 20<br>Strength:2<br>Dexterity: 5<br>Mana:7<br>Age:5/35<br>Salary:32<br>Fights: 0<br>KOs:2<br>Injury: 0<br>Melee weapon: Fist<br>missile weapon: None<br>Spell: None<br>Dodge: Dart<br>Magic res: 20%<br>Armour: None";
@@ -529,7 +547,10 @@ function showManagerView()
 
 function showArenaView()
 {
-    LoadTileMap( 'arena.json');
+    
+    LoadTileMap( 'arena.json', g_currentGrid);
+    
+
     Crafty.e("2D, DOM, Mouse, Text")
         .attr({w:200, h:32, x:20, y:10})
         .text('Quit')

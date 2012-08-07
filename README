@@ -1,4 +1,4 @@
-
+ws
 ** GAS fantasy edition **
 
 SERVER:
@@ -30,10 +30,11 @@ CLIENT:
   Equipment  4          Additional armor or wear over the body layer.
   Weapon     5          All weapons stored with this
   Mouse      6          For transparent collision layer over all other sprites in game object.
+
   Front      7          Used for front layer elements in tile maps (appears over game objects)
 
   Collision  -          Not rendered, shall contain only tiles that are inaccessible 
-                        in the tile map.
+                        in the tile map.  (Mouse      6+        pathfinding layer = collision)
 
 KNOWN ISSUES:
 
