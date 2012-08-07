@@ -4,6 +4,7 @@
    "name": "Happy campers",
    "gladiator":
         [{"name": "Kaensae the Skeleton",
+          "race": "skeleton",
           "age": "5",
           "health": "20",
           "nimbleness": "10",
@@ -55,6 +56,7 @@
          "icon": "skeleton.png"
         },
             {"name": "Mauri the Mighty",
+             "race": "human",
              "age": "25",
              "health": "18",
              "nimbleness": "15",
