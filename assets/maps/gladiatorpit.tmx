@@ -23,14 +23,9 @@
    eJztk70KwjAUhVOhooNuNZNuutX3fxH1AcSKg07+TEpPoBfCtZdcQ+LU4SOHcvgIh3RnjNln4gBOoGEcizi45yz4y1EcWn8qyP8ATwXUe4MPeAmZuuQvsd29Z7+v3dAZgxmYB7LrxvqXYBXIvr9SuJuutwA12LJs2feK3V/jdz3t/nwfrT92/1/8OffnO0t52D//+7dCHvb/z/uX/gXL9p8gTxVc0F0XYTbdSf6rxy0hff5U+H7N9jE4fwvU0WTH
   </data>
  </layer>
- <layer name="Additions" width="24" height="24">
+ <layer name="Overlay" width="24" height="24">
   <data encoding="base64" compression="zlib">
    eJxjYKA9KAHiMij7ESMDgwIZZoD0PGHELtcFxD1QNgsTA4M2GeaD9LAxYZd7QqQZxKpDV9sA9FcjEbgJh/8JgYlAfXJAehIjfjyZAvM1yTCfnRE7G5v5hMym1P0j0XxtJuzsoeL+oW6+FhN29lBx/1A3X5MJO5tY878gYWq7/wuNzadm+C8C6ltMBF5Cpvm0BADP84ID
-  </data>
- </layer>
- <layer name="Tile Layer 3" width="24" height="24">
-  <data encoding="base64" compression="zlib">
-   eJztwQEBAAAAgiD/r25IQAEAfBkJAAAB
   </data>
  </layer>
 </map>

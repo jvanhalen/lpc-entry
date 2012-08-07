@@ -23,10 +23,9 @@
    eJzt1LsOAVEQxvEzkqVw6VC4dChc3tEreAXPhAcQFJRE4RLfZE8x2WCOzdA4xS+z2TP7T06zC+fc8ktWsIFtxpryyXZ2L/pJIZ/QvhXZn1IY+b22J/szSh0Vsq/tPetrYj/2Y///+nMKI/va3q/+z3s4wQ3uBpNbB98/wwUS3KkKNYPJratvl/Bc9u860DWY3KpQ2i5CC+owhonB5FbbtxswhB70PzB4c8atETThAZNih/s=
   </data>
  </layer>
- <layer name="Additions" width="24" height="24">
+ <layer name="Overlay" width="24" height="24">
   <data encoding="base64" compression="zlib">
    eJztz8kKglAUxvF7JXqNWtfrRetyGS1Km+e0eR7eKHyQ/oJhC7UUjRZ+8MMD1/PBESL5lFB25ocUIh+hw96xpPdbDXVnzihCFCP02ztZJcJiDKn43OUVVbo71QDqW2czRL8u3Z0cX01602PoLyTc79ed9qf9af/v+g1nNuVnC+nufPPfK9b3J3xMnF1h0kATI4xxwBE77DHDHBp0bLBFC21MMA3o76ALAyZuuOOCK1ZYo4c+TjhjgCEWWMZz6t/kCWiEekA=
   </data>
  </layer>
- <objectgroup name="Object Layer 1" width="24" height="24"/>
 </map>
