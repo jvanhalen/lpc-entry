@@ -105,16 +105,12 @@ function LoadTileMap( file)
                     {
                         Crafty.e("2D, DOM, Collision, Sprite, solid, transparent")
                             .sprite(xc,yc)
-<<<<<<< HEAD
                             // custom collisions need this also in ALL other colliding entities in order to work.
                             .collision([0,0],
                                        [map.tilewidth,0],
                                        [map.tilewidth, map.tileheight],
                                        [0,map.tileheight])
                             .attr({x:currColumn*tileset.tilewidth, y:currRow*tileset.tileheight, z:GROUND_Z+layer});       
-=======
-                            .attr({x:currColumn*tileset.tilewidth, y:currRow*tileset.tileheight, z:GROUND_Z+layer});
->>>>>>> Restructured the client-server messaging and changed message type from int -> string
                     } else {
                         // determine which layer does this thing belong to
                         var layerZ = 0;
@@ -150,13 +146,10 @@ function LoadTileMap( file)
                         // create tile entity
                         Crafty.e("2D, DOM, Sprite, "+spriteName)
                             .sprite(xc,yc)
-<<<<<<< HEAD
                             .attr({x:currColumn*tileset.tilewidth, 
                                    y:currRow*tileset.tileheight, 
                                    z:layerZ});       
-=======
-                            .attr({x:currColumn*tileset.tilewidth, y:currRow*tileset.tileheight, z:GROUND_Z+layer});
->>>>>>> Restructured the client-server messaging and changed message type from int -> string
+
                     }
                 }
                 // next tile, take care of indices.
@@ -557,7 +550,6 @@ function showArenaView()
         .attr({x:370, y:300, z:5})
         .leftControls(1)
         .setupAnimation("skeleton_body")
-<<<<<<< HEAD
         .bind('KeyDown', function(){
             if ( this.isDown('LEFT_ARROW')) {
                 this.slashAttack('left');
@@ -572,13 +564,6 @@ function showArenaView()
                 this.slashAttack('up');
             }
         });
-
-        
-=======
-        .Ape()
-        .collision([0,0],[16,0],[16,16],[0,16]);
-
->>>>>>> Restructured the client-server messaging and changed message type from int -> string
 }
 
 function showGladiatorPitView()
