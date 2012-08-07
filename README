@@ -19,9 +19,28 @@ CLIENT:
        Feet entity (toes) 
        Weapon entity (optional)
 
+- Graphics layers (z-indices)
+
+  Name       Z-index    Desc
+  -----------------------------
+  Ground     0          Used for bottom layer in tile maps. 
+  Overlay    1          Used for additional overlay in tile maps
+  Behind     2          For some special graphics behind game object (quiver, mostly)
+  Body       3          Basic body animation (human + skeleton)
+  Equipment  4          Additional armor or wear over the body layer.
+  Weapon     5          All weapons stored with this
+  Mouse      6          For transparent collision layer over all other sprites in game object.
+  Front      7          Used for front layer elements in tile maps (appears over game objects)
+
+  Collision  -          Not rendered, shall contain only tiles that are inaccessible 
+                        in the tile map.
 
 KNOWN ISSUES:
 
     If Crafty is initialized and some component is hidden after that from page,
     Crafty's mouse related coordinates get busted unless you do window resize. 
-    I believe that this is browser-related and _needs_ to be taken into account when designing a page.
+    I believe that this is browser-related and _needs_ to be taken into account 
+    when designing a page.
+    
+    Crafty entities must have .collision(polygon) defined for all entities that wish to use 
+    SAT collision algorithm. Otherwise sprite MBR is used for _both_.
