@@ -51,7 +51,8 @@
                       "icon":"roundwoodenshield.png",
                       "description":"A firm round wooden shield to cover your limbs and arteries.",
                       "toblock":"50%",
-                      "armourvalue":"1d4"}]
+                      "armourvalue":"1d4"}],
+         "icon": "skeleton.png"
         },
             {"name": "Mauri the Mighty",
              "age": "25",
@@ -101,6 +102,7 @@
                          "icon":"roundwoodenshield.png",
                          "description":"A firm round wooden shield to cover your limbs and arteries.",
                          "toblock":"50%",
-                         "armourvalue":"1d4"}]
+                         "armourvalue":"1d4"}],
+            "icon": "skeleton.png"
          }]
 }

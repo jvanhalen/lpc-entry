@@ -1,7 +1,7 @@
 {
         "id": "gladiators",
         "free":
-              [{"name": "Känsä the Skeleton",
+              [{"name": "Kaensae the Skeleton",
                 "age": "5",
                 "health": "20",
                 "nimbleness": "10",
@@ -49,7 +49,8 @@
                             "icon":"roundwoodenshield.png",
                             "description":"A firm round wooden shield to cover your limbs and arteries.",
                             "toblock":"50%",
-                            "armourvalue":"1d4"}]
+                            "armourvalue":"1d4"}],
+                "icon": "skeleton.png"
                 },
                 {"name": "Mauri the Mighty",
                 "age": "25",
@@ -99,6 +100,7 @@
                             "icon":"roundwoodenshield.png",
                             "description":"A firm round wooden shield to cover your limbs and arteries.",
                             "toblock":"50%",
-                            "armourvalue":"1d4"}]
+                            "armourvalue":"1d4"}],
+                "icon": "human.png"
                 }]
 }
