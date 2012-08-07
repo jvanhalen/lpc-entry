@@ -13,14 +13,14 @@
     <script type="text/javascript" charset="utf-8" src="../server/maple/lib/Class.js"></script>
     <script type="text/javascript" charset="utf-8" src="../server/maple/lib/Twist.js"></script>
     <script type="text/javascript" charset="utf-8" src="../server/maple/Maple.js"></script>
-    <script type="text/javascript" charset="utf-8" src="../server/maple/Client.js"></script> 
+    <script type="text/javascript" charset="utf-8" src="../server/maple/Client.js"></script>
     <script type="text/javascript" charset="utf-8" src="./lib/sha-hash.js"></script>
     <script type="text/javascript" charset="utf-8" src="./lib/crafty.js"></script>
     <script type="text/javascript" charset="utf-8" src="ape-component.js"></script>
     <script type="text/javascript" charset="utf-8" src="gas-client.js"></script>
     <script type="text/javascript" charset="utf-8" src="./characters.js"></script>
-    
-    
+
+
     <script type="text/javascript">
     var type=10;
     function setType(value)
@@ -28,14 +28,14 @@
 	    type = value;
     }
     </script>
-    
+
     <script type="text/javascript" charset="utf-8">
      // ****************************************
-     // validator plugin settings: when submitted, 
+     // validator plugin settings: when submitted,
      // we use GAS Maple server for authentication.
      // ****************************************
      $.validator.setDefaults({
-	 submitHandler: function() { 
+	 submitHandler: function() {
       var hashPass = Sha1.hash($('#password').val());
       var login = $('#username').val();
        gas.send(type, [ '{"username":"'+login+'"}' ]);
@@ -93,14 +93,15 @@
       }
       function logout()
       {
-        $.cookie('gas-login',null);
-      
+        $.cookie("gas-login", null);
+	window.location.reload(true);
+
       }
       function displayLogin()
       {
            $('#login').fadeOut(500, function(){
                 $('#login').empty();
-                $('#login').html('Welcome back, '+JSON.parse($.cookie("gas-login")).username+'!').append($('#login-nav').html());
+                $('#login').html('<div>Enjoy your stay, '+JSON.parse($.cookie("gas-login")).username+'!</div><br />').append($('#login-nav').html());
                 $('#login').fadeIn('fast', function(){
                     Crafty.scene("loadingView");
                 });
@@ -114,13 +115,13 @@
 
 <body>
   <div id="login-nav">
-    <button type="submit" id="logout" onclick=""> >>&nbsp;&nbsp;Logout</button>
+    <button type="submit" id="logout" onclick="logout();"> >>&nbsp;&nbsp;Logout</button>
   </div>
   <div id="title">
     Galaxy All-Stars: Medieval Edition Login
   </div>
   <div id="login">
-    <form method="post" id="loginform" action="">
+    <form method="post" id="loginform" action="#">
       <fieldset>
 	<div class="form-element">
           <label for="username">Username</label>
@@ -132,8 +133,8 @@
 	</div>
       </fieldset>
       <fieldset>
-        <button type="submit" id="createbtn" title="Create new team" onclick="setType(2);"> >>&nbsp;&nbsp;Create</button>
-        <button type="submit" id="loginbtn" title="Log in to an existing account" onclick="setType(10);"> >>&nbsp;&nbsp;Login</button>
+        <button type="submit" id="createbtn" title="Create new team" onclick="setType('CREATE_USER_REQ');"> >>&nbsp;&nbsp;Create</button>
+        <button type="submit" id="loginbtn" title="Log in to an existing account" onclick="setType('LOGIN_INIT_REQ');"> >>&nbsp;&nbsp;Login</button>
       </fieldset>
     </form>
   </div>
@@ -166,17 +167,17 @@
     PreloadAnimation("plate-armor.json");
     PreloadAnimation("no-armor.json");
 
-    
+
     Crafty.scene("loadingView", function(){
        console.log('Loading');
        for( var i=0;i< assetArray.length;i++)
        {
           console.log('About to load'+assetArray[i]);
        }
-       Crafty.load(assetArray, function(e){ 
+       Crafty.load(assetArray, function(e){
                        console.log('Done loading, starting manager!');
                        Crafty.scene("managerView"); });
-    
+
        Crafty.e("2D, DOM, Text").attr({ w: 100, h: 20, x: 150, y: 120 })
       .text("Loading")
       .css({ "text-align": "center" });
@@ -191,7 +192,7 @@
            $('#login').empty();
                        Crafty.scene("loadingView");
                        });
-*/  
+*/
   // just a jQuery test for fading stuff in
     $("#rank_link").click(function(event){
     $("#ranking").fadeIn("slow");
@@ -199,12 +200,12 @@
     event.preventDefault();
     });
 
-    
-    
+
+
 
   </script>
-  
-   
+
+
 
 </body>
 </html>

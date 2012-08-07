@@ -11,7 +11,7 @@ function PreloadAnimation(animFile) {
         dataType: 'json',
         data: undefined,
         async: false,
-        success: function(a) {     
+        success: function(a) {
             g_Animations[a.name] = a;
             console.log('Preload Done for '+a.name);
         }
@@ -22,8 +22,8 @@ function GetLoadableAssetsFromTileMap( file, assetArray )
 {
     var ASSET_PREFIX = '../assets/maps/';
     // try to read json tile map
-    $.getJSON( ASSET_PREFIX+file, function(map) {                 
-        
+    $.getJSON( ASSET_PREFIX+file, function(map) {
+
         for ( var i=0;i<map.tilesets.length;i++)
         {
             var assetFile = ASSET_PREFIX+map.tilesets[i].image;
@@ -38,41 +38,41 @@ function LoadTileMap( file)
     var ASSET_PREFIX = '../assets/maps/';
 
     // try to read json tile map
-    $.getJSON( ASSET_PREFIX+file, function(map) {                 
+    $.getJSON( ASSET_PREFIX+file, function(map) {
         var tilesetIndices = [];
         for ( var i=0;i<map.tilesets.length;i++)
         {
             // process first tileset
             var tileset = map.tilesets[i];
-            
+
             var tmp = {};
             var newName = map.properties.name+''+i;
             tmp[newName] = '[0,0]';
             // register sprite
             Crafty.sprite(map.tilewidth, map.tilewidth, ASSET_PREFIX+tileset.image, tmp, tileset.spacing);
-            
+
             // store first index
             tilesetIndices[i]=tileset.firstgid;
         }
 
-        
+
         /*console.log('Map:'+map.height+'x'+map.width);
         console.log('Tile size:'+map.tileheight+'x'+map.tilewidth);
         console.log(tileset.image);
         console.log(map.layers[n].name);
         console.log('Map is called: '+map.properties.name);*/
- 
+
        // add name dynamically so this can be made as proper function
         for( var layer=0; layer<map.layers.length;layer++)
         {
-            
+
 
             var currRow = 0;
             var currColumn = 0;
-            // Process layers 
+            // Process layers
             for(var i in map.layers[layer].data)
             {
-                
+
 
                 // indices in JSON format are:
                 // 0: no tile.
@@ -82,12 +82,12 @@ function LoadTileMap( file)
                 {
                     var tilesetIndex = 0;
                     // determine tileset we are using
-                    while ( map.layers[layer].data[i] > tilesetIndices[tilesetIndex+1]) 
+                    while ( map.layers[layer].data[i] > tilesetIndices[tilesetIndex+1])
                         tilesetIndex++;
                     //console.log("Tilesetindex for "+layer+' is ' + tilesetIndex);
 
                     var tileset = map.tilesets[tilesetIndex];
-                    
+
                     // How many columns does our tileset contain
                     var cols = Math.floor(tileset.imagewidth/(tileset.tileheight+tileset.spacing));
 
@@ -95,22 +95,26 @@ function LoadTileMap( file)
                     var index = map.layers[layer].data[i]-tilesetIndices[tilesetIndex];
                     var yc = Math.floor(index/cols);
                     var xc = index - (cols*yc);
-                    
+
                     // Create Crafty entity with plain sprite to be drawn.
                     // attr x,y are expressed in pixels.
                     var GROUND_Z = -1;
                     var spriteName = map.properties.name+tilesetIndex;
                     // skip collision layer
-                    if ( map.layers[layer].name == "Collision" ) 
+                    if ( map.layers[layer].name == "Collision" )
                     {
                         Crafty.e("2D, DOM, Collision, Sprite, solid, transparent")
                             .sprite(xc,yc)
+<<<<<<< HEAD
                             // custom collisions need this also in ALL other colliding entities in order to work.
                             .collision([0,0],
                                        [map.tilewidth,0],
                                        [map.tilewidth, map.tileheight],
                                        [0,map.tileheight])
                             .attr({x:currColumn*tileset.tilewidth, y:currRow*tileset.tileheight, z:GROUND_Z+layer});       
+=======
+                            .attr({x:currColumn*tileset.tilewidth, y:currRow*tileset.tileheight, z:GROUND_Z+layer});
+>>>>>>> Restructured the client-server messaging and changed message type from int -> string
                     } else {
                         // determine which layer does this thing belong to
                         var layerZ = 0;
@@ -146,9 +150,13 @@ function LoadTileMap( file)
                         // create tile entity
                         Crafty.e("2D, DOM, Sprite, "+spriteName)
                             .sprite(xc,yc)
+<<<<<<< HEAD
                             .attr({x:currColumn*tileset.tilewidth, 
                                    y:currRow*tileset.tileheight, 
                                    z:layerZ});       
+=======
+                            .attr({x:currColumn*tileset.tilewidth, y:currRow*tileset.tileheight, z:GROUND_Z+layer});
+>>>>>>> Restructured the client-server messaging and changed message type from int -> string
                     }
                 }
                 // next tile, take care of indices.
@@ -157,7 +165,7 @@ function LoadTileMap( file)
                     currColumn = 0;
                     currRow++;
                 }
-                
+
             }
         }
     });
@@ -175,7 +183,7 @@ var magicItems = [
         cost:100,
         desc:'This spell has made rain capes unnecessary'
     },
-    {                
+    {
         name:'Punch Ward',
         mana:2,
 	    duration:10,
@@ -209,10 +217,10 @@ function showMagicView()
     {
         var item = magicItems[i];
         _y = _y + 32;
-        shopListObjs.push( 
+        shopListObjs.push(
             Crafty.e("2D, DOM, Text, Mouse").attr({w:300,h:32, x: 102, y: _y, z: 3 })
                 .text(item.name+' ' + item.mana + ' ' + item.duration + ' ' + item.effect + ' ' + item.cost + ' ' + item.desc)
-                .css({ 
+                .css({
                     "text-align": "left",
                     "font-family": "Arial",
                     "font-size": "8pt",
@@ -222,7 +230,7 @@ function showMagicView()
                     alert('Selected spell'+this[0]);
                 })
         );
-        shopListObjs.push( 
+        shopListObjs.push(
             Crafty.e("2D, DOM, Sprite, Mouse, staff"+i)
                 .attr({x: 54, y: _y, z: 3 })
                 .bind('Click', function(){
@@ -243,10 +251,10 @@ function showMightView()
     {
         var item = mightItems[i];
         _y = _y + 32;
-        shopListObjs.push( 
+        shopListObjs.push(
             Crafty.e("2D, DOM, Text, Mouse").attr({w:200, h:32, x: 102, y: _y, z: 3 })
                 .text(item.name+' ' +item.effect + ' ' + item.cost )
-                .css({ 
+                .css({
                     "text-align": "left",
                     "font-family": "Arial",
                     "font-size": "8pt",
@@ -255,8 +263,8 @@ function showMightView()
                 .bind('Click', function(){
                     alert('Selected equipment'+this[0]);
                 })
-        ); 
-        shopListObjs.push( 
+        );
+        shopListObjs.push(
             Crafty.e("2D, DOM, Sprite, Mouse, spear"+i)
                 .attr({x: 54, y: _y, z: 3 })
                 .bind('Click', function(){
@@ -272,7 +280,7 @@ function showLoginView()
         .attr({x:160, y:100, z:6})
         .setupAnimation('skeleton_body')
         .walk.body.animate('walk_right', 10, -1);
-    
+
     var tmpObj2 = Crafty.e("2D, DOM, Mouse, Ape, Sprite, transparent")
         .attr({x:500, y:100, z:6})
 	    .setupAnimation("human_body")
@@ -292,7 +300,7 @@ function showGladiatorView()
 {
 
     LoadTileMap( 'inventory.json');
-    
+
 
     Crafty.sprite(64,'../pics/walkcycle/BODY_skeleton.png', {
         skeleton: [0,0]
@@ -327,7 +335,7 @@ function showGladiatorView()
         shield1: [1,9],
         shield2: [2,9]
     });
-    
+
 
     Crafty.e("2D, DOM, Sprite, Mouse, skeleton")
         .attr({x:450, y:220, z:3})
@@ -338,11 +346,11 @@ function showGladiatorView()
         .bind('MouseOut', function(e){
             this.sprite(0,1);
         });
-              
+
 
     Crafty.e("2D, DOM, Text").attr({ w: 400, h: 120, x: 520, y: 170, z: 3 })
         .text(text)
-        .css({ 
+        .css({
             "text-align": "left",
             "font-weight":"bold",
             "font-family": "Fanwood",
@@ -353,7 +361,7 @@ function showGladiatorView()
 
     Crafty.e("2D, DOM, Text").attr({ w: 400, h: 120, x: 210, y: 50, z: 3 })
         .text("Gladiator Properties")
-        .css({ 
+        .css({
             "text-align": "left",
             "font-weight": "bold",
             "font-family": "Fanwood",
@@ -362,7 +370,7 @@ function showGladiatorView()
         });
     Crafty.e("2D, DOM, Text").attr({ w: 400, h: 120, x: 50, y: 150, z: 3 })
         .text("Shop for Everything")
-        .css({ 
+        .css({
             "text-align": "left",
             "font-weight": "bold",
             "font-family": "Fanwood",
@@ -372,7 +380,7 @@ function showGladiatorView()
 
     Crafty.e("2D, DOM, Text, Mouse").attr({x: 50, y: 200, z: 3 })
         .text("Might")
-        .css({ 
+        .css({
             "text-align": "left",
             "font-family": "Arial",
             "font-size": "12pt",
@@ -384,7 +392,7 @@ function showGladiatorView()
         });
     Crafty.e("2D, DOM, Text, Mouse").attr({x: 150, y: 200, z: 3 })
         .text("Magic")
-        .css({ 
+        .css({
             "text-align": "left",
             "font-family": "Arial",
             "font-size": "12pt",
@@ -394,13 +402,13 @@ function showGladiatorView()
         .bind('Click', function(e){
             showMagicView();
         });
-    
-    
-   
-    
+
+
+
+
     Crafty.e("2D, DOM, Text, Mouse").attr({x: 50, y: 50, z: 3 })
         .text("Back")
-        .css({ 
+        .css({
             "text-align": "left",
             "font-family": "Arial",
             "font-size": "12pt",
@@ -410,7 +418,7 @@ function showGladiatorView()
         .bind('Click', function(e){
             Crafty.scene("managerView");
         });
-       
+
 }
 /* A very crude code for displaying arena */
 function showManagerView()
@@ -420,7 +428,7 @@ function showManagerView()
     Crafty.e("2D, DOM, Mouse, Text")
         .attr( {w:130, h:20, x:340, y:100, z:9})
         .text("To Battle!")
-        .css({ 
+        .css({
             "text-align": "center",
             "font-family": "Fanwood",
             "font-size": "13pt",
@@ -431,7 +439,7 @@ function showManagerView()
     // Add a title
     Crafty.e("2D, DOM, Text").attr({ w: 400, h: 20, x: 150, y: 10 })
         .text("Kalevala Heroes / GAS Valhalla")
-        .css({ 
+        .css({
             "text-align": "center",
             "font-family": "Impact",
             "font-size": "24pt"
@@ -439,7 +447,7 @@ function showManagerView()
     // Add some author info
     Crafty.e("2D, DOM, Text").attr({ w: 400, h: 20, x: 150, y: 45 })
         .text("by Team Oldman & Green (c) 2012")
-        .css({ 
+        .css({
             "text-align": "center",
             "font-family": "Arial",
             "font-size": "8pt"
@@ -447,7 +455,7 @@ function showManagerView()
     // Testing info
     Crafty.e("2D, DOM, Text").attr({ w: 140, h: 20, x: 42, y: 220, z:8 })
         .text("~Legend~")
-        .css({ 
+        .css({
             "text-align": "center",
             "font-family": "Fanwood",
             "font-size": "18pt",
@@ -455,7 +463,7 @@ function showManagerView()
         });
     Crafty.e("2D, DOM, Text").attr({ w: 130, h: 300, x:52 , y: 260, z:8 })
         .text("F1: Wear Robe<br>F2: Wear Leather<br>F3: Wear Plate<br>F4: Go Nude<br>X: Bones <br>H: Flesh<br>Arrow keys: Slash!<br>WASD: move")
-        .css({ 
+        .css({
             "text-align": "left",
             "font-family": "Fanwood-Text",
             "font-size": "10pt",
@@ -523,7 +531,7 @@ function showManagerView()
 
 
     //console.log("skel id:"+skel[0]);
-    
+
 }
 
 function showArenaView()
@@ -549,6 +557,7 @@ function showArenaView()
         .attr({x:370, y:300, z:5})
         .leftControls(1)
         .setupAnimation("skeleton_body")
+<<<<<<< HEAD
         .bind('KeyDown', function(){
             if ( this.isDown('LEFT_ARROW')) {
                 this.slashAttack('left');
@@ -565,12 +574,17 @@ function showArenaView()
         });
 
         
+=======
+        .Ape()
+        .collision([0,0],[16,0],[16,16],[0,16]);
+
+>>>>>>> Restructured the client-server messaging and changed message type from int -> string
 }
 
 function showGladiatorPitView()
 {
     console.log('loading tile map');
-    
+
     LoadTileMap( 'gladiatorpit.json' );
 
     console.log('loading tile map done!');
@@ -580,11 +594,11 @@ function showGladiatorPitView()
         .text('Quit')
         .bind('Click', function(){
             Crafty.scene("managerView");
-        }); 
+        });
     // Some info
     Crafty.e("2D, DOM, Mouse, Text")
         .attr({w:200, h:232, x:100, y:200, z:8})
-        .css({ 
+        .css({
             "text-align": "left",
             "font-family": "Fanwood-Text",
             "font-size": "10pt",
@@ -594,26 +608,26 @@ function showGladiatorPitView()
     // Header
     Crafty.e("2D, DOM, Mouse, Text")
         .attr({w:340, h:64, x:200, y:50, z:8})
-        .css({ 
+        .css({
             "text-align": "center",
             "font-family": "Fanwood",
             "font-size": "24pt",
             "color": "#5c3111"
-           
+
         })
         .text('Gladiator Pit');
-    
+
 
     window.setTimeout(function(){
         // pray tell, server, best deals for today?
-        gas.send(13, ['{ "name":"LIST_AVAILABLE_GLADIATORS"}']);
+        gas.send('QUERY_AVAILABLE_GLADIATORS_REQ', ['{ "name":"LIST_AVAILABLE_GLADIATORS"}']);
     }, 1000);
 
 }
 
 function gladiatorHTML(gladiator)
 {
-    var HTMLstr = 
+    var HTMLstr =
         'Name:'+gladiator.name+'<br>'+
         'Age:'+gladiator.age+'<br>'+
         'Health:'+gladiator.health+'<br>'+
@@ -633,7 +647,7 @@ function pitCreateGladiators(gladiatorData){
 
     var pos = { "x" : 414,
                 "y" : 170 };
-    var offset = { "x": 96, 
+    var offset = { "x": 96,
                    "y": 128 };
     var count = 0;
 
@@ -643,7 +657,7 @@ function pitCreateGladiators(gladiatorData){
         console.log('Creating gladiator showcase for ' + gladiator.name);
 
         var body = "human_body";
-        if ( gladiator.race == "skeleton" ) 
+        if ( gladiator.race == "skeleton" )
             body = "skeleton_body";
 
         var xPos = pos.x+(offset.x*count);
@@ -659,7 +673,7 @@ function pitCreateGladiators(gladiatorData){
                 if ( g_pitMessage ) g_pitMessage.destroy();
                 g_pitMessage = Crafty.e("2D, DOM, Text")
                     .attr({w:200, h:232, x:100, y:300, z:8})
-                    .css({ 
+                    .css({
                         "text-align": "left",
                         "font-family": "Fanwood-Text",
                         "font-size": "10pt",
@@ -695,11 +709,11 @@ var GAS = Class(function() {
     update: function(t, tick) {
         //console.log(t, tick, this.getRandom());
         //this.send(4, ['Hello world!']);
-        
+
     },
 
     render: function(t, dt, u) {
-        
+
     },
 
     stopped: function() {
@@ -713,29 +727,29 @@ var GAS = Class(function() {
     message: function(type, tick, data) {
         console.log('message:', type, tick, data);
 
-	
+
 	switch(type) {
-	    // User creation and login
-	    case 2: // User exists, clear fields
-		console.log("User exists");
-		document.getElementById('username').value = '';
-		document.getElementById('password').value = '';
-		break;
-	    
-	    case 5:
-	    case 11:
+
+	    case 'CREATE_USER_RESP':
+	    case 'LOGIN_INIT_RESP':
+		if("OK" == JSON.parse(data).response) {
+			this.send('USER_SALT_REQ', ['{"username":"' + $('#username').val() + '"}']);
+		}
+		else {
+			document.getElementById('username').value = '';
+			document.getElementById('password').value = '';
+		}
+		  break;
+
+	    case 'USER_SALT_RESP':
 		    var hash = Sha1.hash(JSON.parse(data).salt + $('#password').val());
-		    this.send(type, ['{"username":"' + $('#username').val() + '", "pwdhash":"' + hash + '"}']);
-		    console.log('sending: [{"username":"' + $('#username').val() + '", "pwdhash":"' + hash + '"}]');
+		    this.send('LOGIN_REQ', ['{"username":"' + $('#username').val() + '", "pwdhash":"' + hash + '"}']);
+		    //console.log('sending: [{"username":"' + $('#username').val() + '", "pwdhash":"' + hash + '"}]');
 	      break;
-	    
-	    case 10: // Request salt
-		    this.send(type, ['{"username":"' + $('#username').val() + '"}']);
-	      break;
-	    
-	    case 12: // Authenticated by the server - proceed to game lobby
-		if(JSON.parse(data).response !== "NOK") {
-            
+
+	    case 'LOGIN_RESP': // Authenticated by the server - proceed to game lobby
+		if("OK" === JSON.parse(data).response) {
+
 		    $.cookie("gas-login", data);
 		    displayLogin();
             /*$('#login').fadeOut(500, function(){
@@ -746,15 +760,18 @@ var GAS = Class(function() {
                 });
 		    });*/
 		}
-		else {console.log("Login failed");
+		else {
+			console.log("Login failed");
 		}
 	    break;
-        case 13:
+
+        case 'QUERY_AVAILABLE_GLADIATORS_RESP':
                 console.log('Handling gladiator list');
                 pitCreateGladiators(JSON.parse(data[0]).free);
         break;
 	    case 50:
            console.log("Received: " + data[0].name);
+
         break;
 	    default:
 	      console.log("Default branch reached in 'message handling'");
@@ -771,10 +788,7 @@ var GAS = Class(function() {
 
     closed: function(byRemote, errorCode) {
         console.log('Closed:', byRemote, errorCode);
+	$.cookie("gas-login", null); // eat cookie?
     }
 
 });
-
-
-
-

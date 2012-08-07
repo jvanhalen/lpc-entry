@@ -36,10 +36,9 @@ var Test = Maple.Class(function(clientClass) {
 
     update: function(t, tick) {
         //console.log(this.getClients().length, 'client(s) connected', t, tick, this.getRandom());
-        //this.broadcast(5, ['GAS leak detected']);
 
         // make object move on client side.
-        /*if ( this.getClients().length > 0 ) 
+        /*if ( this.getClients().length > 0 )
         {
             var moveCmd = {
                 "name": "MOVE_REQUEST",
@@ -58,7 +57,7 @@ var Test = Maple.Class(function(clientClass) {
             this.getClients().getAt(0).send(moveCmd.type, data );
         }*/
     },
-    
+
     stopped: function() {
         console.log('Server stopped');
 	this.broadcast(0, ['-- server halted --']);
@@ -66,50 +65,21 @@ var Test = Maple.Class(function(clientClass) {
 
     connected: function(client) {
         console.log('Connected:', client.id);
-	//client.send(5, ['{"asdf":"asdf"}']);
+		// Send initial data, e.g. ranking list?
     },
 
     message: function(client, type, tick, data) {
-	
-	console.log("message:", type, "data", data);
 
-        switch(type)
-        {
-		case 2:
-			console.log("*** Creating new user " + '(' + JSON.parse(data).username + ')' + " *** ");
-			// Query DB for user existence
-			this.querydb(JSON.parse(data).username, client, type, data);
-		  break;
+	//console.log("message:", type, "data", data);
+	// TODO: Ugly JSON data will crash our server - fix it
+	this.handleClientRequest(client, type, tick, data);
 
-		case 4: // Login request (login -> salt -> sha1(password+salt) -> compare -> response
-			console.log("*** User " + '(' + JSON.parse(data).username + ')' + " requested login *** ");
-
-			// Query DB for user existence
-			this.querydb(JSON.parse(data).username, client, type, data);
-		  break;
-
-		case 5:
-			this.querydb(JSON.parse(data).username + '/login', client, 6, data, '{"password":"' + JSON.parse(data).pwdhash + '"}');
-		  break;
-
-		case 10:
-			this.querydb(JSON.parse(data).username + '/login', client, type, data, undefined);
-		  break;
-		case 11:
-			this.querydb(JSON.parse(data).username + '/login', client, 12, data, undefined);
-		  break;
-		case 13:
-            this.querydb('/gladiators/available', client, 13, data, undefined);
-	        break;
-		default:
-			console.log("message : default branch reached, type: ", type);
-        }
     },
 
     requested: function(req, res) {
         console.log('HTTP Request');
-	//console.log(req);
-	//console.log(res);
+		//console.log(req);
+		//console.log(res);
     },
 
     disconnected: function(client) {
@@ -129,228 +99,215 @@ var Test = Maple.Class(function(clientClass) {
 	  }
 	});
 	    //tty.setRawMode(true);
-	
+
 	// Query database access
 	this.querydb("/", undefined, undefined, undefined);
     },
 
     querydb: function(querypath, client, type, data) {
-	var options = {host: '127.0.0.1', port: 5984, path: '/'};
-	var http = require('http');
-	var respdata = "";
-	// check that the querypath is valid or it will hang our socket
-	if(querypath[0] !== "/") {
-	   querypath = '/' + querypath;
-	}
-	options.path = querypath;
+		var options = {host: '127.0.0.1', port: 5984, path: '/'};
+		var http = require('http');
+		var respdata = "";
+		// check that the querypath is valid or it will hang our socket
+		if(querypath[0] !== "/") {
+		   querypath = '/' + querypath;
+		}
+		options.path = querypath;
 
-	console.log("GET:", querypath);
-	var req = http.get(options, function(res) {
-	  res.setEncoding('utf8');
-	  res.on('data', function (chunk) {
-	  srv.handledbresp(querypath, chunk, client, type, data);
-	  });
-	});
+		console.log("GET:", querypath);
+		var req = http.get(options, function(res) {
+		  res.setEncoding('utf8');
+		  res.on('data', function (chunk) {
+		  srv.handleDbResponse(querypath, chunk, client, type, data);
+		  });
+		});
 
-	req.on('error', function(e) {
-	  console.log('GET: Cannot access database: ' + e.message);
-	});
+		req.on('error', function(e) {
+		  console.log('GET: Cannot access database: ' + e.message);
+		});
 
-	// write data to request body
-	req.write('data\n');
-	req.write('data\n');
-	req.end();
+		// write data to request body
+		req.write('data\n');
+		req.write('data\n');
+		req.end();
     },
 
     updatedb: function(querypath, client, type, data, content) {
-	var request = require('request')
+		var request = require('request')
 
-	//console.log("PUT to: " + querypath + "\n client.id: " + client.id + "\n content: " + content + "\n data: " + data);
+		//console.log("PUT to: " + querypath + "\n client.id: " + client.id + "\n content: " + content + "\n data: " + data);
 
-	if(undefined === content) {
-	  content = '{"foo":"bar"}';
-	}
+		if(undefined === content) {
+		  content = '{"foo":"bar"}';
+		}
 
-	if(querypath[0] != '/') {
-	  querypath = '/' + querypath;
-	  console.log("WARNING: updatedb: received invalid querypath", querypath);
-	}
+		if(querypath[0] != '/') {
+		  console.log("WARNING: updatedb: received invalid querypath", querypath);
+		  querypath = '/' + querypath;
+		}
 
-	console.log("CONTENT:", content);
+		console.log("CONTENT:", content);
 
-	request({
-	  method: 'PUT',
-	  uri: 'http://localhost:5984' + querypath,
-	  'content-type': 'application/json',
-	  'content-length': content.length,
-	  'body': content
+		request({
+		  method: 'PUT',
+		  uri: 'http://localhost:5984' + querypath,
+		  'content-type': 'application/json',
+		  'content-length': content.length,
+		  'body': content
 
-	}, function (error, response, body) {
-	//console.log("BODY:", body);
-	  if(response) {
-		  if(response.statusCode == 201){
-		    console.log("PUT ok for: " + querypath + "\n client.id: " + client.id + "\n content: " + content);
-		    srv.handledbresp(querypath, response, client, type, data);
-		  } else {
-		    console.log("PUT failed for: " + querypath + "\n client.id: " + client.id + "\n content: " + content + " with status code:" + response.statusCode);
-		  }
-	  }
-	  else {
-		console.log("ERROR: updatedb response undefined for: " + querypath + "\n client.id: " + client.id + "\n content: " + content);
-	  }
-	})
+		}, function (error, response, body) {
+		//console.log("BODY:", body);
+			if(response) {
+				if(response.statusCode == 201){
+					console.log("PUT ok for: " + querypath + "\n client.id: " + client.id + "\n content: " + content);
+						srv.handleDbResponse(querypath, response, client, type, data);
+					}
+					else {
+						console.log("PUT failed for: " + querypath + "\n client.id: " + client.id + "\n content: " + content + " with status code:" + response.statusCode);
+					}
+				}
+				else {
+					console.log("ERROR: updatedb response undefined for: " + querypath + "\n client.id: " + client.id + "\n content: " + content);
+				}
+			})
     },
 
-    handledbresp: function(url, response, client, type, data) {
-	console.log("handledbresp: function(url, response, client, type, data)");
-	//console.log("url:", url);
-	//console.log("type", type);
+    handleDbResponse: function(url, response, client, type, data) {
+		console.log("handleDbResponse: " + url + " : " + response);
 
-	switch(type)
-	{
-		case 2:
-		case 3:
-		case 4:
-		case 5:
-		case 6:
-		  this.handlenewuser(url, response, client, type, data);
-		  break;
-		case 10:
-		case 11:
-		case 12:
-		  this.handlelogin(url, response, client, type, data);
-		  break;
-        case 13:
-          this.handlePitQuery(url, response, client, type, data);
-          break;
-	    default:
-		  console.log("handledbresp : default branch reached, type: ", type);
-		break;
-	}
+		switch(type)
+		{
+			case 'CREATE_USER_REQ':
+			case 'CREATE_USER_STEP_TWO':
+				this.handleNewUserReq(url, response, client, type, data);
+			  break;
+
+			case 'LOGIN_INIT_REQ':
+				if(JSON.parse(response).error)
+				    client.send('LOGIN_INIT_RESP', ['{"response":"NOK"}']);
+				else
+				    client.send('LOGIN_INIT_RESP', ['{"response":"OK"}']);
+			  break;
+
+			case 'LOGIN_REQ':
+
+				var dbval = JSON.parse(response);
+
+				if (dbval["password"] === undefined) {
+
+					dbval["password"] = JSON.parse(data).pwdhash;
+
+					console.log("First login for", JSON.parse(data).username, "Updating passwd.");
+					this.updatedb(JSON.parse(data).username + '/login', client, 'DONT_CARE', data, JSON.stringify(dbval));
+				}
+
+
+				if(JSON.parse(data).pwdhash !== dbval["password"]) {
+					console.log("pwd did not match, login failed");
+					client.send('LOGIN_RESP', ['{"response":"NOK", "username":"' + JSON.parse(data).username + '"}']);
+				}
+				else {
+					console.log("pwd matched, login successful");
+					client.send('LOGIN_RESP', ['{"response":"OK", "username":"' + JSON.parse(data).username + '"}']);
+					// Send also initial data to the server (team, rankings, etc.)
+				}
+
+			  break;
+
+			case 'USER_SALT_REQ':
+				client.send('USER_SALT_RESP', ['{"salt":"' + JSON.parse(response).salt + '"}']);
+			  break;
+
+			case 'QUERY_AVAILABLE_GLADIATORS_REQ':
+				client.send('QUERY_AVAILABLE_GLADIATORS_RESP', [response]);
+			  break;
+
+			default:
+			  console.log("handleDbresponse : default branch reached, type: ", type);
+			break;
+		}
+
     },
-    handlePitQuery: function(url,response, client, type, data) {
-        console.log('handling PitQuery' + response);
-        client.send(type, [response]);
+
+    handlePitQuery: function(url, response, client, type, data) {
+		console.log('handling PitQuery' + response);
+		client.send(type, [response]);
     },
-    handlenewuser: function(url, response, client, type, data) {
-	console.log("handlenewuser: function(url, response, client, type, data)");
-	//console.log("response", response);
-	console.log("url:", url);
-	console.log("type", type);
 
-	switch(type)
-	{
-		// Check for user existence
-		case 2:
-			if("not_found" == JSON.parse(response).error) {
-				this.updatedb(url, client, 3, data, undefined);  // Change 'type' 2 -> 3 for next step of the user creation
-				console.log("Created new user:", url.substring(1));
-			}
-			else {
-				console.log("username already exists");
-				client.send(type, ['{"Response":"User exists"}']);
-			}
+    handleNewUserReq: function(url, response, client, type, data) {
+
+		switch(type)
+		{
+			// Check for user existence
+			case 'CREATE_USER_REQ':
+				if("not_found" == JSON.parse(response).error) {
+					this.updatedb(url, client, 'CREATE_USER_STEP_TWO', data, undefined);
+					console.log("Created new user:", url.substring(1));
+				}
+				else {
+					console.log("user already exists");
+					client.send('CREATE_USER_RESP', ['{"response":"NOK", "Reason": "User exists"}']);
+				}
+			  break;
+
+			case 'CREATE_USER_STEP_TWO':
+				if(response == undefined) {
+					client.send('CREATE_USER_RESP', ['{"response":"NOK", "Reason": "Step two failed"}']);
+					console.log("handleNewUserReq : step CREATE_NEW_USER_STEP_TWO NOT OK (" + url + ")");
+				}
+				else {
+					var crypto = require('crypto');
+					//console.log(salt);
+
+					this.updatedb(url+'/team', client, 'DONT_CARE', data, '{"manager":"' + url.substring(1) + '"}');
+					this.updatedb(url+'/history', client, 'DONT_CARE', data, '{"created":"' + Date.now() + '", "from":"' + client.id.split(":",1) + '"}');
+
+					var salt = crypto.createHash('sha1');
+					salt.update(crypto.randomBytes(128));
+
+					this.updatedb(url+'/login', client, 'USER_SALT_RESP', data, '{"salt":"' + salt.digest('hex') + '"}');
+
+				}
+			  break;
+
+			default:
+			  console.log("handleNewUserReq : default branch reached, type: ", type);
+			break;
+		}
+
+    },
+
+	handleClientRequest: function (client, type, tick, data) {
+
+		console.log("handleReqMessage '" + type + "' data: " + data);
+
+        switch(type)
+        {
+		case 'CREATE_USER_REQ':
+			this.querydb(JSON.parse(data).username, client, type, data);
 		  break;
 
-		case 3:
-			if(response == undefined) {
-				client.send(type, ['{"Response":"NOK"}']);
-				console.log("handlenewuser : step 3 NOT OK (" + url + ")");
-				//TODO: remove user
-			}
-			else {
-				var crypto = require('crypto');
-				//console.log(salt);
-
-				this.updatedb(url+'/team', client, 0, data, '{"manager":"' + url.substring(1) + '"}');
-				this.updatedb(url+'/history', client, 0, data, '{"created":"' + Date.now() + '", "from":"' + client.id.split(":",1) + '"}');
-
-				var salt = crypto.createHash('sha1');
-				salt.update(crypto.randomBytes(128));
-
-				this.updatedb(url+'/login', client, 4, data, '{"salt":"' + salt.digest('hex') + '"}');
-
-			} 
+		case 'LOGIN_INIT_REQ':
+			this.querydb(JSON.parse(data).username, client, type, data);
 		  break;
 
-		// Request salt from database
-		case 4:
-			console.log("handlenewuser : step 4 querying salt from:" + url);
-			this.querydb(JSON.parse(data).username + '/login', client, 5, data); // Set type to 5 for the last step of the login process
+		case 'LOGIN_REQ':
+			this.querydb(JSON.parse(data).username + '/login', client, type, data, '{"password":"' + JSON.parse(data).pwdhash + '"}');
 		  break;
 
-		// Update user password and send confirmation to client
-		case 5:
-			if(response == undefined) {
-				console.log("handlenewuser : step 5 NOT OK (" + url + ")");
-				//TODO: remove user
-			}
-			else {
-				console.log("handlenewuser : step 5 (sending salt to the client for password generation) ");
-			} 
-			//console.log(data);
-			//console.log('[{"salt":"' + JSON.parse(response).salt + '"}]');
-			client.send(type, ['{"salt":"' + JSON.parse(response).salt + '"}']);
+		case 'USER_SALT_REQ':
+			this.querydb(JSON.parse(data).username + '/login', client, type, data);
 		  break;
 
-		case 6:
-			//console.log("JSON.stringify(response)", JSON.stringify(response));
-			var update = JSON.parse(response);
-			update["password"] = JSON.parse(data).pwdhash;
-
-			// For some reason, the following function does not work properly (HTTP GET returns empty set)
-			this.updatedb(JSON.parse(data).username + '/login', client, 0, data, JSON.stringify(update));
-
-
-		  break;
+		case 'QUERY_AVAILABLE_GLADIATORS_REQ':
+            this.querydb('/gladiators/available', client, type, data, undefined);
+	        break;
 		default:
-		  console.log("handlenewuser : default branch reached, type: ", type);
-		break;
+			console.log("message : default branch reached, type: ", type);
+        }
+
+
 	}
-    },
-
-    handlelogin: function(url, response, client, type, data) {
-	console.log("handlelogin: function(url, response, client, type, data)");
-	console.log("url:", url);
-	console.log("type", type);
-	switch(type)
-	{
-		// Check for user existence
-		case 10:
-			if("not_found" == JSON.parse(response).error) {
-				console.log("not_found");
-				client.send(12, ['{"response":"NOK"}']);
-			}
-			else {
-				console.log("db found, querying salt");
-				this.querydb(JSON.parse(data).username + "/login", client, 11);
-			}
-		  break;
-
-		// Forward salt
-		case 11:
-		  	client.send(11, ['{"salt":"' + JSON.parse(response).salt + '"}']);
-		  break;
-
-		// Verify user
-		case 12:
-		   //Connection OK / NOK
-			if(JSON.parse(data).pwdhash === JSON.parse(response).password) {
-				console.log("User", JSON.parse(data).username, "logged in.");
-				client.send(12, ['{"username":"'+JSON.parse(data).username+'","password":"'+JSON.parse(response).password+'"}']);
-			}
-			else {
-				console.log("User", JSON.parse(data).username, "login failed (password mismatch).");
-				console.log(JSON.parse(data).pwdhash + " != " + JSON.parse(response).password);
-			}
-		  break;
-
-		default:
-		  console.log("handlelogin : default branch reached, type: ", type);
-		  break;
-	}
-	
-    } 
 
 });
 
