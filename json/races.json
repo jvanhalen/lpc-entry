@@ -1,0 +1,11 @@
+{
+	"_id": "races",
+	"baseattr": "15",
+	"race":[{"human":
+					{"health": "6d4", "mana": "4d5", "nimbleness": "5d4", "strength": "3d6", "description": "Just a man."}},
+			{"skeleton":
+					{"health": "7d4", "mana": "5d5", "nimbleness": "4d4", "strength": "3d5", "description": "Ripped flesh and shiny bones."}},
+			{"dwarf":
+					{"health": "6d5", "mana": "4d4", "nimbleness": "4d4", "strength": "6d4", "description": "A sturdy short fellow."}}]
+
+}
