@@ -16,7 +16,8 @@
     <script type="text/javascript" charset="utf-8" src="../server/maple/Client.js"></script>
     <script type="text/javascript" charset="utf-8" src="./lib/sha-hash.js"></script>
     <script type="text/javascript" charset="utf-8" src="./lib/crafty.js"></script>
-    <script type="text/javascript" charset="utf-8" src="./pathfinding-browser.js"></script>
+    <script type="text/javascript" charset="utf-8" src="./lib/pathfinding-browser.js"></script>
+    <script type="text/javascript" charset="utf-8" src="./lib/Queue.compressed.js"></script>
     <script type="text/javascript" charset="utf-8" src="ape-component.js"></script>
     <script type="text/javascript" charset="utf-8" src="gas-client.js"></script>
     <script type="text/javascript" charset="utf-8" src="./characters.js"></script>
@@ -149,8 +150,8 @@
     // Connect to GAS server
     var gas = new GAS();
 
-    //gas.connect('gassrv.dyndns.org', 8282);
-    gas.connect('localhost', 8282);
+    gas.connect('gassrv.dyndns.org', 8282);
+    //gas.connect('localhost', 8282);
     Crafty.scene("managerView", showManagerView);
     Crafty.scene("gladiatorView", showGladiatorView);
     Crafty.scene("arenaView", showArenaView);
@@ -184,6 +185,7 @@
       .css({ "text-align": "center" });
     });
     Crafty.scene("loginView");
+
     if ( $.cookie("gas-login")) {
        displayLogin();
     }
