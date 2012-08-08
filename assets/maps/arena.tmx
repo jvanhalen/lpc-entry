@@ -21,7 +21,7 @@
  </layer>
  <layer name="Overlay" width="25" height="25">
   <data encoding="base64" compression="zlib">
-   eJxjYKA/0GdkYDDAgQ0ZiVeDCxgCcSBQTRAOHMxIvBpkIArELkDsTOXwcIaaKwbEwUAcQmXzYSAEaj4M0wLAzLYDYn8a2eEDxLZA7AfE8TSyIwaIfaF20BoMhB2g8LOjsR2xQBxHYztUgViNxnbQAhCygxrxQ8gOXOmbFLsJ2YErDZCSNgjZgSsNkJI2BkOcj9qBAKA6JI+OdqDX9dgAqWqCGWhX3yKbCwAw8RzP
+   eJztlcsKwjAQRScfoX9Qt9oPsPha+sCmSx9/4P8vvYEUB+mYSelUF144i8LNHGgGQjR+5o5oIVA6fUdKCVborAU2Tt/hmYAd2MZv6Wx7nhQOivPC3CnwoGFOzXlNh+Jcz2hzRqcW8E7fITa7AqfP19Q7e7AER3A3clzAITqs8w1H+H+VseMKbsaOAsyMHRZJOYa4n5RD2u8cd8oh7UDObqQc0g7k7MYv3Pnf8Up4Qx4jOt7f+q7kdjx1v7dDhM99AjEfKTA=
   </data>
  </layer>
  <objectgroup name="SpawnPoints" width="25" height="25" visible="0">
