@@ -56,6 +56,7 @@
            password:"Please enter password"
          }})
       });
+
     </script>
 
     <script type="text/javascript" charset="utf-8">
@@ -95,9 +96,10 @@
       function logout()
       {
         $.cookie("gas-login", null);
-	window.location.reload(true);
+		window.location.reload(true);
 
       }
+
       function displayLogin()
       {
            $('#login').fadeOut(500, function(){
@@ -134,8 +136,8 @@
 	</div>
       </fieldset>
       <fieldset>
-        <button type="submit" id="createbtn" title="Create new team" onclick="setType('CREATE_USER_REQ');"> >>&nbsp;&nbsp;Create</button>
         <button type="submit" id="loginbtn" title="Log in to an existing account" onclick="setType('LOGIN_INIT_REQ');"> >>&nbsp;&nbsp;Login</button>
+		<button type="submit" id="createbtn" title="Create new team" onclick="setType('CREATE_USER_REQ');"> >>&nbsp;&nbsp;Create</button>
       </fieldset>
     </form>
   </div>
@@ -201,12 +203,7 @@
     event.preventDefault();
     });
 
-
-
-
   </script>
-
-
 
 </body>
 </html>
