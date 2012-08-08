@@ -143,6 +143,7 @@ function LoadTileMap(file, createGrid)
    
     // try to read json tile map
 
+
     $.ajax({
         url: ASSET_PREFIX+file,
         dataType: 'json',
@@ -287,7 +288,6 @@ function LoadTileMap(file, createGrid)
                                 .attr({x:currColumn*tileset.tilewidth, 
                                        y:currRow*tileset.tileheight, 
                                        z:layerZ});       
-
                         }
                     }
                     // next tile, take care of indices.
@@ -302,10 +302,8 @@ function LoadTileMap(file, createGrid)
         }
         
     });
-    
-    var finder = new PF.AStarFinder();
-    if ( file == "arena.json")
-        console.log("Path found" +JSON.stringify(finder.findPath(12,10,13,10, grid.clone())));
+  
+
     return grid;
 }
 
@@ -674,6 +672,7 @@ function showManagerView()
 
 function showArenaView()
 {
+
    
     g_currentGrid = LoadTileMap( 'arena.json', true );
     
@@ -681,6 +680,7 @@ function showArenaView()
     {
         console.log("WARNING: current grid is not set!");
     }
+
 
     Crafty.e("2D, DOM, Mouse, Text")
         .attr({w:200, h:32, x:20, y:10})
@@ -695,6 +695,7 @@ function showArenaView()
             "font-family":"Fanwood-Text",
             "font-size":"16pt"
         });
+
        
     var tmpObj = Crafty.e("2D, DOM, Multiway, Keyboard, Grid, LeftControls, Mouse, Ape, Sprite, transparent")
         .Ape()
@@ -937,12 +938,6 @@ var GAS = Class(function() {
 
     closed: function(byRemote, errorCode) {
         console.log('Closed:', byRemote, errorCode);
-
-
-        // perhaps better to leave cookie until browser closed
-        // or logged off explicitly? Otherwise every refresh 
-        // will kill the cookie and user needs to relogin.
-	    //$.cookie("gas-login", null); // eat cookie?
     }
 
 });
