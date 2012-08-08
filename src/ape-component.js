@@ -115,14 +115,11 @@ Crafty.c('Ape', {
 			    // load sprite
 			    Crafty.sprite(64, '../pics/walkcycle/'+val.image, spriteDef);
 			    var tmp = entity.walk;
-			    console.log("tmp key = "+tmp[key] );
+
 			    // remove previous one if it exists.
 			    if ( entity.walk[key] ) { 
-                    console.log("Dupe check: "+entity[0] + " is dirty.");
                     entity.walk[key].destroy();
-			    } else {
-                    console.log("Dupe check: "+entity[0] + " is clean.");
-			    }
+			    } 
 			    // this must contain an entity.
 			    entity.walk[key] =  Crafty.e('2D, DOM, SpriteAnimation, Mouse, '+propname)
                     .animate("walk_up",1,0,8)
@@ -141,7 +138,6 @@ Crafty.c('Ape', {
                     entity.walk[key].destroy();
 			    }
             }
-		    console.log('setting up walk done for '+entity[0]+' is '+ entity.walk.body[0]);
 		});
 		$.each( a.thrust, function(key,val){
             if ( a.thrust[key] )
@@ -149,7 +145,7 @@ Crafty.c('Ape', {
 			    var spriteDef = {};
 			    var propname = a.name + '_' + key + '_thrust_cycle';
 			    spriteDef[propname] = [0,2];
-			    console.log(spriteDef);
+
 			    // load sprite
 			    Crafty.sprite(64, '../pics/thrust/'+val.image, spriteDef);
 			    
@@ -182,7 +178,7 @@ Crafty.c('Ape', {
 			    var spriteDef = {};
 			    var propname = a.name + '_' + key + '_slash_cycle';
 			    spriteDef[propname] = [0,2];
-			    console.log(spriteDef);
+
 			    // load sprite
 			    Crafty.sprite(64, '../pics/slash/'+val.image, spriteDef);
 			    
@@ -214,7 +210,7 @@ Crafty.c('Ape', {
 			    var spriteDef = {};
 			    var propname = a.name + '_' + key + '_bow_cycle';
 			    spriteDef[propname] = [0,2];
-			    console.log(spriteDef);
+
 			    // load sprite
 			    Crafty.sprite(64, '../pics/bow/'+val.image, spriteDef);
 			    
@@ -246,7 +242,7 @@ Crafty.c('Ape', {
 			    var spriteDef = {};
 			    var propname = a.name + '_' + key + '_hurt_cycle';
 			    spriteDef[propname] = [0,2];
-			    console.log(spriteDef);
+
 			    // load sprite
 			    Crafty.sprite(64, '../pics/hurt/'+val.image, spriteDef);
 			    
@@ -275,7 +271,7 @@ Crafty.c('Ape', {
 			    var spriteDef = {};
 			    var propname = a.name + '_' + key + '_spellcast_cycle';
 			    spriteDef[propname] = [0,2];
-			    console.log(spriteDef);
+
 			    // load sprite
 			    Crafty.sprite(64, '../pics/spellcast/'+val.image, spriteDef);
 			    
@@ -283,7 +279,7 @@ Crafty.c('Ape', {
 			    if ( entity.spellcast[key] ) { 
                     entity.spellcast[key].destroy();
 			    }
-			    console.log('Final entity id: ' + entity[0]);
+
 			    // this must contain an entity.
 			    entity.spellcast[key] =  Crafty.e('2D, DOM, SpriteAnimation, Mouse, '+propname)
                     .animate("spellcast_up",1,0,6)
@@ -300,7 +296,7 @@ Crafty.c('Ape', {
 			    }
             }
 		});
-        console.log('We are down in setupAnimation');
+        //console.log('We are down in setupAnimation');
         return this;
     }, // end ajax callback func
     enableAnimation: function(anim){
@@ -310,7 +306,6 @@ Crafty.c('Ape', {
         return this;
     },
     disableAnimation: function(anim){
-        console.log('disable animation call for ' +anim);
        
         $.each( anim, function(key,val){
             if ( anim[key] ) anim[key].visible = false;
@@ -345,12 +340,12 @@ Crafty.c('Ape', {
         return this;
     },
     thrustAttack: function(direction) {
-        console.log('attack!');
+
         this.hideAll();
         this.enableAnimation(this.thrust);
         if ( direction == 'left') 
         {
-            console.log('Lefty1');
+
             for(var i in this.thrust)
             {
                 if ( this.thrust[i] ) {
@@ -391,7 +386,7 @@ Crafty.c('Ape', {
         return this;
     }, 
     slashAttack: function(direction) {
-        console.log('attack!');
+
         this.hideAll();
         this.enableAnimation(this.slash);
         if ( direction == 'left') 
@@ -439,7 +434,7 @@ Crafty.c('Ape', {
             if (!this.walk.body.isPlaying("walk_left")){
                 for(var i in this.walk)
                 {
-                    if ( this.walk[i] ) this.walk[i].stop().animate("walk_left", 10, -1);
+                    if ( this.walk[i] ) this.walk[i].stop().animate("walk_left", 10, 0);
                 }
             }
         }
@@ -447,7 +442,7 @@ Crafty.c('Ape', {
             if (!this.walk.body.isPlaying("walk_right")){
                 for(var i in this.walk)
                 {
-                    if ( this.walk[i]) this.walk[i].stop().animate("walk_right", 10, -1);
+                    if ( this.walk[i]) this.walk[i].stop().animate("walk_right", 10, 0);
                 }
             }
         }
@@ -455,7 +450,7 @@ Crafty.c('Ape', {
             if (!this.walk.body.isPlaying("walk_up")){
                 for(var i in this.walk)
                 {
-                    if ( this.walk[i]) this.walk[i].stop().animate("walk_up", 10, -1);
+                    if ( this.walk[i]) this.walk[i].stop().animate("walk_up", 10, 0);
                 }
             }
         }
@@ -463,7 +458,7 @@ Crafty.c('Ape', {
             if (!this.walk.body.isPlaying("walk_down")){
                 for(var i in this.walk)
                 {
-                    if ( this.walk[i]) this.walk[i].stop().animate("walk_down", 10, -1);
+                    if ( this.walk[i]) this.walk[i].stop().animate("walk_down", 10, 0);
                 }
             }
         }
@@ -474,6 +469,7 @@ Crafty.c('Ape', {
             }
         }
     },
+
     Ape: function(n) {
         this.name = n;
         //setup animations
