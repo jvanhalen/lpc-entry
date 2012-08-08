@@ -61,13 +61,13 @@ function LoadTileMap( file )
             // store first index
             tilesetIndices[i]=tileset.firstgid;
         }
-       
+
 
         if ( useGrid)
         {
-            grid = new PF.Grid(map.width, map.height); 
-        } 
-        
+            grid = new PF.Grid(map.width, map.height);
+        }
+
         /*console.log('Map:'+map.height+'x'+map.width);
         console.log('Tile size:'+map.tileheight+'x'+map.tilewidth);
         console.log(tileset.image);
@@ -124,7 +124,7 @@ function LoadTileMap( file )
                                        [map.tilewidth,0],
                                        [map.tilewidth, map.tileheight],
                                        [0,map.tileheight])
-                            .attr({x:currColumn*tileset.tilewidth, y:currRow*tileset.tileheight, z:GROUND_Z+layer});       
+                            .attr({x:currColumn*tileset.tilewidth, y:currRow*tileset.tileheight, z:GROUND_Z+layer});
                     } else {
                         // determine which layer does this thing belong to
                         var layerZ = 0;
@@ -139,9 +139,9 @@ function LoadTileMap( file )
                         case "Front":
                             layerZ = 7;
                             break;
-                            // ones below should not exist in tile map, 
+                            // ones below should not exist in tile map,
                             // but let's be prepared.
-                        case "Behind": 
+                        case "Behind":
                             layerZ = 2;
                             break;
                         case "Body":
@@ -153,16 +153,16 @@ function LoadTileMap( file )
                         case "Weapon":
                             layerZ = 5;
                             break;
-                        case "Mouse": 
+                        case "Mouse":
                             layerZ = 6;
                             break;
                         }
                         // create tile entity
                         Crafty.e("2D, DOM, Sprite, "+spriteName)
                             .sprite(xc,yc)
-                            .attr({x:currColumn*tileset.tilewidth, 
-                                   y:currRow*tileset.tileheight, 
-                                   z:layerZ});       
+                            .attr({x:currColumn*tileset.tilewidth,
+                                   y:currRow*tileset.tileheight,
+                                   z:layerZ});
 
                     }
                 }
@@ -179,7 +179,7 @@ function LoadTileMap( file )
         if ( useGrid )
             arguments[1] = grid;
     });
-    
+
 }
 
 var text = "Känsä the Skeleton<br>Health: 20<br>Strength:2<br>Dexterity: 5<br>Mana:7<br>Age:5/35<br>Salary:32<br>Fights: 0<br>KOs:2<br>Injury: 0<br>Melee weapon: Fist<br>missile weapon: None<br>Spell: None<br>Dodge: Dart<br>Magic res: 20%<br>Armour: None";
@@ -547,9 +547,9 @@ function showManagerView()
 
 function showArenaView()
 {
-    
+
     LoadTileMap( 'arena.json', g_currentGrid);
-    
+
 
     Crafty.e("2D, DOM, Mouse, Text")
         .attr({w:200, h:32, x:20, y:10})
@@ -564,7 +564,7 @@ function showArenaView()
             "font-family":"Fanwood-Text",
             "font-size":"16pt"
         });
-       
+
     var tmpObj = Crafty.e("2D, DOM, Multiway, Keyboard, LeftControls, Mouse, Ape, Sprite, transparent")
         .Ape()
         .collision([16,32],[48,32],[48,64],[16,64])
@@ -794,7 +794,6 @@ var GAS = Class(function() {
 
     closed: function(byRemote, errorCode) {
         console.log('Closed:', byRemote, errorCode);
-	$.cookie("gas-login", null); // eat cookie?
     }
 
 });
