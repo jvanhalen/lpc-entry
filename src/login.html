@@ -47,6 +47,11 @@
      // validator plugin rules for login form
      // ****************************************
       $().ready(function(){
+
+	  // TODO: Create a custom (animated) cursor for "manager"
+	   //$('*').css('cursor','pointer');
+	   $('*').css('cursor', 'url("../pics/gauntlet_cursor.png"), pointer');
+
         $('#loginform').validate({
          rules: {
          username:"required",
