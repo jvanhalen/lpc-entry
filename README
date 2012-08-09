@@ -2,10 +2,19 @@ ws
 ** GAS fantasy edition **
 
 SERVER:
- - clients should connect to the demo server running at gassrv.dyndns.org:8282
+ - port 8080 used for websocket communication
  - maple.js
  - couchDB
- - communicates synchronously with clients (JSON data format)
+
+SERVER installation (Ubuntu Linux 12.04):
+
+** Execute the following commands from the command line
+sudo apt-get install npm
+sudo npm install pathfinding
+sudo npm install websocket
+
+** start gas server by entering its root folder and type
+node server/server.js
 
 CLIENT:
 
@@ -16,20 +25,20 @@ CLIENT:
        Belt entity (optional)
        Hands entity (optional)
        Legs entity (optional)
-       Feet entity (toes) 
+       Feet entity (toes)
        Weapon entity (optional)
 
 - Graphics layers (z-indices)
 
   Name       Z-index    Desc
   -----------------------------
-  Ground     0          Used for bottom layer in tile maps. 
+  Ground     0          Used for bottom layer in tile maps.
   Overlay    1          Used for additional overlay in tile maps
   Behind     2          For some special graphics behind game object (quiver, mostly)
   Body       3          Basic body animation (human + skeleton)
   Equipment  4          Additional armor or wear over the body layer.
   Weapon     5          All weapons stored with this
-  Collision  6          Not rendered, shall contain only transparent tiles that help in tile 
+  Collision  6          Not rendered, shall contain only transparent tiles that help in tile
                         mouse selection.
   Mouse      7          For transparent collision layer over all other sprites in game object.
 
@@ -40,9 +49,15 @@ CLIENT:
 KNOWN ISSUES:
 
     If Crafty is initialized and some component is hidden after that from page,
-    Crafty's mouse related coordinates get busted unless you do window resize. 
-    I believe that this is browser-related and _needs_ to be taken into account 
+    Crafty's mouse related coordinates get busted unless you do window resize.
+    I believe that this is browser-related and _needs_ to be taken into account
     when designing a page.
-    
-    Crafty entities must have .collision(polygon) defined for all entities that wish to use 
+
+    Crafty entities must have .collision(polygon) defined for all entities that wish to use
     SAT collision algorithm. Otherwise sprite MBR is used for _both_.
+
+ART:
+http://opengameart.org/content/knights-glove-mouse-cursor
+http://opengameart.org/content/powers-icons
+http://opengameart.org/content/modified-and-cliped-magic-skill-item-icons
+http://opengameart.org/content/extended-lpc-magic-pack
