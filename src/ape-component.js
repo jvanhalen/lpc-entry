@@ -434,7 +434,7 @@ Crafty.c('Ape', {
             if (!this.walk.body.isPlaying("walk_left")){
                 for(var i in this.walk)
                 {
-                    if ( this.walk[i] ) this.walk[i].stop().animate("walk_left", 10, 0);
+                    if ( this.walk[i] ) this.walk[i].stop().animate("walk_left", 20, 0);
                 }
             }
         }
@@ -442,7 +442,7 @@ Crafty.c('Ape', {
             if (!this.walk.body.isPlaying("walk_right")){
                 for(var i in this.walk)
                 {
-                    if ( this.walk[i]) this.walk[i].stop().animate("walk_right", 10, 0);
+                    if ( this.walk[i]) this.walk[i].stop().animate("walk_right", 20, 0);
                 }
             }
         }
@@ -450,7 +450,7 @@ Crafty.c('Ape', {
             if (!this.walk.body.isPlaying("walk_up")){
                 for(var i in this.walk)
                 {
-                    if ( this.walk[i]) this.walk[i].stop().animate("walk_up", 10, 0);
+                    if ( this.walk[i]) this.walk[i].stop().animate("walk_up", 20, 0);
                 }
             }
         }
@@ -458,7 +458,7 @@ Crafty.c('Ape', {
             if (!this.walk.body.isPlaying("walk_down")){
                 for(var i in this.walk)
                 {
-                    if ( this.walk[i]) this.walk[i].stop().animate("walk_down", 10, 0);
+                    if ( this.walk[i]) this.walk[i].stop().animate("walk_down", 20, 0);
                 }
             }
         }
@@ -475,7 +475,7 @@ Crafty.c('Ape', {
         //setup animations
         this.requires("Collision, Grid")
         //change direction when a direction change event is received
-            .bind("NewDirection",
+           /* .bind("NewDirection",
                   function (direction) {
                       this.hideAll();
                       this.enableAnimation(this.walk);
@@ -517,7 +517,7 @@ Crafty.c('Ape', {
                               if ( this.walk[i]) this.walk[i].stop();
                           }
                       }
-                  })
+                  })*/
             .bind('Moved', function(from) {
 
                 if(this.hit('solid')){

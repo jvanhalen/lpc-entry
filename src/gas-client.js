@@ -32,6 +32,14 @@ Crafty.c('Grid', {
         while(!this.movePattern.isEmpty()) 
             this.movePattern.dequeue();
     },
+    coordinatesMatch: function(tx,ty)
+    {
+        if (this.x == tx*32-16 &&
+            this.y == ty*32-32)
+            return true;
+        else
+            return false;
+    },
     MakeNextMove: function(){
         
         // move once previous move has finished.
@@ -45,34 +53,40 @@ Crafty.c('Grid', {
         {
             // get first position to move into
             var pos = this.movePattern.peek();
-            // make move 
-            this.MoveTo( pos[0], pos[1] );
-            // remove position 
-            this.movePattern.dequeue();
+            
+            if ( this.coordinatesMatch(pos[0],pos[1]) )
+            {
+                // remove position 
+                this.movePattern.dequeue();
+                
+                // update tile position.
+                this.tile_x = pos[0];
+                this.tile_y = pos[1];            
+            } 
+            else 
+            {
+                // make move 
+                this.Step( pos[0], pos[1] );                        
+            }
+            
+
+            
+
         } else {
-            //console.log('move pattern empty');
+            console.log('move pattern empty');
         }
         return this;
     },
-    MoveTo: function(x,y) {
+    Step: function(x,y) {
         var dirx = x-this.tile_x;
         var diry = y-this.tile_y;
         var steps_x = 0;
         var steps_y = 0;
-        var moving = true;
-        if ( Crafty.math.abs(dirx) <= 1 &&
-             Crafty.math.abs(diry) <= 1 )
-        {
-            this.startWalking({x:dirx, y:diry});
-            this.tween({x:this.x+(dirx*32), y:this.y+(diry*32)}, 20);
 
-            // update tile position.
-            this.tile_x += dirx;
-            this.tile_y += diry;
-        }
-        else {
-            console.log("Dude, I cannot teleport!");
-        }
+
+        this.startWalking({x:dirx, y:diry});
+        this.tween({x:this.x+(dirx*32), y:this.y+(diry*32)}, 20);
+
         return this;
     }
 });
@@ -688,39 +702,17 @@ function showArenaView()
         .bind('Click', function(){
             Crafty.scene("managerView");
         });
-    Crafty.e("2D, DOM, Mouse, Text")
-        .attr({w:200, h:32, x:520, y:510, z:9})
-        .text('Compare to this top edge!')
-        .css({
-            "font-family":"Fanwood-Text",
-            "font-size":"16pt"
-        });
+   
 
        
-    var tmpObj = Crafty.e("2D, DOM, Multiway, Keyboard, Grid, LeftControls, Mouse, Ape, Sprite, transparent")
+    var tmpObj = Crafty.e("2D, DOM, Multiway, Keyboard, Grid, Mouse, Ape, Sprite, transparent")
         .Ape()
         .collision([16,32],[48,32],[48,64],[16,64])
-        .attr({x:370, y:300, z:7})
-        .leftControls(1)
-        .Grid(12,10)
+        .attr({x:2*32-16, y:7*32-32, z:7})
+        .Grid(2,7)
         .setupAnimation("skeleton_body")
-        .bind('KeyDown', function(){
-            if ( this.isDown('LEFT_ARROW')) {
-                this.MoveTo(this.tile_x-1, this.tile_y);
-                //slashAttack('left');
-            }
-            if ( this.isDown('RIGHT_ARROW')) {
-                this.MoveTo(this.tile_x+1, this.tile_y);
-                //this.slashAttack('right');
-            }
-            if ( this.isDown('DOWN_ARROW')) {
-                this.MoveTo(this.tile_x, this.tile_y+1);
-                //this.slashAttack('down');
-            }
-            if ( this.isDown('UP_ARROW')) {
-                this.MoveTo(this.tile_x, this.tile_y-1);
-                //this.slashAttack('up');
-            }
+        .bind("MouseOver", function(){
+            console.log('mouseover');
         });
     // set for pathfinding
     g_currentGladiator = tmpObj;
