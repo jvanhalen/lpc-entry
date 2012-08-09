@@ -21,7 +21,7 @@
   */
 var Maple = require('./maple/Maple');
 var clientToUsername = [];
-
+var PF = require('pathfinding');
 
 // Test -----------------------------------------------------------------------
 var Test = Maple.Class(function(clientClass) {
@@ -33,7 +33,19 @@ var Test = Maple.Class(function(clientClass) {
 	console.log('Server initializing...');
 	this.init();
         console.log('Server startup complete.');
-
+        /*
+          how to use createGridFromFile:
+          -----------------------------
+          var grid = this.createGridFromFile('arena');
+          
+          how to use A* to get path from point a to point b:
+          -------------------------------------------------
+          var finder = new PF.AStarFinder();
+          var path = finder.findPath( 8,13,  8,14,  grid.clone() );
+          console.log('Path:'+JSON.stringify(path));
+          path = finder.findPath( 8,13,   9,13,   grid.clone() );
+          console.log('Path:'+JSON.stringify(path));
+        */
     },
 
     update: function(t, tick) {
@@ -332,7 +344,47 @@ var Test = Maple.Class(function(clientClass) {
 			console.log("message : default branch reached, type: ", type);
         }
 
-	}
+	},
+    // creates a pathfinding grid from given tilemap.json file.
+    createGridFromFile: function(file) {
+        
+        var asset = './../assets/maps/'+file;
+
+        // try to read json tile map
+        var map = require(asset);
+        if ( !map ) return null;
+        
+        var grid = new PF.Grid(map.width, map.height); 
+        
+        for( var layer=0; layer<map.layers.length;layer++)
+        {
+            // process only collision layer
+            if ( map.layers[layer].name == "Collision" ) {
+                
+                var currRow = 0;
+                var currColumn = 0;
+                // Process layer data
+                for(var i in map.layers[layer].data)
+                {
+                    // non-zero means a set tile and on collision 
+                    // layer it means 'blocked'
+                    if ( map.layers[layer].data[i] > 0 )
+                    {
+                        grid.setWalkableAt(currColumn, currRow, false);
+                    }
+                    // next tile, take care of indices.
+                    currColumn++;
+                    if ( currColumn >= map.width ) {
+                        currColumn = 0;
+                        currRow++;
+                    }
+                    
+                }
+            }
+        }
+
+        return grid;
+    }
 
 });
 
