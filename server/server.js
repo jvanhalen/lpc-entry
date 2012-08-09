@@ -20,6 +20,8 @@
   * THE SOFTWARE.
   */
 var Maple = require('./maple/Maple');
+var clientToUsername = [];
+
 
 // Test -----------------------------------------------------------------------
 var Test = Maple.Class(function(clientClass) {
@@ -65,6 +67,8 @@ var Test = Maple.Class(function(clientClass) {
 
     connected: function(client) {
         console.log('Connected:', client.id);
+		clientToUsername[client.id] = "undefined";
+		console.log(clientToUsername);
 		// Send initial data, e.g. ranking list?
     },
 
@@ -84,6 +88,8 @@ var Test = Maple.Class(function(clientClass) {
 
     disconnected: function(client) {
         console.log('Disconnected:', client.id);
+		delete clientToUsername[client.id];
+		console.log(clientToUsername);
     },
 
     init: function() {
@@ -114,7 +120,7 @@ var Test = Maple.Class(function(clientClass) {
 		}
 		options.path = querypath;
 
-		console.log("GET:", querypath);
+		//console.log("GET:", querypath);
 		var req = http.get(options, function(res) {
 		  res.setEncoding('utf8');
 		  res.on('data', function (chunk) {
@@ -180,14 +186,14 @@ var Test = Maple.Class(function(clientClass) {
 			case 'CREATE_USER_REQ':
 			case 'CREATE_USER_STEP_TWO':
 				this.handleNewUserReq(url, response, client, type, data);
-			  break;
+				break;
 
 			case 'LOGIN_INIT_REQ':
 				if(JSON.parse(response).error)
 				    client.send('LOGIN_INIT_RESP', ['{"response":"NOK"}']);
 				else
 				    client.send('LOGIN_INIT_RESP', ['{"response":"OK"}']);
-			  break;
+				break;
 
 			case 'LOGIN_REQ':
 
@@ -209,22 +215,25 @@ var Test = Maple.Class(function(clientClass) {
 				else {
 					console.log("pwd matched, login successful");
 					client.send('LOGIN_RESP', ['{"response":"OK", "username":"' + JSON.parse(data).username + '"}']);
+					clientToUsername[client.id] = JSON.parse(data).username;
+					console.log(clientToUsername);
 					// Send also initial data to the server (team, rankings, etc.)
 				}
 
-			  break;
+				break;
 
 			case 'USER_SALT_REQ':
 				client.send('USER_SALT_RESP', ['{"salt":"' + JSON.parse(response).salt + '"}']);
-			  break;
+				break;
 
-			case 'QUERY_AVAILABLE_GLADIATORS_REQ':
-				client.send('QUERY_AVAILABLE_GLADIATORS_RESP', [response]);
-			  break;
+			case 'GET_AVAILABLE_GLADIATORS_REQ':
+				client.send('GET_AVAILABLE_GLADIATORS_RESP', [response]);
+				console.log(response);
+				break;
 
 			default:
-			  console.log("handleDbresponse : default branch reached, type: ", type);
-			break;
+				console.log("handleDbresponse : default branch reached, type: ", type);
+				break;
 		}
 
     },
@@ -246,18 +255,17 @@ var Test = Maple.Class(function(clientClass) {
 				}
 				else {
 					console.log("user already exists");
-					client.send('CREATE_USER_RESP', ['{"response":"NOK", "Reason": "User exists"}']);
+					client.send('CREATE_USER_RESP', ['{"response":"NOK", "reason": "User exists"}']);
 				}
 			  break;
 
 			case 'CREATE_USER_STEP_TWO':
 				if(response == undefined) {
-					client.send('CREATE_USER_RESP', ['{"response":"NOK", "Reason": "Step two failed"}']);
+					client.send('CREATE_USER_RESP', ['{"response":"NOK", "reason": "Step two failed"}']);
 					console.log("handleNewUserReq : step CREATE_NEW_USER_STEP_TWO NOT OK (" + url + ")");
 				}
 				else {
 					var crypto = require('crypto');
-					//console.log(salt);
 
 					this.updatedb(url+'/team', client, 'DONT_CARE', data, '{"manager":"' + url.substring(1) + '"}');
 					this.updatedb(url+'/history', client, 'DONT_CARE', data, '{"created":"' + Date.now() + '", "from":"' + client.id.split(":",1) + '"}');
@@ -271,41 +279,58 @@ var Test = Maple.Class(function(clientClass) {
 			  break;
 
 			default:
-			  console.log("handleNewUserReq : default branch reached, type: ", type);
-			break;
+				console.log("handleNewUserReq : default branch reached, type: ", type);
+				break;
 		}
 
     },
 
+	handleHireGladiatorReq: function (url, client, type, data) {
+
+
+
+	},
+
+	rollDice: function(dice) {
+
+		var roll = require('roll');
+		return roll.roll(dice).result;
+
+	},
+
 	handleClientRequest: function (client, type, tick, data) {
 
-		console.log("handleReqMessage '" + type + "' data: " + data);
+		console.log("handleClientRequest '" + type + "' data: " + data);
 
         switch(type)
         {
 		case 'CREATE_USER_REQ':
 			this.querydb(JSON.parse(data).username, client, type, data);
-		  break;
+			break;
 
 		case 'LOGIN_INIT_REQ':
 			this.querydb(JSON.parse(data).username, client, type, data);
-		  break;
+			break;
 
 		case 'LOGIN_REQ':
 			this.querydb(JSON.parse(data).username + '/login', client, type, data, '{"password":"' + JSON.parse(data).pwdhash + '"}');
-		  break;
+			break;
 
 		case 'USER_SALT_REQ':
 			this.querydb(JSON.parse(data).username + '/login', client, type, data);
-		  break;
+			break;
 
-		case 'QUERY_AVAILABLE_GLADIATORS_REQ':
+		case 'GET_AVAILABLE_GLADIATORS_REQ':
             this.querydb('/gladiators/available', client, type, data, undefined);
 	        break;
+
+		case 'HIRE_GLADIATOR_REQ':
+			this.handleHireGladiatorReq(null, client, type, data);
+			break;
+
 		default:
 			console.log("message : default branch reached, type: ", type);
         }
-
 
 	}
 
@@ -313,6 +338,6 @@ var Test = Maple.Class(function(clientClass) {
 
 var srv = new Test();
 srv.start({
-    port: 8282,
+	port: 8080,
     logicRate: 10
 });

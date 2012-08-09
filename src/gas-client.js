@@ -7,7 +7,7 @@ var g_currentGladiator = null;
 
 // grid component responsible for "griddy" game object movement.
 Crafty.c('Grid', {
-    tile_x: null, 
+    tile_x: null,
     tile_y: null,
     movePattern: null, // [[x,y], [,], ...]
     moving: false,
@@ -32,7 +32,7 @@ Crafty.c('Grid', {
     },
     ClearMovePattern: function()
     {
-        while(!this.movePattern.isEmpty()) 
+        while(!this.movePattern.isEmpty())
             this.movePattern.dequeue();
     },
     coordinatesMatch: function(tx,ty)
@@ -44,7 +44,7 @@ Crafty.c('Grid', {
             return false;
     },
     UpdateMovement: function(){
-        
+
         if ( !this.movePattern.isEmpty() )
         {
             if ( !this.targetPos )
@@ -54,27 +54,27 @@ Crafty.c('Grid', {
                 this.targetPos = pos;
                 this.Step(pos[0], pos[1]);
 
-            } 
+            }
             else if ( this.coordinatesMatch(this.targetPos[0], this.targetPos[1]) )
             {
                 // remove coordinate since we have reached it.
                 this.movePattern.dequeue();
                 //update tile position.
                 this.tile_x = this.targetPos[0];
-                this.tile_y = this.targetPos[1];         
+                this.tile_y = this.targetPos[1];
 
                 this.targetPos = null;
 
             }
-        } 
-        else 
+        }
+        else
         {
             this.startWalking({x:0,y:0});
         }
         return this;
     },
     Step: function(x,y) {
-        
+
 
 
         var dirx = x-this.tile_x;
@@ -85,11 +85,11 @@ Crafty.c('Grid', {
         this.tween({x:this.x+(dirx*32), y:this.y+(diry*32)}, 10);
         // animate walking
         this.startWalking({x:dirx,y:diry});
-        
+
         return this;
     }
-    
-    
+
+
 });
 
 function HandleMouseClick(x,y,passable)
@@ -104,17 +104,17 @@ function HandleMouseClick(x,y,passable)
         console.log("There is no grid!");
         return;
     }
-    
-    
+
+
     var backup = g_currentGrid.clone();
     var finder = new PF.AStarFinder();
-    var path = finder.findPath( g_currentGladiator.tile_x, 
+    var path = finder.findPath( g_currentGladiator.tile_x,
                                 g_currentGladiator.tile_y,
                                 x,y, backup );
     console.log("start point:"+g_currentGladiator.tile_x +","+g_currentGladiator.tile_y);
     console.log("Path found:"+JSON.stringify(path));
     g_currentGladiator.SetMovePattern( path );
-    
+
 }
 
 function PreloadAnimation(animFile) {
@@ -149,13 +149,13 @@ function GetLoadableAssetsFromTileMap( file, assetArray )
 
 function LoadTileMap(file, createGrid)
 {
-    
-    var ASSET_PREFIX = '../assets/maps/';
-    
 
-    
+    var ASSET_PREFIX = '../assets/maps/';
+
+
+
     var grid = undefined;
-   
+
     // try to read json tile map
 
 
@@ -171,50 +171,50 @@ function LoadTileMap(file, createGrid)
             {
                 // process first tileset
                 var tileset = map.tilesets[i];
-                
+
                 var tmp = {};
                 var newName = map.properties.name+''+i;
                 tmp[newName] = '[0,0]';
                 // register sprite
                 Crafty.sprite(map.tilewidth, map.tilewidth, ASSET_PREFIX+tileset.image, tmp, tileset.spacing);
-                
+
                 // store first index
                 tilesetIndices[i]=tileset.firstgid;
             }
-            
-            
+
+
             if ( createGrid)
             {
-                grid = new PF.Grid(map.width, map.height); 
-            } 
-            
+                grid = new PF.Grid(map.width, map.height);
+            }
+
             /*console.log('Map:'+map.height+'x'+map.width);
               console.log('Tile size:'+map.tileheight+'x'+map.tilewidth);
               console.log(tileset.image);
               console.log(map.layers[n].name);
               console.log('Map is called: '+map.properties.name);*/
-            
+
             // add name dynamically so this can be made as proper function
             for( var layer=0; layer<map.layers.length;layer++)
             {
-                
-                
+
+
                 var currRow = 0;
                 var currColumn = 0;
                 // Process layers
                 for(var i in map.layers[layer].data)
                 {
-                    
-                    
+
+
                     // indices in JSON format are:
                     // 0: no tile.
-                    // X: first tile in tileset                
-                    if ( map.layers[layer].data[i] == 0 && 
+                    // X: first tile in tileset
+                    if ( map.layers[layer].data[i] == 0 &&
                          map.layers[layer].name == "Collision" )
                     {
                         Crafty.e("2D, DOM, Collision, Grid, Mouse, Sprite, transparent")
                         // custom collisions need this also in ALL other colliding entities in order to work.
-                            .collision([0,0],                    
+                            .collision([0,0],
                                        [map.tilewidth,0],
                                        [map.tilewidth, map.tileheight],
                                        [0,map.tileheight])
@@ -231,17 +231,17 @@ function LoadTileMap(file, createGrid)
                         while ( map.layers[layer].data[i] > tilesetIndices[tilesetIndex+1])
                             tilesetIndex++;
                         //console.log("Tilesetindex for "+layer+' is ' + tilesetIndex);
-                        
+
                         var tileset = map.tilesets[tilesetIndex];
-                        
+
                         // How many columns does our tileset contain
                         var cols = Math.floor(tileset.imagewidth/(tileset.tileheight+tileset.spacing));
-                        
+
                         // reduce first index number from to get proper coordinates
                         var index = map.layers[layer].data[i]-tilesetIndices[tilesetIndex];
                         var yc = Math.floor(index/cols);
                         var xc = index - (cols*yc);
-                        
+
                         // Create Crafty entity with plain sprite to be drawn.
                         // attr x,y are expressed in pixels.
                         var GROUND_Z = -1;
@@ -252,10 +252,10 @@ function LoadTileMap(file, createGrid)
                         {
                             if ( grid )
                                 grid.setWalkableAt(currColumn, currRow, false);
-                            
+
                             Crafty.e("2D, DOM, Collision, Grid, Mouse, Sprite, solid, transparent")
                             // custom collisions need this also in ALL other colliding entities in order to work.
-                                .collision([0,0],                    
+                                .collision([0,0],
                                            [map.tilewidth,0],
                                            [map.tilewidth, map.tileheight],
                                            [0,map.tileheight])
@@ -279,9 +279,9 @@ function LoadTileMap(file, createGrid)
                             case "Front":
                                 layerZ = 8;
                                 break;
-                                // ones below should not exist in tile map, 
+                                // ones below should not exist in tile map,
                                 // but let's be prepared.
-                            case "Behind": 
+                            case "Behind":
                                 layerZ = 2;
                                 break;
                             case "Body":
@@ -293,16 +293,16 @@ function LoadTileMap(file, createGrid)
                             case "Weapon":
                                 layerZ = 5;
                                 break;
-                            case "Mouse": 
+                            case "Mouse":
                                 layerZ = 7;
                                 break;
                             }
                             // create tile entity
                             Crafty.e("2D, DOM, Sprite, "+spriteName)
                                 .sprite(xc,yc)
-                                .attr({x:currColumn*tileset.tilewidth, 
-                                       y:currRow*tileset.tileheight, 
-                                       z:layerZ});       
+                                .attr({x:currColumn*tileset.tilewidth,
+                                       y:currRow*tileset.tileheight,
+                                       z:layerZ});
                         }
                     }
                     // next tile, take care of indices.
@@ -311,13 +311,13 @@ function LoadTileMap(file, createGrid)
                         currColumn = 0;
                         currRow++;
                     }
-                    
+
                 }
             }
         }
-        
+
     });
-  
+
 
     return grid;
 }
@@ -613,8 +613,7 @@ function showManagerView()
             "color":"#734212"
         });
     Crafty.e("2D, DOM, Text").attr({ w: 130, h: 300, x:52 , y: 260, z:8 })
-        .text("F1: Wear Robe<br>F2: Wear Leather<br>F3: Wear Plate<br>F4: Go Nude<br>X: Bones <br>H: Flesh<br>Arrow keys: Slash!<br>WASD: move")
-        .css({
+        .text("F1: Wear Robe<br />F2: Wear Leather<br />F3: Wear Plate<br />F4: Go Nude<br />X: Bones <br />H: Flesh<br />Arrow keys: Slash!<br />WASD: move<br />P: Gladiator Pit")        .css({
             "text-align": "left",
             "font-family": "Fanwood-Text",
             "font-size": "10pt",
@@ -666,6 +665,10 @@ function showManagerView()
             {
                 this.setupAnimation("human_body");
             }
+            if ( this.isDown('P'))
+            {
+                Crafty.scene("gladiatorPitView");
+            }
         })
 
 
@@ -688,9 +691,9 @@ function showManagerView()
 function showArenaView()
 {
 
-   
+
     g_currentGrid = LoadTileMap( 'arena.json', true );
-    
+
     if ( !g_currentGrid  )
     {
         console.log("WARNING: current grid is not set!");
@@ -703,9 +706,9 @@ function showArenaView()
         .bind('Click', function(){
             Crafty.scene("managerView");
         });
-   
 
-       
+
+
     var tmpObj = Crafty.e("2D, DOM, Multiway, Keyboard, Grid, Mouse, Ape, Sprite, transparent")
         .Ape()
         .collision([16,32],[48,32],[48,64],[16,64])
@@ -761,7 +764,7 @@ function showGladiatorPitView()
 
     window.setTimeout(function(){
         // pray tell, server, best deals for today?
-        gas.send('QUERY_AVAILABLE_GLADIATORS_REQ', ['{ "name":"LIST_AVAILABLE_GLADIATORS"}']);
+        gas.send('GET_AVAILABLE_GLADIATORS_REQ', []);
     }, 1000);
 
 }
@@ -851,11 +854,11 @@ var GAS = Class(function() {
         //console.log(t, tick, this.getRandom());
         //this.send(4, ['Hello world!']);
 
-       
+
     },
 
     render: function(t, dt, u) {
-       
+
     },
 
     stopped: function() {
@@ -907,10 +910,9 @@ var GAS = Class(function() {
 		}
 	    break;
 
-        case 'QUERY_AVAILABLE_GLADIATORS_RESP':
+        case 'GET_AVAILABLE_GLADIATORS_RESP':
                 console.log('Handling gladiator list');
-                pitCreateGladiators(JSON.parse(data[0]).free);
-        break;
+                pitCreateGladiators(JSON.parse(data[0]).gladiators);
 	    case 50:
            console.log("Received: " + data[0].name);
 
