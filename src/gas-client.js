@@ -8,12 +8,15 @@ var g_currentGladiator = null;
 // grid component responsible for "griddy" game object movement.
 Crafty.c('Grid', {
     tile_x: null, 
-    tile_y: null, 
+    tile_y: null,
     movePattern: null, // [[x,y], [,], ...]
+    moving: false,
+    targetPos:null,
     init: function()
     {
         this.requires('Tween');
         this.movePattern = new Queue();
+        this.moving = false;
     },
     Grid: function(xc,yc){
         this.tile_x = xc;
@@ -40,55 +43,53 @@ Crafty.c('Grid', {
         else
             return false;
     },
-    MakeNextMove: function(){
+    UpdateMovement: function(){
         
-        // move once previous move has finished.
-        if ( this.walk.body.isPlaying() ) 
+        if ( !this.movePattern.isEmpty() )
         {
-            console.log('still playing previous move pattern...');
-            return;
-        }
-        
-        if ( !this.movePattern.isEmpty())
-        {
-            // get first position to move into
-            var pos = this.movePattern.peek();
-            
-            if ( this.coordinatesMatch(pos[0],pos[1]) )
+            if ( !this.targetPos )
             {
-                // remove position 
-                this.movePattern.dequeue();
-                
-                // update tile position.
-                this.tile_x = pos[0];
-                this.tile_y = pos[1];            
+                // get first position to move into
+                var pos = this.movePattern.peek();
+                this.targetPos = pos;
+                this.Step(pos[0], pos[1]);
+
             } 
-            else 
+            else if ( this.coordinatesMatch(this.targetPos[0], this.targetPos[1]) )
             {
-                // make move 
-                this.Step( pos[0], pos[1] );                        
+                // remove coordinate since we have reached it.
+                this.movePattern.dequeue();
+                //update tile position.
+                this.tile_x = this.targetPos[0];
+                this.tile_y = this.targetPos[1];         
+
+                this.targetPos = null;
+
             }
-            
-
-            
-
-        } else {
-            console.log('move pattern empty');
+        } 
+        else 
+        {
+            this.startWalking({x:0,y:0});
         }
         return this;
     },
     Step: function(x,y) {
+        
+
+
         var dirx = x-this.tile_x;
         var diry = y-this.tile_y;
         var steps_x = 0;
         var steps_y = 0;
-
-
-        this.startWalking({x:dirx, y:diry});
-        this.tween({x:this.x+(dirx*32), y:this.y+(diry*32)}, 20);
-
+        // move object gradually
+        this.tween({x:this.x+(dirx*32), y:this.y+(diry*32)}, 10);
+        // animate walking
+        this.startWalking({x:dirx,y:diry});
+        
         return this;
     }
+    
+    
 });
 
 function HandleMouseClick(x,y,passable)
@@ -110,7 +111,7 @@ function HandleMouseClick(x,y,passable)
     var path = finder.findPath( g_currentGladiator.tile_x, 
                                 g_currentGladiator.tile_y,
                                 x,y, backup );
-
+    console.log("start point:"+g_currentGladiator.tile_x +","+g_currentGladiator.tile_y);
     console.log("Path found:"+JSON.stringify(path));
     g_currentGladiator.SetMovePattern( path );
     
@@ -713,6 +714,9 @@ function showArenaView()
         .setupAnimation("skeleton_body")
         .bind("MouseOver", function(){
             console.log('mouseover');
+        })
+        .bind("EnterFrame", function(){
+            this.UpdateMovement();
         });
     // set for pathfinding
     g_currentGladiator = tmpObj;
@@ -847,15 +851,11 @@ var GAS = Class(function() {
         //console.log(t, tick, this.getRandom());
         //this.send(4, ['Hello world!']);
 
-        // a crude hack for getting skeleton to move in arena view
-        if ( g_currentGladiator )
-        {
-            g_currentGladiator.MakeNextMove();
-        }
+       
     },
 
     render: function(t, dt, u) {
-
+       
     },
 
     stopped: function() {
