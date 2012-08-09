@@ -1,7 +1,6 @@
 
 {
    "_id": "messages",
-   "_rev": "1",
    "message": [
                {"name": "CREATE_USER_REQ"},
                {"name": "CREATE_USER_RESP"},
@@ -9,8 +8,12 @@
                {"name": "LOGIN_RESP"},
                {"name": "USER_SALT_REQ"},
                {"name": "USER_SALT_RESP"},
-               {"name": "QUERY_AVAILABLE_GLADIATORS_REQ"},
-               {"name": "QUERY_AVAILABLE_GLADIATORS_RESP"},
+               {"name": "GET_AVAILABLE_GLADIATORS_REQ"},
+               {"name": "GET_AVAILABLE_GLADIATORS_RESP", "free": [{}]},
+               {"name": "HIRE_GLADIATOR_REQ", "gladiator": "gladiator's name"},
+               {"name": "HIRE_GLADIATOR_RESP", "response": "OK/NOK", "gladiator": "gladiator's name", "reason": "Not available anymore."},
+               {"name": "FIRE_GLADIATOR_REQ", "gladiator": "gladiator's name"},
+               {"name": "FIRE_GLADIATOR_RESP", "response": "OK/NOK", "gladiator": "gladiator's name", "reason": ""},
                {"name": "TEAM_REQ",
                 "username": "username"
                },

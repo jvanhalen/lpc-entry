@@ -1,11 +1,12 @@
 {
 
     "_id": "configs",
-    "_rev": "1",
-    "teamsizemax": "8",
-    "teamsizematch": "4",
-    "rankdifference": "10",
-    "allowgamechat": "false",
-    "allowlobbychat": "true"
-    
+    "teamsizemax": 			"8",
+    "teamsizematch": 		"4",
+    "challencerankmax": 	"10",
+    "matchchat": 			"false",
+    "lobbychat": 			"true",
+	"startingmoney":		"1000",
+	"gladiatorprice": 		"12d10"
+
 }
