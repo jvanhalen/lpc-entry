@@ -612,7 +612,7 @@ function showManagerView()
             "font-size": "18pt",
             "color":"#734212"
         });
-    Crafty.e("2D, DOM, Text").attr({ w: 130, h: 300, x:52 , y: 260, z:8 })
+    Crafty.e("2D, DOM, Text").attr({ w: 130, h: 300, x:52 , y: 250, z:8 })
         .text("F1: Wear Robe<br />F2: Wear Leather<br />F3: Wear Plate<br />F4: Go Nude<br />X: Bones <br />H: Flesh<br />Arrow keys: Slash!<br />WASD: move<br />P: Gladiator Pit")        .css({
             "text-align": "left",
             "font-family": "Fanwood-Text",
