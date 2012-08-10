@@ -4,6 +4,9 @@ var g_Animations = {}; /* storage of all animations objects used in pre-loading 
 var g_pitMessage = null;
 var g_currentGrid = null;
 var g_currentGladiator = null;
+var g_gladiators = [];
+var g_timer = { view: null, time: 0};
+
 
 // grid component responsible for "griddy" game object movement.
 Crafty.c('Grid', {
@@ -69,13 +72,11 @@ Crafty.c('Grid', {
         }
         else
         {
-            this.startWalking({x:0,y:0});
+            this.startWalking({x:0,y:0},0);
         }
         return this;
     },
     Step: function(x,y) {
-
-
 
         var dirx = x-this.tile_x;
         var diry = y-this.tile_y;
@@ -84,7 +85,7 @@ Crafty.c('Grid', {
         // move object gradually
         this.tween({x:this.x+(dirx*32), y:this.y+(diry*32)}, 10);
         // animate walking
-        this.startWalking({x:dirx,y:diry});
+        this.startWalking({x:dirx,y:diry},20);
 
         return this;
     }
@@ -706,8 +707,25 @@ function showArenaView()
         .bind('Click', function(){
             Crafty.scene("managerView");
         });
+    // resume buttons
+    Crafty.e("2D, DOM, Mouse, Text")
+        .attr({w:200, h:32, x:220, y:160, z:9})
+        .text('A team done!')
+        .bind('Click', function(){
 
-
+            console.log('Resuming A');
+        });
+    Crafty.e("2D, DOM, Mouse, Text")
+        .attr({w:200, h:32, x:480, y:160, z:9})
+        .text('B team done!')
+        .bind('Click', function(){
+            console.log('Resuming B');
+        });
+    g_timer.view = Crafty.e("2D, DOM, Mouse, Text")
+        .attr({w:100, h:32, x:730, y:40, z:9})
+        .text('23')
+        .css({"font-family":"Impact",
+              "font-size":"24pt"});
 
     var tmpObj = Crafty.e("2D, DOM, Multiway, Keyboard, Grid, Mouse, Ape, Sprite, transparent")
         .Ape()
@@ -718,11 +736,27 @@ function showArenaView()
         .bind("MouseOver", function(){
             console.log('mouseover');
         })
-        .bind("EnterFrame", function(){
-            this.UpdateMovement();
+        .bind("Click", function(){
+            // set for pathfinding
+            g_currentGladiator = this;
         });
-    // set for pathfinding
-    g_currentGladiator = tmpObj;
+    
+    var tmpObj2 = Crafty.e("2D, DOM, Multiway, Keyboard, Grid, Mouse, Ape, Sprite, transparent")
+        .Ape()
+        .collision([16,32],[48,32],[48,64],[16,64])
+        .attr({x:12*32-16, y:7*32-32, z:7})
+        .Grid(12,7)
+        .setupAnimation("human_body")
+        .bind("MouseOver", function(){
+            console.log('mouseover');
+        })
+        .bind("Click", function(){
+            // set for pathfinding
+            g_currentGladiator = this;
+        });
+
+    g_gladiators.push(tmpObj);
+    g_gladiators.push(tmpObj2);
 }
 
 function showGladiatorPitView()
@@ -840,21 +874,37 @@ function pitCreateGladiators(gladiatorData){
     });
 }
 
+
+
 /*global Class, Maple */
 var GAS = Class(function() {
-    Maple.Client(this, 30, 60);
+    Maple.Client(this, 110, 60);
 
 }, Maple.Client, {
-
+    paused: false,   // state
+    pointOfReference: 0,
     started: function() {
         console.log('started');
+        this.pointOfReference = 0;
     },
 
     update: function(t, tick) {
-        //console.log(t, tick, this.getRandom());
+
+      
+        if ( this.paused == false)
+        {
+            for ( var g in g_gladiators )
+            {
+                g_gladiators[g].UpdateMovement();
+            }
+        } 
+        /*if ( g_timer.view ) {
+            g_timer.time = g_timer.time-(tick - this.pointOfReference);
+            g_timer.view.text( g_timer.time / 333.33);
+            this.pointOfReference = tick;
+        }*/
         //this.send(4, ['Hello world!']);
-
-
+        
     },
 
     render: function(t, dt, u) {
@@ -870,7 +920,7 @@ var GAS = Class(function() {
     },
 
     message: function(type, tick, data) {
-        console.log('message:', type, tick, data);
+        //console.log('message:', type, tick, data);
 
 
 	switch(type) {
@@ -916,6 +966,12 @@ var GAS = Class(function() {
 	    case 50:
            console.log("Received: " + data[0].name);
 
+        break;
+        case 'BATTLE_CONTROL_SYNC':
+            var bc = data[0];
+            this.paused = bc.paused;
+            g_timer.time = bc.duration;
+            
         break;
 	    default:
 	      console.log("Default branch reached in 'message handling'");
