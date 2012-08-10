@@ -427,14 +427,14 @@ Crafty.c('Ape', {
         }
         return this;
     },
-    startWalking: function (direction) {
+    startWalking: function (direction, speed) {
         this.hideAll();
         this.enableAnimation(this.walk);
         if (direction.x < 0) {
             if (!this.walk.body.isPlaying("walk_left")){
                 for(var i in this.walk)
                 {
-                    if ( this.walk[i] ) this.walk[i].stop().animate("walk_left", 20, -1);
+                    if ( this.walk[i] ) this.walk[i].stop().animate("walk_left", speed, -1);
                 }
             }
         }
@@ -442,7 +442,7 @@ Crafty.c('Ape', {
             if (!this.walk.body.isPlaying("walk_right")){
                 for(var i in this.walk)
                 {
-                    if ( this.walk[i]) this.walk[i].stop().animate("walk_right", 20, -1);
+                    if ( this.walk[i]) this.walk[i].stop().animate("walk_right", speed, -1);
                 }
             }
         }
@@ -450,7 +450,7 @@ Crafty.c('Ape', {
             if (!this.walk.body.isPlaying("walk_up")){
                 for(var i in this.walk)
                 {
-                    if ( this.walk[i]) this.walk[i].stop().animate("walk_up", 20, -1);
+                    if ( this.walk[i]) this.walk[i].stop().animate("walk_up", speed, -1);
                 }
             }
         }
@@ -458,7 +458,7 @@ Crafty.c('Ape', {
             if (!this.walk.body.isPlaying("walk_down")){
                 for(var i in this.walk)
                 {
-                    if ( this.walk[i]) this.walk[i].stop().animate("walk_down", 20, -1);
+                    if ( this.walk[i]) this.walk[i].stop().animate("walk_down", speed, -1);
                 }
             }
         }
