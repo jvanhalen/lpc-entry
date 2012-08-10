@@ -1,6 +1,30 @@
 ws
 ** GAS fantasy edition **
 
+WHAT GAS IS?
+
+GAS fantasy edition is an Areena 5/6 style single and multiplayer
+manager game spiced with enhanced turn-based battles with time
+limits. Play against computer or other players online, train best
+gladiators and relive your most formidable battles in real-time!
+
+COORDINATE SYSTEM:
+
+Server holds grid-based coordinates  with floating-point
+values. Integer part contains tile coordinates. 
+Decimal part expresses object transition from one tile to another.
+Coordinates are converted into pixels by client and therere can be
+visualized in different manner by different client implementations.
+
+Example: pos : [1.05, 3.7]
+
+1.05 = tile x-coordinate 1, with 5% moved over to x-coordinate 2.
+3.7 = tile y-coordinate 3, with 70% moved over to y-coordinate 4.
+
+Client may choose how transition between tiles is visualized.
+
+
+
 SERVER:
  - port 8080 used for websocket communication
  - maple.js
