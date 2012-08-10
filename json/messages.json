@@ -74,5 +74,11 @@
         "newtargetpos":
             [{"x": "1",
               "y": "1"}]
+         },
+         {
+         "name": "BATTLE_CONTROL_SYNC",
+         "paused": true/false,
+         "duration": 1000,
+         "start": 2354
          }]
 }
