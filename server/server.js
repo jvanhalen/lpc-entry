@@ -29,6 +29,10 @@ var Test = Maple.Class(function(clientClass) {
 
 }, Maple.Server, {
 
+    pointOfReference: 0, // ticks 
+    paused: false,   // state
+    duration: 0, // for how long
+
     started: function() {
 	console.log('Server initializing...');
 	this.init();
@@ -50,6 +54,59 @@ var Test = Maple.Class(function(clientClass) {
 
     update: function(t, tick) {
         //console.log(this.getClients().length, 'client(s) connected', t, tick, this.getRandom());
+
+
+        // assuming that logicRate = 10 ticks, tickRate = 3ms.
+        // update gets called every 10 ticks, and tick is increased every 3 ms.
+        // this means, that within one second there is ~333 ticks, and update gets 
+        // called ~33 times per second.
+        var FIVE_SECONDS = 333*5;
+        var ONE_SECOND = 333;
+        if ( this.paused == true )
+        {
+            if ( tick - this.pointOfReference >= FIVE_SECONDS )
+            {
+
+                this.paused = false;
+                this.pointOfReference = tick;
+                
+                var msg = {
+                    "name":"BATTLE_CONTROL_SYNC",
+                    "paused":this.paused,
+                    "duration":ONE_SECOND,
+                    "start":this.pointOfReference
+                };
+                var data = [];
+                data.push(msg);
+                // sends to ALL clients at the momemnt, but needs to send for
+                // only battlers and potential viewers.
+                for(var c = 0; c< this.getClients().length; c++)
+                {
+                    this.getClients().getAt(c).send(data[0].name, data);
+                }
+            }
+        }
+        else
+        {
+            if ( tick - this.pointOfReference >= ONE_SECOND )
+            {
+                this.paused = true;
+                this.pointOfReference = tick;
+                var msg = [{
+                    "name":"BATTLE_CONTROL_SYNC",
+                    "paused":this.paused,
+                    "duration":FIVE_SECONDS,
+                    "start":this.pointOfReference
+                }];
+                // sends to ALL clients at the momemnt, but needs to send for
+                // only battlers and potential viewers.
+                for(var c = 0; c< this.getClients().length; c++)
+                {
+                    this.getClients().getAt(c).send(msg[0].name, msg);
+                }
+            }
+           
+        } 
 
         // make object move on client side.
         /*if ( this.getClients().length > 0 )
@@ -391,5 +448,6 @@ var Test = Maple.Class(function(clientClass) {
 var srv = new Test();
 srv.start({
 	port: 8080,
-    logicRate: 10
+    logicRate: 10,
+    tickRate: 3
 });
