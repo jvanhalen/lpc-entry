@@ -3,7 +3,7 @@
    "_rev": "16-267750e124e9e819e9b3a6b7af781fd5",
    "player1": "{
    tick: 0,
-   name: "hihihi",
+   name: "test1",
    gladiators: [
    {
        "name": "Känsä the Skeleton",
@@ -17,6 +17,7 @@
        "fights": "0",
        "knockouts": "0",
        "injured": "0",
+       "pos": {"x":2, "y":7},
        "melee": [
            {
                "name": "astalo",
@@ -99,6 +100,7 @@
        "fights": "100",
        "knockouts": "48",
        "injured": "0",
+       "pos": {"x":22, "y":7},
        "melee": [
            {
                "name": "astalo",
