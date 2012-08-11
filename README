@@ -8,6 +8,32 @@ manager game spiced with enhanced turn-based battles with time
 limits. Play against computer or other players online, train best
 gladiators and relive your most formidable battles in real-time!
 
+Gladiator team consists maximum of 8 gladiators. From those player can choose max 4 gladiators to battle. 
+
+GAME STATE:
+
+MATCH_SYNC message provides a copy of current game state, a snapshot, 
+if you will. 
+
+History data consists of:
+
+1. base state in the beginning of battle, with tick number.
+2. individual commands with ticks when executed.
+
+A snapshot of game state will be taken and stored into battledb every X ticks.
+This snapshot is used to provide a faster access to current game state if 
+connection is lost for player in the middle of battle.
+
+
+SPELLS:
+
+Spells consume mana. Each spell drains specific amount of mana. Half
+of spell mana drain is consumed on preparation, and other half on casting.
+
+Spells require a preparation time, which is expressed in ticks. 
+Preparation time may be 0, which means that spell may be cast instantly.
+
+
 COORDINATE SYSTEM:
 
 Server holds grid-based coordinates  with floating-point
