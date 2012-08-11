@@ -66,39 +66,7 @@
     </script>
 
     <script type="text/javascript" charset="utf-8">
-      var teams = ["Warriors of the Sun",
-      "Shark Teeth",
-      "Gray Wolves",
-      "Chaos Power",
-      "Bear Slayers",
-      "Soldiers of the Moon",
-      "Impatients",
-      "Lords of Olor",
-      "Lords of Darkness",
-      "Ring Knights",
-      "Grim Masters",
-      "Dust Biters",
-      "Guardians of Light",
-      "Careless",
-      "Bloodhounds"];
-
-      function displayRanking()
-      {
-      $("#ranking").empty();
-      $("#ranking").width(300);
-      $("#ranking").append('<table>');
-        for( t in teams)
-        {
-        $("#ranking").append('<tr><td>')
-            .append(teams[t])
-            .append('</td><td>')
-            .append(0)
-            .append('</td></tr>');
-        }
-        $("#ranking").append('</table>');
-
-
-      }
+      
       function logout()
       {
         $.cookie("gas-login", null);
@@ -118,16 +86,12 @@
            });
       }
 
-
     </script>
 </head>
 
 <body>
   <div id="login-nav">
     <button type="submit" id="logout" onclick="logout();"> >>&nbsp;&nbsp;Logout</button>
-  </div>
-  <div id="title">
-    Galaxy All-Stars: Medieval Edition Login
   </div>
   <div id="login">
     <form method="post" id="loginform" action="#">
@@ -147,8 +111,10 @@
       </fieldset>
     </form>
   </div>
+  <div id="managers">
+    
+  </div>
 
-  <a href="#" id="rank_link">Rankings</a><br/>
   <div id="ranking">
   </div>
   <script>
@@ -194,7 +160,9 @@
     Crafty.scene("loginView");
 
     if ( $.cookie("gas-login")) {
-       displayLogin();
+
+          gas.send('LOGIN_INIT_REQ', [ '{"username":"' + JSON.parse($.cookie("gas-login")).username+'"}' ]);
+
     }
 
     // Ignore login for development..
@@ -203,12 +171,7 @@
                        Crafty.scene("loadingView");
                        });
 */
-  // just a jQuery test for fading stuff in
-    $("#rank_link").click(function(event){
-    $("#ranking").fadeIn("slow");
-    displayRanking();
-    event.preventDefault();
-    });
+
 
   </script>
 
