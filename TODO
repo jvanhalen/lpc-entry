@@ -1,2 +1,5 @@
-melee fighting
-pause functionality
+- melee fighting
+- Fix the login protocol when entering with existing cookie.
+- Finish battle creation on server-side and client-side
+
+* pause functionality (partially done)
