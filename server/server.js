@@ -23,6 +23,8 @@ var Maple = require('./maple/Maple');
 var clientToUsername = [];
 var PF = require('pathfinding');
 
+
+
 // Test -----------------------------------------------------------------------
 var Test = Maple.Class(function(clientClass) {
     Maple.Server(this, clientClass);
@@ -32,7 +34,9 @@ var Test = Maple.Class(function(clientClass) {
     pointOfReference: 0, // ticks 
     paused: false,   // state
     duration: 0, // for how long
-
+    
+    battleSessions: [], // which battles are active.
+    
     started: function() {
 	console.log('Server initializing...');
 	this.init();
@@ -50,6 +54,7 @@ var Test = Maple.Class(function(clientClass) {
           path = finder.findPath( 8,13,   9,13,   grid.clone() );
           console.log('Path:'+JSON.stringify(path));
         */
+        
     },
 
     update: function(t, tick) {
@@ -299,7 +304,22 @@ var Test = Maple.Class(function(clientClass) {
 				client.send('GET_AVAILABLE_GLADIATORS_RESP', [response]);
 				console.log(response);
 				break;
+            case 'GET_TEAM_REQ':
+                client.send('GET_TEAM_RESP', [response]);
+                console.log(response);
+                break;
+            case 'GET_ONLINE_PLAYERS':
 
+                break;
+            case 'START_BATTLE_REQ':
+                console.log('Received battle uuid: '+response);
+                this.updatedb('/battle/'+JSON.parse(response).uuids[0], client, 'START_BATTLE_STEP2_REQ', data, '{}');
+            //'{ "history":[], "player1":{"name":"'+JSON.parse(data).username+'"}'
+                break;
+            case 'START_BATTLE_STEP2_REQ':
+                console.log('Sending battle start to client: ');
+                client.send('START_BATTLE_RESP', ['{"done":true}']);
+                break;
 			default:
 				console.log("handleDbresponse : default branch reached, type: ", type);
 				break;
@@ -336,7 +356,7 @@ var Test = Maple.Class(function(clientClass) {
 				else {
 					var crypto = require('crypto');
 
-					this.updatedb(url+'/team', client, 'DONT_CARE', data, '{"manager":"' + url.substring(1) + '"}');
+					this.updatedb(url+'/team', client, 'DONT_CARE', data, '{"manager":"' + url.substring(1) + '", "ingame":null, "gladiators":[]}');
 					this.updatedb(url+'/history', client, 'DONT_CARE', data, '{"created":"' + Date.now() + '", "from":"' + client.id.split(":",1) + '"}');
 
 					var salt = crypto.createHash('sha1');
@@ -367,6 +387,12 @@ var Test = Maple.Class(function(clientClass) {
 
 	},
 
+    handleStartBattle: function( url, client, type, data)
+    {
+        this.querydb( '/_uuids', client, type, data);
+        //this.updatedb( url, client, type, data, undefined);
+    },
+
 	handleClientRequest: function (client, type, tick, data) {
 
 		console.log("handleClientRequest '" + type + "' data: " + data);
@@ -378,7 +404,14 @@ var Test = Maple.Class(function(clientClass) {
 			break;
 
 		case 'LOGIN_INIT_REQ':
-			this.querydb(JSON.parse(data).username, client, type, data);
+            if ( !JSON.parse(data).username || JSON.parse(data).username == '')
+            {
+                client.send('LOGIN_INIT_RESP', ['{"response":"NOK"}']);
+            } 
+            else {
+			    this.querydb(JSON.parse(data).username, client, type, data);
+            }
+
 			break;
 
 		case 'LOGIN_REQ':
@@ -396,8 +429,26 @@ var Test = Maple.Class(function(clientClass) {
 		case 'HIRE_GLADIATOR_REQ':
 			this.handleHireGladiatorReq(null, client, type, data);
 			break;
+        case 'GET_TEAM_REQ':
+            this.querydb(JSON.parse(data).username+'/team', client, type, data);
+            break;
+        case 'GET_ONLINE_PLAYERS_REQ':
 
+            
+            var playerNames = { players:[] }
+            for( var c=0; c < this.getClients().length;c++)
+            {
+                playerNames.players.push(clientToUsername[this.getClients().getAt(c)]);
+            }
+
+            console.log('sending now'+ JSON.stringify([playerNames]));
+            client.send('GET_ONLINE_PLAYERS_RESP', [playerNames]);
+            break;
+        case 'START_BATTLE_REQ':
+            this.handleStartBattle('/battle', client, type, data);
+            break;
 		default:
+
 			console.log("message : default branch reached, type: ", type);
         }
 

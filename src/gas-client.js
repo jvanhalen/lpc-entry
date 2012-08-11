@@ -24,6 +24,7 @@ Crafty.c('Grid', {
     Grid: function(xc,yc){
         this.tile_x = xc;
         this.tile_y = yc;
+        this.attr({x:this.tile_x*32-16, y:this.tile_y*32-32, z:7})
         return this;
     },
     SetMovePattern: function(path){
@@ -427,7 +428,7 @@ function showMightView()
 
 function showLoginView()
 {
-
+    g_currentView = "login";
     var tmpObj = Crafty.e("2D, DOM, Mouse, Ape, Sprite, transparent")
         .attr({x:160, y:100, z:6})
         .setupAnimation('skeleton_body')
@@ -450,7 +451,7 @@ function showLoginView()
 
 function showGladiatorView()
 {
-
+    g_currentView = "gladiator";
     LoadTileMap( 'inventory.json');
 
 
@@ -576,18 +577,9 @@ function showGladiatorView()
 function showManagerView()
 {
 
+    g_currentView = "manager";
     LoadTileMap( 'test.json');
-    Crafty.e("2D, DOM, Mouse, Text")
-        .attr( {w:130, h:20, x:340, y:100, z:9})
-        .text("To Battle!")
-        .css({
-            "text-align": "center",
-            "font-family": "Fanwood",
-            "font-size": "13pt",
-        })
-        .bind('Click', function(){
-            Crafty.scene("arenaView");
-        });
+    
     // Add a title
     Crafty.e("2D, DOM, Text").attr({ w: 400, h: 20, x: 150, y: 10 })
         .text("Kalevala Heroes / GAS Valhalla")
@@ -620,71 +612,17 @@ function showManagerView()
             "font-size": "10pt",
             "color": "#5c3111"
         });
-    var tmpObj = Crafty.e("2D, DOM, Multiway, Keyboard, LeftControls, Mouse, Ape, Sprite, transparent")
-        .attr({x:370, y:300, z:5})
-        .leftControls(1)
-        .setupAnimation("skeleton_body")
-        .Ape()
-        .collision([16,32],[48,32],[48,64],[16,64])
-        .bind("Click", function(){
-            Crafty.scene("gladiatorView");
-        })
-        .bind('KeyDown', function(){
-            if ( this.isDown('LEFT_ARROW')) {
-                this.slashAttack('left');
-            }
-            if ( this.isDown('RIGHT_ARROW')) {
-                this.slashAttack('right');
-            }
-            if ( this.isDown('DOWN_ARROW')) {
-                this.slashAttack('down');
-            }
-            if ( this.isDown('UP_ARROW')) {
-                this.slashAttack('up');
-            }
-            if ( this.isDown('F1'))
-            {
-                this.setupAnimation("robe");
-            }
-            if ( this.isDown('F2'))
-            {
-                this.setupAnimation("leather_armor");
-            }
-            if ( this.isDown('F3'))
-            {
-                this.setupAnimation("plate_armor");
-            }
-            if ( this.isDown('F4'))
-            {
-                this.setupAnimation("no_armor");
-            }
-            if ( this.isDown('X'))
-            {
-                this.setupAnimation("skeleton_body");
-            }
-            if ( this.isDown('H'))
-            {
-                this.setupAnimation("human_body");
-            }
-            if ( this.isDown('P'))
-            {
-                Crafty.scene("gladiatorPitView");
-            }
-        })
+   
 
 
-    Crafty.sprite(64, '../pics/items.png', {
-        big_boys_do_battle: [0,0]
-    });
-
-    Crafty.e("2D, DOM, Mouse, Sprite, big_boys_do_battle")
-        .attr({x:367, y:420, z:3})
-        .sprite(1,9)
-        .bind('Click', function(){
-            Crafty.scene("gladiatorPitView");
-        });
+   
 
 
+
+    var data = $.cookie("gas-login");
+    gas.send('GET_TEAM_REQ', [ '{"username":"'+ JSON.parse(data).username + '"}' ]);
+    gas.send('GET_ONLINE_PLAYERS_REQ', [ '{"username":"'+ JSON.parse(data).username + '"}' ]);
+    
     //console.log("skel id:"+skel[0]);
 
 }
@@ -692,7 +630,7 @@ function showManagerView()
 function showArenaView()
 {
 
-
+    g_currentView = "arena";
     g_currentGrid = LoadTileMap( 'arena.json', true );
 
     if ( !g_currentGrid  )
@@ -702,7 +640,7 @@ function showArenaView()
 
 
     Crafty.e("2D, DOM, Mouse, Text")
-        .attr({w:200, h:32, x:20, y:10})
+        .attr({w:200, h:32, x:20, y:10, z:9})
         .text('Quit')
         .bind('Click', function(){
             Crafty.scene("managerView");
@@ -726,7 +664,11 @@ function showArenaView()
         .text('23')
         .css({"font-family":"Impact",
               "font-size":"24pt"});
-
+    
+    var data = $.cookie('gas-login');
+    //gas.send('GET_TEAM_REQ', [ '{"username":"'+ JSON.parse(data).username + '"}' ]);
+    gas.send('START_BATTLE_REQ', [ '{"username":"'+ JSON.parse(data).username + '"}' ]);
+    /*
     var tmpObj = Crafty.e("2D, DOM, Multiway, Keyboard, Grid, Mouse, Ape, Sprite, transparent")
         .Ape()
         .collision([16,32],[48,32],[48,64],[16,64])
@@ -756,11 +698,13 @@ function showArenaView()
         });
 
     g_gladiators.push(tmpObj);
-    g_gladiators.push(tmpObj2);
+    g_gladiators.push(tmpObj2);*/
 }
 
 function showGladiatorPitView()
 {
+    g_currentView = "gladiatorpit";
+
     console.log('loading tile map');
 
     LoadTileMap( 'gladiatorpit.json' );
@@ -889,7 +833,6 @@ var GAS = Class(function() {
     },
 
     update: function(t, tick) {
-
       
         if ( this.paused == false)
         {
@@ -947,6 +890,7 @@ var GAS = Class(function() {
 
 		    $.cookie("gas-login", data);
 		    displayLogin();
+            
             /*$('#login').fadeOut(500, function(){
 			    $('#login').empty();
                 $('#login').text('<h1>Welcome back, '+data.username+'!</h1>');
@@ -956,6 +900,7 @@ var GAS = Class(function() {
 		    });*/
 		}
 		else {
+            $.removeCookie("gas-login");
 			console.log("Login failed");
 		}
 	    break;
@@ -967,11 +912,26 @@ var GAS = Class(function() {
            console.log("Received: " + data[0].name);
 
         break;
+        case 'GET_TEAM_RESP':
+           console.log("Received team:"+ JSON.stringify(data));
+           this.handleTeamResponse(data);
+
+        break;
         case 'BATTLE_CONTROL_SYNC':
             var bc = data[0];
             this.paused = bc.paused;
             g_timer.time = bc.duration;
             
+        break;
+        case 'GET_ONLINE_PLAYERS_RESP':
+        console.log('received player list'+data[0].players);
+        for(var i in data[0].players){
+            console.log('online: ' +data[0].players[i]);
+        }
+
+        break;
+        case 'START_BATTLE_RESP':
+        console.log('Starting battle:' + JSON.stringify(data[0]));
         break;
 	    default:
 	      console.log("Default branch reached in 'message handling'");
@@ -981,7 +941,107 @@ var GAS = Class(function() {
         return true; // return true to mark this message as handled
 
     },
+    handleTeamResponse: function(data)
+    {
+        if ( g_currentView == "manager")
+        {
+            // if game is unfinished, resume
+            if ( JSON.parse(data[0]).ingame != null)
+            {
+                Crafty.e("2D, DOM, Mouse, Text")
+                    .attr( {w:130, h:20, x:340, y:100, z:9})
+                    .text("Resume battle!")
+                    .css({
+                        "text-align": "center",
+                        "font-family": "Fanwood",
+                        "font-size": "13pt",
+                    })
+                    .bind('Click', function(){
+                        Crafty.scene("arenaView");
+                    });
+                
+                
+                
+            } else {
+                Crafty.e("2D, DOM, Mouse, Text")
+                    .attr( {w:130, h:20, x:340, y:100, z:9})
+                    .text("Select battles")
+                    .css({
+                        "text-align": "center",
+                        "font-family": "Fanwood",
+                        "font-size": "13pt",
+                    })
+                    .bind('Click', function(){
+                        Crafty.scene("arenaView");
+                    });
+                
+            }
+            // create visualization for each gladiator in team.
+            var gladiators = JSON.parse(data[0]).gladiators;
+            for (var i in gladiators )
+            {
+                var anim = "";
+                switch ( gladiators[i].race) 
+                {
+                case "skeleton":
+                    anim = "skeleton_body";
+                    break;
+                case "human":
+                    anim = "human_body";
+                    break;
+                }
 
+
+                Crafty.e("2D, DOM, Multiway, Keyboard, LeftControls, Mouse, Ape, Sprite, transparent")
+                    .attr({x:222+(i*32), y:300, z:7})
+                    .leftControls(1)
+                    .setupAnimation(anim)
+                    .Ape()
+                    .collision([16,32],[48,32],[48,64],[16,64])
+                    .bind("Click", function(){
+                        Crafty.scene("gladiatorView");
+                    });
+                
+                
+            }            
+        } 
+        else if ( g_currentView == "arena" )
+        {
+            g_gladiators = [];
+            // create visualization for each gladiator in team.
+            var gladiators = JSON.parse(data[0]).gladiators;
+            for (var i in gladiators )
+            {
+                var anim = "";
+                switch ( gladiators[i].race) 
+                {
+                case "skeleton":
+                    anim = "skeleton_body";
+                    break;
+                case "human":
+                    anim = "human_body";
+                    break;
+                }
+
+               var o = Crafty.e("2D, DOM, Multiway, Keyboard, Grid, Mouse, Ape, Sprite, transparent")
+                    .Ape()
+                    .collision([16,32],[48,32],[48,64],[16,64])
+                    //.attr({x:2*32-16, y:7*32-32, z:7})
+                    .Grid(2,7+(i*2))
+                    .setupAnimation(anim)
+                    .bind("MouseOver", function(){
+                        console.log('mouseover');
+                    })
+                    .bind("Click", function(){
+                        // set for pathfinding
+                        g_currentGladiator = this;
+                    });
+                
+                g_gladiators.push(o);
+                
+            }            
+        }
+    },
     syncedMessage: function(type, tick, data) {
         console.log('synced message:', type, tick, data);
     },
