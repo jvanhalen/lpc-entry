@@ -1,10 +1,9 @@
 {
    "_id": "ee5d4d5c7dfdf1568be588ecab00015f",
-   "_rev": "12-88b74934fb6e09094bb15b3b997b4410",
-   "player1": "{   base_state: {
-     tick:0,
-     gladiators: []
-   },
+   "_rev": "16-267750e124e9e819e9b3a6b7af781fd5",
+   "player1": "{
+   tick: 0,
+   name: "hihihi",
    gladiators: [
    {
        "name": "Känsä the Skeleton",
@@ -85,6 +84,8 @@
 ]
 }",
    "player2": "{
+   tick: 0,
+   name: "hihi2",
    gladiators: [
      {
        "name": "Mauri the Mighty",
