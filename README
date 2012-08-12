@@ -9,6 +9,9 @@ limits. Play against computer or other players online, train best
 gladiators and relive your most formidable battles in real-time!
 
 Gladiator team consists maximum of 8 gladiators. From those player can choose max 4 gladiators to battle. 
+Multiplayer game challenges are made between two players. When challenge is accepted, currently active battle 
+team is sent to fight on that instant from both parties.
+
 
 GAME STATE:
 
