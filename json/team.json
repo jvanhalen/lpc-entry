@@ -1,8 +1,10 @@
-
 {
    "_id": "team",
    "name": "Happy campers",
-   "gladiator":
+   "ingame": "battle-UUID",
+   "manager": "username",
+   "battleteam":[ "Kaensae the Skeleton", "Mauri the Mighty" ],
+   "gladiators":
         [{"name": "Kaensae the Skeleton",
           "race": "skeleton",
           "age": "5",
