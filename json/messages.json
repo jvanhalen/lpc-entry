@@ -17,7 +17,9 @@
                {"name": "TEAM_REQ",
                 "username": "username"
                },
-               {"name": "TEAM_RESP"},
+               {"name": "TEAM_RESP",
+                "team": {}               
+               },
                {"name": "MATCH_SYNC",
                 "team1": [{"name": "My team", "gladiator":   [{"name": "Mauri", "pos": [{"x": "1", "y": "1"}]},
                                                               {"name": "Kaensae", "pos": [{"x": "1", "y": "1"}]}]}], // Include all the gladiator data
@@ -80,5 +82,19 @@
          "paused": true/false,
          "duration": 1000,
          "start": 2354
-         }]
+         },
+         {
+         "name": "BATTLETEAM_SELECT_REQ",
+         "gladiators":[ "name1", "name2", "name3", "name4" ]
+         "username":"test1"
+         "password":"h45h"
+         },
+         {
+         "name": "BATTLETEAM_SELECT_RES",
+         "response": "NOK/OK",
+         "gladiators":[ "name1", "name2", "name3", "name4" ],
+         "username":"test1"
+         }
+         ]
+
 }
