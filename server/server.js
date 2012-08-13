@@ -22,11 +22,10 @@
 var Maple = require('./maple/Maple');
 var clientToUsername = [];
 var PF = require('pathfinding');
+var configs = require('../json/configs'); 			// Game configuration file
 
-<<<<<<< HEAD
-
-=======
 var reservedGladiatorList = [];
+var availableGladiatorsList = [];
 
 var LOGIC_RATE = 10; // Logic rate in milliseconds
 var TICK_RATE = 3; // Tick rate in milliseconds
@@ -40,7 +39,6 @@ var THIRTY_SECONDS = 30000 / TICK_RATE;
 var ROUND_LENGTH = TWO_SECONDS; 					// Round length, round means the "free action" period after the management period
 var INITIAL_MANAGEMENT_PERIOD = THIRTY_SECONDS; 	// Initial management period after the gladiator placement
 var MANAGEMENT_PERIOD = FIVE_SECONDS; 				// Management period after the initial round
->>>>>>> initial support for gladiator generation
 
 // Test -----------------------------------------------------------------------
 var Test = Maple.Class(function(clientClass) {
@@ -51,9 +49,9 @@ var Test = Maple.Class(function(clientClass) {
     pointOfReference: 0, // ticks
     paused: false,   // state
     duration: 0, // for how long
-    
+
     battleSessions: [], // which battles are active.
-    
+
     started: function() {
 	console.log('Server initializing...');
 	this.init();
@@ -71,7 +69,7 @@ var Test = Maple.Class(function(clientClass) {
           path = finder.findPath( 8,13,   9,13,   grid.clone() );
           console.log('Path:'+JSON.stringify(path));
         */
-        
+
     },
 
     update: function(t, tick) {
@@ -190,8 +188,8 @@ var Test = Maple.Class(function(clientClass) {
 	});
 	    //tty.setRawMode(true);
 
-	// Initialize some global variables from database
-	this.querydb("/gladiators/available", 'localhost', 'INIT_AVAILABLE_GLADIATORS', undefined);
+		// Create database for gladiators, then fill it with new gladiators
+		this.querydb('/' + configs.gladiatordb, {'id': 'localhost'}, 'INIT_GLADIATOR_DATABASE', {'id': 'localhost'});
     },
 
     querydb: function(querypath, client, type, data) {
@@ -217,8 +215,8 @@ var Test = Maple.Class(function(clientClass) {
 		});
 
 		// write data to request body
-		req.write('data\n');
-		req.write('data\n');
+		//req.write('data\n');
+		//req.write('data\n');
 		req.end();
     },
 
@@ -313,10 +311,18 @@ var Test = Maple.Class(function(clientClass) {
 				break;
 
 			case 'GET_AVAILABLE_GLADIATORS_REQ':
-				client.send('GET_AVAILABLE_GLADIATORS_RESP', [data.gladiator]);
-				console.log(response);
+				client.send('GET_AVAILABLE_GLADIATORS_RESP', [data]);
 				break;
-<<<<<<< HEAD
+
+			case 'INIT_GLADIATOR_DATABASE':
+				// Always try to init the gladiator db
+				this.updatedb('/' + configs.gladiatordb, {"id": "localhost"}, 'CREATE_GLADIATORS');
+				break;
+
+			case 'CREATE_GLADIATORS':
+				this.generateGladiators();
+				break;
+
             case 'GET_TEAM_REQ':
                 client.send('GET_TEAM_RESP', [response]);
                 console.log(response);
@@ -333,7 +339,6 @@ var Test = Maple.Class(function(clientClass) {
                 console.log('Sending battle start to client: ');
                 client.send('START_BATTLE_RESP', ['{"done":true}']);
                 break;
-=======
 
 			case 'HIRE_GLADIATOR_REQ':
 				client.send('HIRE_GLADIATOR_RESP', [response]);
@@ -347,7 +352,6 @@ var Test = Maple.Class(function(clientClass) {
 			case 'DONT_CARE':
 				break;
 
->>>>>>> initial support for gladiator generation
 			default:
 				console.log("handleDbresponse : default branch reached, type: ", type);
 				break;
@@ -405,7 +409,6 @@ var Test = Maple.Class(function(clientClass) {
 
     },
 
-<<<<<<< HEAD
 	handleHireGladiatorReq: function (url, client, type, data) {
 
 
@@ -425,8 +428,7 @@ var Test = Maple.Class(function(clientClass) {
         //this.updatedb( url, client, type, data, undefined);
     },
 
-=======
->>>>>>> initial support for gladiator generation
+
 	handleClientRequest: function (client, type, tick, data) {
 
 		console.log("handleClientRequest '" + type + "' data: " + data);
@@ -441,7 +443,7 @@ var Test = Maple.Class(function(clientClass) {
             if ( !JSON.parse(data).username || JSON.parse(data).username == '')
             {
                 client.send('LOGIN_INIT_RESP', ['{"response":"NOK"}']);
-            } 
+            }
             else {
 			    this.querydb(JSON.parse(data).username, client, type, data);
             }
@@ -457,36 +459,43 @@ var Test = Maple.Class(function(clientClass) {
 			break;
 
 		case 'GET_AVAILABLE_GLADIATORS_REQ':
-            this.querydb('/gladiators/available', client, type, data, undefined);
+			// Return random gladiators to every request or the same set for everyone?
+			var gladilist = "";
+			for(var i = 0; i< configs.hirelistlength; i++) {
+				//var rand = this.rollDice("1d" + availableGladiatorsList.length + "-" + configs.hirelistlength);
+				gladilist += '"' + availableGladiatorsList[i] + '",';
+			}
+			gladilist = gladilist.substr(0, gladilist.length-1); // Trim the trailing ,
+			console.log('{"keys":[' + 	gladilist + ']}')
+            this.postRequest('/gladiators/_all_docs?include_docs=true', client, type, data, '{"keys":[' + 	gladilist + ']}');
 	        break;
 
 		case 'HIRE_GLADIATOR_REQ':
 			this.handleHireGladiatorReq(null, client, type, data);
 			break;
+
         case 'GET_TEAM_REQ':
             this.querydb(JSON.parse(data).username+'/team', client, type, data);
             break;
+
         case 'GET_ONLINE_PLAYERS_REQ':
 
-            
+
             var playerNames = { players:[] }
             for( var c=0; c < this.getClients().length;c++)
             {
                 playerNames.players.push(clientToUsername[this.getClients().getAt(c)]);
             }
-
-<<<<<<< HEAD
             console.log('sending now'+ JSON.stringify([playerNames]));
             client.send('GET_ONLINE_PLAYERS_RESP', [playerNames]);
             break;
+
         case 'START_BATTLE_REQ':
             this.handleStartBattle('/battle', client, type, data);
             break;
-=======
 		case 'DONT_CARE':
 			break;
 
->>>>>>> initial support for gladiator generation
 		default:
 
 			console.log("message : default branch reached, type: ", type);
@@ -509,11 +518,6 @@ var Test = Maple.Class(function(clientClass) {
 
 	},
 
-	popGladiator: function() {
-
-		var gladiator = require('../rulesets/gladiator');
-
-	},
 
 	rollDice: function(dice) {
 		var roll = require('roll');
@@ -608,16 +612,136 @@ var Test = Maple.Class(function(clientClass) {
 
 		}
 
+	},
+
+	generateGladiators: function () {
+		var fs = require('fs');
+		var races = require('../json/races'); // read races.json
+		var gladiator = [];
+		var racecount = 0;
+
+		//console.log("Available races:");
+		for(key in races.race) {
+			//console.log(races.race[key].name);
+			racecount += 1;
+		}
+
+		var bulk_set = parseInt(configs.gladiatorsindatabase); // Write the whole set one or two writes
+
+		for(i in availableGladiatorsList) {
+			if(i < parseInt(configs.gladiatorsindatabase)) {
+				var race = this.rollDice("1d"+racecount+"-1");
+				gladiator[i%bulk_set] = {
+					"_id": availableGladiatorsList[i],
+					"name": availableGladiatorsList[i],
+					"race": races.race[race].name,
+					"age": 0,
+					"health": this.rollDice(races.race[race].health),
+					"nimbleness": this.rollDice(races.race[race].nimbleness),
+					"strength": this.rollDice(races.race[race].strength),
+					"mana": this.rollDice(races.race[race].mana),
+					"salary": this.rollDice(configs.basesalary),
+					"fights": "0",
+					"knockouts": "0",
+					"injured": "0",
+					"icon": races.race[race].icon
+				}
+			}
+
+			// Store gladiator to database
+
+			//this.updatedb('/' + configs.gladiatordb + '/' + gladiator.name, {"id": "localhost"}, 'DONT_CARE', null, JSON.stringify(gladiator));
+
+			// Use the bulk-write for better performance
+			if(i%bulk_set==0) {
+				var request = require('request');
+				var options = {
+					'host': 'localhost',
+					'port': 5984,
+					'path': '/' + configs.gladiatordb + '/_bulk_docs',
+					'method': 'POST',
+					headers: {
+						'Content-Type': 'application/json',
+					}
+
+				};
+
+				var http = require('http');
+				var req = http.request(options, function(res) {
+				  console.log('STATUS: ' + res.statusCode);
+				  //console.log('HEADERS: ' + JSON.stringify(res.headers));
+				  res.setEncoding('utf8');
+				  res.on('data', function (chunk) {
+					//console.log('BODY: ' + chunk);
+				  });
+				});
+
+				req.on('error', function(e) {
+				  console.log('problem with request: ' + e.message);
+				});
+
+				// write data to request body
+				req.write('{"docs":' + JSON.stringify(gladiator) + '}\n');
+				req.end();
+
+				//console.log("i%bulk_set", i%bulk_set);
+				//this.updatedb('/' + configs.gladiatordb + '/_bulk_docs', {"id": "localhost"}, 'DONT_CARE', null, '{"docs":' + JSON.stringify(gladiator) + '}');
+			}
+
+		}
+	},
+
+	postRequest: function(url, client, type, data, postdata) {
+		var request = require('request');
+		var options = {
+			'host': 'localhost',
+			'port': 5984,
+			'path': url,
+			'method': 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+			}
+
+		};
+
+		var http = require('http');
+		var req = http.request(options, function(res) {
+		var response = "";
+		  //console.log('STATUS: ' + res.statusCode);
+		  //console.log('HEADERS: ' + JSON.stringify(res.headers));
+		  res.setEncoding('utf8');
+		  res.on('data', function (chunk) {
+			//console.log(chunk);
+			response += chunk;	// Collect the bits and pieces of the POST response
+			//srv.handleDbResponse(url, res, client, type, chunk);
+		  });
+		  res.on('end', function () {
+			// Finally handle the whole response message
+			//console.log(response);
+			srv.handleDbResponse(url, res, client, type, response);
+			response = "";
+		  });
+		});
+
+		req.on('error', function(e) {
+		  console.log('problem with request: ' + e.message);
+		});
+
+		// write data to request body
+		req.write(postdata);
+		req.end();
+
 	}
+
 });
 
-var srv = new Test();
-srv.generateGladiators();
-/*
+	var srv = new Test();
+	// Read gladiator names
+	var fs = require('fs');
+	availableGladiatorsList = fs.readFileSync('./rulesets/gladiatornames.txt').toString().split("\n");
 
-srv.start({
-	port: 8080,
-    logicRate: LOGIC_RATE,
-    tickRate: TICK_RATE
-});
-*/
+	srv.start({
+		port: 8080,
+		logicRate: LOGIC_RATE,
+		tickRate: TICK_RATE
+	});

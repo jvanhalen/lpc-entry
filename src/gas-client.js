@@ -579,7 +579,7 @@ function showManagerView()
 
     g_currentView = "manager";
     LoadTileMap( 'test.json');
-    
+
     // Add a title
     Crafty.e("2D, DOM, Text").attr({ w: 400, h: 20, x: 150, y: 10 })
         .text("Kalevala Heroes / GAS Valhalla")
@@ -612,17 +612,17 @@ function showManagerView()
             "font-size": "10pt",
             "color": "#5c3111"
         });
-   
 
 
-   
+
+
 
 
 
     var data = $.cookie("gas-login");
     gas.send('GET_TEAM_REQ', [ '{"username":"'+ JSON.parse(data).username + '"}' ]);
     gas.send('GET_ONLINE_PLAYERS_REQ', [ '{"username":"'+ JSON.parse(data).username + '"}' ]);
-    
+
     //console.log("skel id:"+skel[0]);
 
 }
@@ -664,7 +664,7 @@ function showArenaView()
         .text('23')
         .css({"font-family":"Impact",
               "font-size":"24pt"});
-    
+
     var data = $.cookie('gas-login');
     //gas.send('GET_TEAM_REQ', [ '{"username":"'+ JSON.parse(data).username + '"}' ]);
     gas.send('START_BATTLE_REQ', [ '{"username":"'+ JSON.parse(data).username + '"}' ]);
@@ -682,7 +682,7 @@ function showArenaView()
             // set for pathfinding
             g_currentGladiator = this;
         });
-    
+
     var tmpObj2 = Crafty.e("2D, DOM, Multiway, Keyboard, Grid, Mouse, Ape, Sprite, transparent")
         .Ape()
         .collision([16,32],[48,32],[48,64],[16,64])
@@ -773,13 +773,16 @@ function pitCreateGladiators(gladiatorData){
                    "y": 128 };
     var count = 0;
 
-    // parse gladiator JSON
-    $.each(gladiatorData, function(key,gladiator)
+	gladiatorData2 = gladiatorData.rows;
+
+    $.each(gladiatorData2, function(key,gladiator)
     {
-        console.log('Creating gladiator showcase for ' + gladiator.name);
+		console.log(key, ":", gladiator.doc.name);
+
+        console.log('Creating gladiator showcase for ' + gladiator.doc.name);
 
         var body = "human_body";
-        if ( gladiator.race == "skeleton" )
+        if ( gladiator.doc.race == "skeleton" )
             body = "skeleton_body";
 
         var xPos = pos.x+(offset.x*count);
@@ -801,7 +804,7 @@ function pitCreateGladiators(gladiatorData){
                         "font-size": "10pt",
                         "color": "#5c3111"
                     })
-                    .text(gladiatorHTML(gladiator));
+                    .text(gladiatorHTML(gladiator.doc));
             })
             .bind("MouseOut", function(e){
                 this.hideAll();
@@ -833,21 +836,21 @@ var GAS = Class(function() {
     },
 
     update: function(t, tick) {
-      
+
         if ( this.paused == false)
         {
             for ( var g in g_gladiators )
             {
                 g_gladiators[g].UpdateMovement();
             }
-        } 
+        }
         /*if ( g_timer.view ) {
             g_timer.time = g_timer.time-(tick - this.pointOfReference);
             g_timer.view.text( g_timer.time / 333.33);
             this.pointOfReference = tick;
         }*/
         //this.send(4, ['Hello world!']);
-        
+
     },
 
     render: function(t, dt, u) {
@@ -890,7 +893,7 @@ var GAS = Class(function() {
 
 		    $.cookie("gas-login", data);
 		    displayLogin();
-            
+
             /*$('#login').fadeOut(500, function(){
 			    $('#login').empty();
                 $('#login').text('<h1>Welcome back, '+data.username+'!</h1>');
@@ -906,8 +909,8 @@ var GAS = Class(function() {
 	    break;
 
         case 'GET_AVAILABLE_GLADIATORS_RESP':
-                console.log('Handling gladiator list');
-                pitCreateGladiators(JSON.parse(data[0]).gladiators);
+			console.log('Handling gladiator list');
+			pitCreateGladiators(JSON.parse(data));
 	    case 50:
            console.log("Received: " + data[0].name);
 
@@ -921,7 +924,7 @@ var GAS = Class(function() {
             var bc = data[0];
             this.paused = bc.paused;
             g_timer.time = bc.duration;
-            
+
         break;
         case 'GET_ONLINE_PLAYERS_RESP':
         console.log('received player list'+data[0].players);
@@ -959,9 +962,9 @@ var GAS = Class(function() {
                     .bind('Click', function(){
                         Crafty.scene("arenaView");
                     });
-                
-                
-                
+
+
+
             } else {
                 Crafty.e("2D, DOM, Mouse, Text")
                     .attr( {w:130, h:20, x:340, y:100, z:9})
@@ -974,14 +977,14 @@ var GAS = Class(function() {
                     .bind('Click', function(){
                         Crafty.scene("arenaView");
                     });
-                
+
             }
             // create visualization for each gladiator in team.
             var gladiators = JSON.parse(data[0]).gladiators;
             for (var i in gladiators )
             {
                 var anim = "";
-                switch ( gladiators[i].race) 
+                switch ( gladiators[i].race)
                 {
                 case "skeleton":
                     anim = "skeleton_body";
@@ -1001,10 +1004,10 @@ var GAS = Class(function() {
                     .bind("Click", function(){
                         Crafty.scene("gladiatorView");
                     });
-                
-                
-            }            
-        } 
+
+
+            }
+        }
         else if ( g_currentView == "arena" )
         {
             g_gladiators = [];
@@ -1013,7 +1016,7 @@ var GAS = Class(function() {
             for (var i in gladiators )
             {
                 var anim = "";
-                switch ( gladiators[i].race) 
+                switch ( gladiators[i].race)
                 {
                 case "skeleton":
                     anim = "skeleton_body";
@@ -1036,10 +1039,10 @@ var GAS = Class(function() {
                         // set for pathfinding
                         g_currentGladiator = this;
                     });
-                
+
                 g_gladiators.push(o);
-                
-            }            
+
+            }
         }
     },
     syncedMessage: function(type, tick, data) {
