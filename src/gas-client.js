@@ -874,7 +874,8 @@ var GAS = Class(function() {
 	    case 'CREATE_USER_RESP':
 	    case 'LOGIN_INIT_RESP':
 		if("OK" == JSON.parse(data).response) {
-			this.send('USER_SALT_REQ', ['{"username":"' + $('#username').val() + '"}']);
+            //console.log('I want salt for '+JSON.parse($.cookie("gas-login")).username);
+			this.send('USER_SALT_REQ', ['{"username":"' + JSON.parse($.cookie("gas-login")).username + '"}']);
 		}
 		else {
 			document.getElementById('username').value = '';
@@ -883,8 +884,8 @@ var GAS = Class(function() {
 		  break;
 
 	    case 'USER_SALT_RESP':
-		    var hash = Sha1.hash(JSON.parse(data).salt + $('#password').val());
-		    this.send('LOGIN_REQ', ['{"username":"' + $('#username').val() + '", "pwdhash":"' + hash + '"}']);
+		    var hash = Sha1.hash(JSON.parse(data).salt + JSON.parse($.cookie("gas-login")).password);
+		    this.send('LOGIN_REQ', ['{"username":"' + JSON.parse($.cookie("gas-login")).username + '", "pwdhash":"' + hash + '"}']);
 		    //console.log('sending: [{"username":"' + $('#username').val() + '", "pwdhash":"' + hash + '"}]');
 	      break;
 

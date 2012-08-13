@@ -40,6 +40,8 @@
 	 submitHandler: function() {
       var hashPass = Sha1.hash($('#password').val());
       var login = $('#username').val();
+       // set cookie for later use
+       $.cookie('gas-login', JSON.stringify({"username":login, "password":hashPass}));
        gas.send(type, [ '{"username":"'+login+'"}' ]);
      }
      });

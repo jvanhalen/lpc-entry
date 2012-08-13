@@ -295,8 +295,7 @@ var Test = Maple.Class(function(clientClass) {
 					console.log("First login for", JSON.parse(data).username, "Updating passwd.");
 					this.updatedb('/users/'+JSON.parse(data).username, client, 'DONT_CARE', data, JSON.stringify(dbval));
 				}
-
-            
+                        
 				if(JSON.parse(data).pwdhash !== dbval.login["password"]) {
 					console.log("pwd did not match, login failed");
 					client.send('LOGIN_RESP', ['{"response":"NOK", "username":"' + JSON.parse(data).username + '"}']);
