@@ -200,3 +200,8 @@ input:focus:required:invalid {
 }
 
 #cr-stage { border:2px solid black; margin:5px auto; color:white; float:left }
+#managers_title {     font-family: 'Fanwood'; font-size: 18pt;}
+.manager-entry {
+    font-size: 10pt;
+    font-family: 'Fanwood-Text';
+}

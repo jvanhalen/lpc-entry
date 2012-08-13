@@ -928,9 +928,13 @@ var GAS = Class(function() {
 
         break;
         case 'GET_ONLINE_PLAYERS_RESP':
+        $('#managers_title').append("Players currently online:")
+        
         console.log('received player list'+data[0].players);
         for(var i in data[0].players){
-            console.log('online: ' +data[0].players[i]);
+            //console.log('online: ' +data[0].players[i]);
+            $('#managers_body').append('<div class=\"manager-entry\">'+data[0].players[i]+' [throw challenge]</div>');
+
         }
 
         break;
@@ -965,8 +969,6 @@ var GAS = Class(function() {
                     .bind('Click', function(){
                         Crafty.scene("arenaView");
                     });
-
-
 
             } else {
                 Crafty.e("2D, DOM, Mouse, Text")
