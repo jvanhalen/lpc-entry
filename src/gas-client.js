@@ -605,12 +605,17 @@ function showManagerView()
             "font-size": "18pt",
             "color":"#734212"
         });
-    Crafty.e("2D, DOM, Text").attr({ w: 130, h: 300, x:52 , y: 250, z:8 })
-        .text("F1: Wear Robe<br />F2: Wear Leather<br />F3: Wear Plate<br />F4: Go Nude<br />X: Bones <br />H: Flesh<br />Arrow keys: Slash!<br />WASD: move<br />P: Gladiator Pit")        .css({
+    Crafty.e("2D, DOM, Keyboard, Text").attr({ w: 130, h: 300, x:52 , y: 250, z:8 })
+        .text("P: Gladiator Pit")        .css({
             "text-align": "left",
             "font-family": "Fanwood-Text",
             "font-size": "10pt",
             "color": "#5c3111"
+        })
+        .bind('KeyDown', function () { 
+            if (this.isDown('P')){ 
+                Crafty.scene("gladiatorPitView");
+            }
         });
 
 
@@ -785,9 +790,10 @@ function pitCreateGladiators(gladiatorData){
         if ( gladiator.doc.race == "skeleton" )
             body = "skeleton_body";
 
-        var xPos = pos.x+(offset.x*count);
+        var xPos = pos.x+(offset.x*(count%3));
+        var yPos = pos.y+(offset.y*(Math.floor(count/3)));
         var obj = Crafty.e("2D, DOM, Delay, Mouse, Ape, Sprite, transparent")
-            .attr({x:xPos, y:170, z:5})
+            .attr({x:xPos, y:yPos, z:5})
             .setupAnimation(body)
             .bind("MouseOver", function(e){
                 this.hideAll();
