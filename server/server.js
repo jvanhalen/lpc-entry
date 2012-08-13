@@ -373,7 +373,7 @@ var Test = Maple.Class(function(clientClass) {
                 var obj = {};
 
                 var user = JSON.parse(response);
-                user.team = {"manager":url.substring(1), "ingame":null, "gladiators":[]};
+                user.team = {"manager":JSON.parse(data).username, "ingame":null, "gladiators":[]};
                 user.history = {"created": Date.now(), "from": client.id.split(":",1) };
 
 				var salt = crypto.createHash('sha1');
