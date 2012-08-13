@@ -496,7 +496,7 @@ var Test = Maple.Class(function(clientClass) {
             var playerNames = { players:[] }
             for( var c=0; c < this.getClients().length;c++)
             {
-                playerNames.players.push(clientToUsername[this.getClients().getAt(c)]);
+                playerNames.players.push(clientToUsername[this.getClients().getAt(c).id]);
             }
             console.log('sending now'+ JSON.stringify([playerNames]));
             client.send('GET_ONLINE_PLAYERS_RESP', [playerNames]);
