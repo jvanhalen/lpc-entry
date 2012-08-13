@@ -1,12 +1,16 @@
 {
 
-    "_id": "configs",
-    "teamsizemax": 			"8",
-    "teamsizematch": 		"4",
-    "challencerankmax": 	"10",
-    "matchchat": 			"false",
-    "lobbychat": 			"true",
-	"startingmoney":		"1000",
-	"gladiatorprice": 		"12d10"
+    "_id": 						"configs",
+    "gladiatordb":				"gladiators",
+    "playerspershard":			"1000",
+    "teamsizemax": 				"8",
+    "teamsizematch": 			"4",
+    "challengerankmax": 		"10",
+    "matchchat": 				"false",
+    "lobbychat": 				"true",
+	"startingmoney":			"200",
+	"basesalary": 		    	"5d4",
+    "gladiatorsindatabase": 	"10000",
+	"hirelistlength":			"3"
 
 }
