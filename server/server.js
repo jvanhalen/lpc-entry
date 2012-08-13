@@ -435,13 +435,6 @@ var Test = Maple.Class(function(clientClass) {
 
 	},
 
-	rollDice: function(dice) {
-
-		var roll = require('roll');
-		return roll.roll(dice).result;
-
-	},
-
     handleStartBattle: function( url, client, type, data)
     {
         this.querydb( '/_uuids', client, type, data);
@@ -523,22 +516,6 @@ var Test = Maple.Class(function(clientClass) {
 
 	},
 
-	handleHireGladiatorReq: function (url, client, type, data) {
-
-		// Check that the gladiator is not yet reserved
-		var gladiator = JSON.parse(data).gladiator;
-		if(reservedGladiatorList[gladiator]) {
-			//Already reserved
-			client.send("HIRE_GLADIATOR_RESP", ['{"gladiator":"' + gladiator + '", "response":"NOK", "reason":"Gladiator already hired"}']);
-			console.log("Gladiator", + gladiator + "already hired.");
-		}
-		else {
-			reservedGladiatorList[gladiator] = "Reserved";
-		}
-
-	},
-
-
 	rollDice: function(dice) {
 		var roll = require('roll');
 		return roll.roll(dice).result;
@@ -584,55 +561,6 @@ var Test = Maple.Class(function(clientClass) {
 
         return grid;
     },
-
-	generateGladiators: function () {
-		var fs = require('fs');
-		var races = require('../json/races'); // read races.json
-		var configs = require('../json/configs');
-		var gladiator = [];
-		var array = fs.readFileSync('./rulesets/gladiatornames.txt').toString().split("\n");
-		var racecount = 0;
-
-		console.log("Available races:");
-
-		for(key in races.race) {
-			console.log(races.race[key].name);
-			racecount += 1;
-		}
-
-		// Create database for gladiators
-		this.updatedb('/' + configs.gladiatordb, {"id": "localhost"}, 'DONT_CARE', undefined, undefined);
-
-
-		for(i in array) {
-			if(i <= parseInt(configs.gladiatorsindatabase)) {
-				var race = this.rollDice("1d"+racecount+"-1");
-				gladiator = {
-					"_id": array[i],
-					"name": array[i],
-					"race": races.race[race].name,
-					"age": 0,
-					"health": this.rollDice(races.race[race].health),
-					"nimbleness": this.rollDice(races.race[race].nimbleness),
-					"strength": this.rollDice(races.race[race].strength),
-					"mana": this.rollDice(races.race[race].mana),
-					"salary": this.rollDice(configs.basesalary),
-					"fights": "0",
-					"knockouts": "0",
-					"injured": "0",
-					"icon": races.race[race].icon
-				}
-			}
-			else {
-				break;
-			}
-
-			// Store gladiator to database
-			this.updatedb('/' + configs.gladiatordb + '/' + gladiator.name, {"id": "localhost"}, 'DONT_CARE', null, JSON.stringify(gladiator));
-
-		}
-
-	},
 
 	generateGladiators: function () {
 		var fs = require('fs');
