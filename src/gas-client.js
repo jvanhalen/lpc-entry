@@ -620,7 +620,7 @@ function showManagerView()
 
 
     var data = $.cookie("gas-login");
-    gas.send('GET_TEAM_REQ', [ '{"username":"'+ JSON.parse(data).username + '"}' ]);
+    gas.send('TEAM_REQ', [ '{"username":"'+ JSON.parse(data).username + '"}' ]);
     gas.send('GET_ONLINE_PLAYERS_REQ', [ '{"username":"'+ JSON.parse(data).username + '"}' ]);
     
     //console.log("skel id:"+skel[0]);
@@ -900,7 +900,7 @@ var GAS = Class(function() {
 		    });*/
 		}
 		else {
-            $.removeCookie("gas-login");
+            $.cookie("gas-login", null);
 			console.log("Login failed");
 		}
 	    break;
@@ -912,9 +912,9 @@ var GAS = Class(function() {
            console.log("Received: " + data[0].name);
 
         break;
-        case 'GET_TEAM_RESP':
+        case 'TEAM_RESP':
            console.log("Received team:"+ JSON.stringify(data));
-           this.handleTeamResponse(data);
+           this.handleTeamResponse(JSON.parse(data[0]).team);
 
         break;
         case 'BATTLE_CONTROL_SYNC':
@@ -941,12 +941,14 @@ var GAS = Class(function() {
         return true; // return true to mark this message as handled
 
     },
-    handleTeamResponse: function(data)
+    handleTeamResponse: function(team)
     {
+
+        // create visualization for each gladiator in team.
         if ( g_currentView == "manager")
         {
             // if game is unfinished, resume
-            if ( JSON.parse(data[0]).ingame != null)
+            if ( team.ingame != null)
             {
                 Crafty.e("2D, DOM, Mouse, Text")
                     .attr( {w:130, h:20, x:340, y:100, z:9})
@@ -976,12 +978,11 @@ var GAS = Class(function() {
                     });
                 
             }
-            // create visualization for each gladiator in team.
-            var gladiators = JSON.parse(data[0]).gladiators;
-            for (var i in gladiators )
+
+            for (var i in team.gladiators )
             {
                 var anim = "";
-                switch ( gladiators[i].race) 
+                switch ( team.gladiators[i].race) 
                 {
                 case "skeleton":
                     anim = "skeleton_body";
@@ -990,14 +991,20 @@ var GAS = Class(function() {
                     anim = "human_body";
                     break;
                 }
+                var offset = 0;
+                if ( jQuery.inArray(team.gladiators[i].name, team.battleteam) != -1 )
+                {
+                    offset = 1;
+                }
 
 
-                Crafty.e("2D, DOM, Multiway, Keyboard, LeftControls, Mouse, Ape, Sprite, transparent")
-                    .attr({x:222+(i*32), y:300, z:7})
-                    .leftControls(1)
-                    .setupAnimation(anim)
+                Crafty.e("2D, DOM, Grid, Multiway, Keyboard, LeftControls, Mouse, Ape, Sprite, transparent")
+                    .attr({x:222+(i*32), y:300+(offset*32), z:7})
                     .Ape()
                     .collision([16,32],[48,32],[48,64],[16,64])
+                    //.Grid(7+i,9+offset)
+                    .leftControls(1)
+                    .setupAnimation(anim)
                     .bind("Click", function(){
                         Crafty.scene("gladiatorView");
                     });
@@ -1009,11 +1016,10 @@ var GAS = Class(function() {
         {
             g_gladiators = [];
             // create visualization for each gladiator in team.
-            var gladiators = JSON.parse(data[0]).gladiators;
-            for (var i in gladiators )
+            for (var i in team.gladiators )
             {
                 var anim = "";
-                switch ( gladiators[i].race) 
+                switch ( team.gladiators[i].race) 
                 {
                 case "skeleton":
                     anim = "skeleton_body";
@@ -1026,7 +1032,6 @@ var GAS = Class(function() {
                var o = Crafty.e("2D, DOM, Multiway, Keyboard, Grid, Mouse, Ape, Sprite, transparent")
                     .Ape()
                     .collision([16,32],[48,32],[48,64],[16,64])
-                    //.attr({x:2*32-16, y:7*32-32, z:7})
                     .Grid(2,7+(i*2))
                     .setupAnimation(anim)
                     .bind("MouseOver", function(){
