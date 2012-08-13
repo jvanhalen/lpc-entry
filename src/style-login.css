@@ -1,5 +1,5 @@
 #login {
-    min-width:350px;
+    min-width:250px;
     height:200px;
     background-color: #2e1a20;  
     color: white;
@@ -11,6 +11,21 @@
     border-color: #eec06a;
     border-width: 2px;
 }
+
+.block {
+    width:250px;
+    height:200px;
+    background-color: #2e1a20;  
+    color: white;
+    font-family: 'Fanwood';
+    font-size: 24pt;
+    float:right;
+    padding: 1cm 1cm 1cm 1cm;
+    border: dashed;
+    border-color: #eec06a;
+    border-width: 2px;
+}
+
 #login-nav {
     display: none;
 }
@@ -45,7 +60,7 @@ input {
     
     border: none;
 
-    width: 316px;
+    width: 116px;
     height: 27px;
     margin:15px 0;
     color:#fff;
