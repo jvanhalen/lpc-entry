@@ -934,6 +934,8 @@ var GAS = Class(function() {
 
         break;
         case 'GET_ONLINE_PLAYERS_RESP':
+        $('#managers_title').empty();
+        $('#managers_body').empty();
         $('#managers_title').append("Players currently online:")
         
         console.log('received player list'+data[0].players);
