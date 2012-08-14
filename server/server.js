@@ -24,7 +24,7 @@ var clientToUsername = [];
 var PF = require('pathfinding');
 var configs = require('../json/configs'); 			// Game configuration file
 
-var reservedGladiatorList = [];
+var reservedGladiatorsList = [];
 var availableGladiatorsList = [];
 
 var LOGIC_RATE = 10; // Logic rate in milliseconds
@@ -213,8 +213,8 @@ var Test = Maple.Class(function(clientClass) {
 		//console.log("GET:", querypath);
 		var req = http.get(options, function(res) {
 		  res.setEncoding('utf8');
-		  res.on('data', function (chunk) {
-		  srv.handleDbResponse(querypath, chunk, client, type, data);
+		  res.on('data', function (response) {
+		  	srv.handleDbResponse(querypath, client, type, data, response);
 		  });
 		});
 
@@ -258,7 +258,7 @@ var Test = Maple.Class(function(clientClass) {
 			if(response) {
 				if(response.statusCode == 201){
 					//console.log("PUT ok for: " + querypath + "\n client.id: " + client.id + "\n content: " + content);
-						srv.handleDbResponse(querypath, response, client, type, data);
+						srv.handleDbResponse(querypath, client, type, data, response);
 					}
 					else {
 						console.log("PUT failed for: " + querypath + "\n client.id: " + client.id + "\n content: " + content + " with status code:" + response.statusCode);
@@ -270,8 +270,8 @@ var Test = Maple.Class(function(clientClass) {
 			})
     },
 
-    handleDbResponse: function(url, response, client, type, data) {
-		//console.log("handleDbResponse: " + url + " : " + response);
+    handleDbResponse: function(querypath, client, type, data, response) {
+		console.log("handleDbResponse: ", type, "querypath", querypath + " : " + data);
 
 		switch(type)
 		{
@@ -356,9 +356,14 @@ var Test = Maple.Class(function(clientClass) {
 
                 break;
 
-			case 'HIRE_GLADIATOR_REQ':
-				client.send('HIRE_GLADIATOR_RESP', [response]);
-				console.log(response);
+			case 'HIRE_GLADIATOR_QUERY':
+				this.querydb('/' + configs.gladiatordb + '/' + JSON.parse(data).name, client, "HIRE_GLADIATOR_OK", data);
+				//console.log(data);
+				break;
+
+			case 'HIRE_GLADIATOR_OK':
+				client.send("HIRE_GLADIATOR_RESP", [{"type": "HIRE_GLADIATOR_RESP", "response": "OK", "name":  JSON.parse(data).name, "reason": "Ready to serve."}]);
+				console.log(data);
 				break;
 
 			case 'UPDATE_AVAILABLE_GLADIATOR_LIST':
@@ -424,7 +429,7 @@ var Test = Maple.Class(function(clientClass) {
 				salt.update(crypto.randomBytes(128));
                 user.login = {"salt": salt.digest('hex')};
 
-                console.log("Updateing user:"+JSON.stringify(user));
+                console.log("Updating user:"+JSON.stringify(user));
                 this.updatedb(url, client, 'DONT_CARE', data, JSON.stringify(user));
 
             }
@@ -442,7 +447,16 @@ var Test = Maple.Class(function(clientClass) {
 
 	handleHireGladiatorReq: function (url, client, type, data) {
 
+		//console.log("handleHireGladiatorReq: ", data);
+		//console.log("data.name: ", JSON.parse(data).name);
+		if(reservedGladiatorsList[JSON.parse(data).name]) {
+			client.send("HIRE_GLADIATOR_RESP", [{"type": "HIRE_GLADIATOR_RESP", "response": "NOK", "name": JSON.parse(data).name, "reason": "Already hired."}]);
+		}
+		else {
+			reservedGladiatorsList.push(JSON.parse(data).name);
+        		this.querydb('/' + configs.gladiatordb + '/' + JSON.parse(data).name, client, "HIRE_GLADIATOR_QUERY", data);
 
+		}
 
 	},
 
@@ -594,6 +608,7 @@ var Test = Maple.Class(function(clientClass) {
 					"_id": availableGladiatorsList[i],
 					"name": availableGladiatorsList[i],
 					"race": races.race[race].name,
+					"team": null,
 					"age": 0,
 					"health": this.rollDice(races.race[race].health),
 					"nimbleness": this.rollDice(races.race[race].nimbleness),
@@ -650,12 +665,13 @@ var Test = Maple.Class(function(clientClass) {
 		}
 	},
 
-	postRequest: function(url, client, type, data, postdata) {
+	postRequest: function(querypath, client, type, data, postdata) {
+		console.log("querypath", querypath, "\nclient:", client, "\ntype:", type, "\ndata", data, "\npostdata", postdata);
 		var request = require('request');
 		var options = {
 			'host': 'localhost',
 			'port': 5984,
-			'path': url,
+			'path': querypath,
 			'method': 'POST',
 			headers: {
 				'Content-Type': 'application/json',
@@ -677,7 +693,7 @@ var Test = Maple.Class(function(clientClass) {
 		  res.on('end', function () {
 			// Finally handle the whole response message
 			//console.log(response);
-			srv.handleDbResponse(url, res, client, type, response);
+			srv.handleDbResponse(querypath, client, type, response, data);
 			response = "";
 		  });
 		});
