@@ -149,9 +149,6 @@ var Test = Maple.Class(function(clientClass) {
 
     connected: function(client) {
         console.log('Connected:', client.id);
-		clientToUsername[client.id] = "undefined";
-		console.log(clientToUsername);
-		// Send initial data, e.g. ranking list?
     },
 
     message: function(client, type, tick, data) {
@@ -169,9 +166,17 @@ var Test = Maple.Class(function(clientClass) {
     },
 
     disconnected: function(client) {
+
+	var playerNames = { players:[] }
+	playerNames.players.push( clientToUsername[client.id]);
+
+	for( var c=0; c < this.getClients().length; c++)
+	{
+	console.log("Updating:", this.getClients().getAt(c).id);
+	this.getClients().getAt(c).send("PLAYER_DISCONNECTED_PUSH", [playerNames]);
+	}
+	delete clientToUsername[client.id];
         console.log('Disconnected:', client.id);
-		delete clientToUsername[client.id];
-		console.log(clientToUsername);
     },
 
     init: function() {
@@ -191,6 +196,7 @@ var Test = Maple.Class(function(clientClass) {
 
 		// Create database for gladiators, then fill it with new gladiators
 		this.querydb('/' + configs.gladiatordb, {'id': 'localhost'}, 'INIT_GLADIATOR_DATABASE', {'id': 'localhost'});
+		this.updatedb('/' + configs.usersdb, {'id': 'localhost'}, 'DONT_CARE', {'id': 'localhost'});
 
     },
 
@@ -287,15 +293,15 @@ var Test = Maple.Class(function(clientClass) {
 			case 'LOGIN_REQ':
 
 			    var dbval = JSON.parse(response);
-            
+
      			if (dbval.login["password"] === undefined) {
 
 					dbval.login["password"] = JSON.parse(data).pwdhash;
-                    
+
 					console.log("First login for", JSON.parse(data).username, "Updating passwd.");
 					this.updatedb('/users/'+JSON.parse(data).username, client, 'DONT_CARE', data, JSON.stringify(dbval));
 				}
-                        
+
 				if(JSON.parse(data).pwdhash !== dbval.login["password"]) {
 					console.log("pwd did not match, login failed");
 					client.send('LOGIN_RESP', ['{"response":"NOK", "username":"' + JSON.parse(data).username + '"}']);
@@ -304,8 +310,16 @@ var Test = Maple.Class(function(clientClass) {
 					console.log("pwd matched, login successful");
 					client.send('LOGIN_RESP', ['{"response":"OK", "username":"' + JSON.parse(data).username + '"}']);
 					clientToUsername[client.id] = JSON.parse(data).username;
-					console.log(clientToUsername);
+					//console.log(clientToUsername);
 					// Send also initial data to the server (team, rankings, etc.)
+            				var playerNames = { players:[] }
+                			playerNames.players.push(JSON.parse(data).username);
+
+					for( var c=0; c < this.getClients().length; c++)
+					{
+					console.log("Updating:", this.getClients().getAt(c).id);
+					this.getClients().getAt(c).send("PLAYER_CONNECTED_PUSH", [playerNames]);
+					}
 				}
 
 				break;
@@ -330,9 +344,7 @@ var Test = Maple.Class(function(clientClass) {
                 client.send('TEAM_RESP', ['{"name":"TEAM_RESP", "team":'+JSON.stringify(JSON.parse(response).team)+'}']);
                 console.log(response);
                 break;
-            case 'GET_ONLINE_PLAYERS':
 
-                break;
             case 'START_BATTLE_REQ':
                 console.log('Received battle uuid: '+response);
                 this.updatedb('/battle/'+JSON.parse(response).uuids[0], client, 'START_BATTLE_STEP2_REQ', data, '{}');
@@ -391,7 +403,7 @@ var Test = Maple.Class(function(clientClass) {
 				}
 				else {
                     this.querydb('/users/'+JSON.parse(data).username, client, 'CREATE_USER_STEP_THREE', data);
-                    
+
 				}
 			  break;
 
@@ -414,7 +426,7 @@ var Test = Maple.Class(function(clientClass) {
 
                 console.log("Updateing user:"+JSON.stringify(user));
                 this.updatedb(url, client, 'DONT_CARE', data, JSON.stringify(user));
-                
+
             }
             break;
 
@@ -478,8 +490,8 @@ var Test = Maple.Class(function(clientClass) {
 				gladilist += '"' + availableGladiatorsList[i] + '",';
 			}
 			gladilist = gladilist.substr(0, gladilist.length-1); // Trim the trailing ,
-			console.log('{"keys":[' + 	gladilist + ']}')
-            this.postRequest('/gladiators/_all_docs?include_docs=true', client, type, data, '{"keys":[' + 	gladilist + ']}');
+			console.log('{"keys":[' + gladilist + ']}')
+            this.postRequest('/gladiators/_all_docs?include_docs=true', client, type, data, '{"keys":[' + gladilist + ']}');
 	        break;
 
 		case 'HIRE_GLADIATOR_REQ':

@@ -612,13 +612,11 @@ function showManagerView()
             "font-size": "10pt",
             "color": "#5c3111"
         })
-        .bind('KeyDown', function () { 
-            if (this.isDown('P')){ 
+        .bind('KeyDown', function () {
+            if (this.isDown('P')){
                 Crafty.scene("gladiatorPitView");
             }
         });
-
-
 
 
 
@@ -875,19 +873,30 @@ var GAS = Class(function() {
         //console.log('message:', type, tick, data);
 
 
-	switch(type) {
+		switch(type) {
+
+		case 'PLAYER_CONNECTED_PUSH':
+			console.log(data[0]);
+			$('#managers_body').append('<div class="manager-entry" id="'+data[0].players[0]+'">'+data[0].players[0]+' [<a href="#" title="Challenge '+data[0].players[0]+' - show player rank and team info?">challenge</a>]</div>');
+			break;
+
+		case 'PLAYER_DISCONNECTED_PUSH':
+			console.log(data[0]);
+			console.log("PLAYER", data[0].players[0], "DISCONNECTED");
+			$('#'+data[0].players[0]).remove();
+			break;
 
 	    case 'CREATE_USER_RESP':
 	    case 'LOGIN_INIT_RESP':
-		if("OK" == JSON.parse(data).response) {
-            //console.log('I want salt for '+JSON.parse($.cookie("gas-login")).username);
-			this.send('USER_SALT_REQ', ['{"username":"' + JSON.parse($.cookie("gas-login")).username + '"}']);
-		}
-		else {
-			document.getElementById('username').value = '';
-			document.getElementById('password').value = '';
-		}
-		  break;
+			if("OK" == JSON.parse(data).response) {
+				//console.log('I want salt for '+JSON.parse($.cookie("gas-login")).username);
+				this.send('USER_SALT_REQ', ['{"username":"' + JSON.parse($.cookie("gas-login")).username + '"}']);
+			}
+			else {
+				document.getElementById('username').value = '';
+				document.getElementById('password').value = '';
+			}
+			break;
 
 	    case 'USER_SALT_RESP':
 		    var hash = Sha1.hash(JSON.parse(data).salt + JSON.parse($.cookie("gas-login")).password);
@@ -896,59 +905,69 @@ var GAS = Class(function() {
 	      break;
 
 	    case 'LOGIN_RESP': // Authenticated by the server - proceed to game lobby
-		if("OK" === JSON.parse(data).response) {
+			if("OK" === JSON.parse(data).response) {
 
-		    $.cookie("gas-login", data);
-		    displayLogin();
+				$.cookie("gas-login", data);
+				displayLogin();
 
-            /*$('#login').fadeOut(500, function(){
-			    $('#login').empty();
-                $('#login').text('<h1>Welcome back, '+data.username+'!</h1>');
-                $('#login').fadeIn('slow', function(){
-                    Crafty.scene("managerView");
-                });
-		    });*/
-		}
-		else {
-            $.cookie("gas-login", null);
-			console.log("Login failed");
-		}
-	    break;
+				/*$('#login').fadeOut(500, function(){
+					$('#login').empty();
+					$('#login').text('<h1>Welcome back, '+data.username+'!</h1>');
+					$('#login').fadeIn('slow', function(){
+						Crafty.scene("managerView");
+					});
+				});*/
+			}
+			else {
+				$.cookie("gas-login", null);
+				console.log("Login failed");
+			}
+			break;
 
         case 'GET_AVAILABLE_GLADIATORS_RESP':
 			console.log('Handling gladiator list');
 			pitCreateGladiators(JSON.parse(data));
+			break;
+
 	    case 50:
            console.log("Received: " + data[0].name);
+			break;
 
-        break;
         case 'TEAM_RESP':
-           console.log("Received team:"+ JSON.stringify(data));
-           this.handleTeamResponse(JSON.parse(data[0]).team);
+			console.log("Received team:"+ JSON.stringify(data));
+			this.handleTeamResponse(JSON.parse(data[0]).team);
+			break;
 
-        break;
         case 'BATTLE_CONTROL_SYNC':
             var bc = data[0];
             this.paused = bc.paused;
             g_timer.time = bc.duration;
 
-        break;
+			break;
+
         case 'GET_ONLINE_PLAYERS_RESP':
-        $('#managers_title').empty();
-        $('#managers_body').empty();
-        $('#managers_title').append("Players currently online:")
-        
-        console.log('received player list'+data[0].players);
-        for(var i in data[0].players){
-            //console.log('online: ' +data[0].players[i]);
-            $('#managers_body').append('<div class=\"manager-entry\">'+data[0].players[i]+' [throw challenge]</div>');
+			$('#managers_title').empty();
+			$('#managers_body').empty();
+			$('#managers_title').append("Players currently online:");
 
-        }
+			console.log('received player list'+data[0].players); // Should we use the username of the team name? Also include the match statistics and gladiators in team? If so, use zlib to compress/decompress data
+			// Order by rank, name or something else?
+			data[0].players.sort(); // This time by name
+			for(var i in data[0].players){
+				// Should we prevent the challenging of lower rank players or make it "free-for-all"?
+				// Later on, make server push the online activity status changes to reduce data traffic
+				//console.log('online: ' +data[0].players[i]);
+				if(data[0].players[i] == JSON.parse($.cookie("gas-login")).username)
+					$('#managers_body').append('<div class="manager-entry" id="'+data[0].players[i]+'">'+data[0].players[i]+' [<a href="#" title="It\'s me! Show some stats?">my team</a>]</div>');
+				else
+					$('#managers_body').append('<div class="manager-entry" id="'+data[0].players[i]+'">'+data[0].players[i]+' [<a href="#" title="Challenge '+ data[0].players[i] +' - show player rank and team info?">challenge</a>]</div>');
+			}
+			break;
 
-        break;
         case 'START_BATTLE_RESP':
-        console.log('Starting battle:' + JSON.stringify(data[0]));
-        break;
+			console.log('Starting battle:' + JSON.stringify(data[0]));
+			break;
+
 	    default:
 	      console.log("Default branch reached in 'message handling'");
 	      break;
@@ -997,7 +1016,7 @@ var GAS = Class(function() {
             {
                 var anim = "";
 
-                switch ( team.gladiators[i].race) 
+                switch ( team.gladiators[i].race)
                 {
                 case "skeleton":
                     anim = "skeleton_body";
@@ -1035,7 +1054,7 @@ var GAS = Class(function() {
             {
                 var anim = "";
 
-                switch ( team.gladiators[i].race) 
+                switch ( team.gladiators[i].race)
                 {
                 case "skeleton":
                     anim = "skeleton_body";
