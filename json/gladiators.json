@@ -1,6 +1,7 @@
 {
         "_id": "kaensae",
         "name": "Kaensae the Skeleton",
+        "team": "name of the team or empty string",
         "race": "skeleton",
         "age": "5",
         "health": "20",
