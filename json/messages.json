@@ -2,32 +2,32 @@
 {
    "_id": "messages",
    "message": [
-               {"name": "CREATE_USER_REQ"},
-               {"name": "CREATE_USER_RESP"},
-               {"name": "LOGIN_REQ"},
-               {"name": "LOGIN_RESP"},
-               {"name": "USER_SALT_REQ"},
-               {"name": "USER_SALT_RESP"},
-               {"name": "GET_AVAILABLE_GLADIATORS_REQ"},
-               {"name": "GET_AVAILABLE_GLADIATORS_RESP", "free": [{}]},
-               {"name": "HIRE_GLADIATOR_REQ", "gladiator": "gladiator's name"},
-               {"name": "HIRE_GLADIATOR_RESP", "response": "OK/NOK", "gladiator": "gladiator's name", "reason": "Not available anymore."},
-               {"name": "FIRE_GLADIATOR_REQ", "gladiator": "gladiator's name"},
-               {"name": "FIRE_GLADIATOR_RESP", "response": "OK/NOK", "gladiator": "gladiator's name", "reason": ""},
-               {"name": "TEAM_REQ",
+               {"type": "CREATE_USER_REQ"},
+               {"type": "CREATE_USER_RESP"},
+               {"type": "LOGIN_REQ"},
+               {"type": "LOGIN_RESP"},
+               {"type": "USER_SALT_REQ"},
+               {"type": "USER_SALT_RESP"},
+               {"type": "GET_AVAILABLE_GLADIATORS_REQ"},
+               {"type": "GET_AVAILABLE_GLADIATORS_RESP", "free": [{}]},
+               {"type": "HIRE_GLADIATOR_REQ", "name": "gladiator's name"},
+               {"type": "HIRE_GLADIATOR_RESP", "response": "OK/NOK", "name": "gladiator's name", "reason": "Not available anymore."},
+               {"type": "FIRE_GLADIATOR_REQ", "gladiator": "gladiator's name"},
+               {"type": "FIRE_GLADIATOR_RESP", "response": "OK/NOK", "gladiator": "gladiator's name", "reason": ""},
+               {"type": "TEAM_REQ",
                 "username": "username"
                },
-               {"name": "TEAM_RESP",
-                "team": {}               
+               {"type": "TEAM_RESP",
+                "team": {}
                },
-               {"name": "MATCH_SYNC",
+               {"type": "MATCH_SYNC",
                 "team1": [{"name": "My team", "gladiator":   [{"name": "Mauri", "pos": [{"x": "1", "y": "1"}]},
                                                               {"name": "Kaensae", "pos": [{"x": "1", "y": "1"}]}]}], // Include all the gladiator data
                 "team2": [{"name": "Your team", "gladiator": [{"name": "Mauri", "pos": [{"x": "1", "y": "1"}]},
                                                               {"name": "Kaensae", "pos": [{"x": "1", "y": "1"}]}]}], // Include all the gladiator data
                },
          {
-        "name": "MOVE_REQ",
+        "type": "MOVE_REQ",
         "username": "oldman",
         "oldpos":
             [{"x": "1",
@@ -38,7 +38,7 @@
         "id":"objectid"
         },
         {
-        "name": "MOVE_RESP",
+        "type": "MOVE_RESP",
         "response": "OK/NOK",
         "oldpos":
             [{"x": "1",
@@ -50,7 +50,7 @@
         "attack": [{"damage": "0", "target": "name"}]
         },
         {
-        "name": "ATTACK_REQ",
+        "type": "ATTACK_REQ",
         "username": "oldman",
         "attackerid": "Mauri",
         "targetid": "Kaensae",
@@ -62,7 +62,7 @@
               "y": "1"}],
         },
         {
-        "name": "ATTACK_RESP",
+        "type": "ATTACK_RESP",
         "response": "OK/NOK",
         "attackerid": "Mauri",
         "targetid": "Kaensae",
@@ -78,19 +78,19 @@
               "y": "1"}]
          },
          {
-         "name": "BATTLE_CONTROL_SYNC",
+         "type": "BATTLE_CONTROL_SYNC",
          "paused": true/false,
          "duration": 1000,
          "start": 2354
          },
          {
-         "name": "BATTLETEAM_SELECT_REQ",
-         "gladiators":[ "name1", "name2", "name3", "name4" ]
-         "username":"test1"
+         "type": "BATTLETEAM_SELECT_REQ",
+         "gladiators":[ "name1", "name2", "name3", "name4" ],
+         "username":"test1",
          "password":"h45h"
          },
          {
-         "name": "BATTLETEAM_SELECT_RES",
+         "type": "BATTLETEAM_SELECT_RES",
          "response": "NOK/OK",
          "gladiators":[ "name1", "name2", "name3", "name4" ],
          "username":"test1"
