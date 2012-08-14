@@ -1,7 +1,12 @@
+A:link {text-decoration: none; color: red;}
+A:visited {text-decoration: none; color: red;}
+A:active {text-decoration: none; color: red;}
+A:hover {text-decoration: underline; color: red;}
+
 #login {
     min-width:250px;
     height:200px;
-    background-color: #2e1a20;  
+    background-color: #2e1a20;
     color: white;
     font-family: 'Fanwood';
     font-size: 24pt;
@@ -15,7 +20,7 @@
 .block {
     width:250px;
     height:200px;
-    background-color: #2e1a20;  
+    background-color: #2e1a20;
     color: white;
     font-family: 'Fanwood';
     font-size: 24pt;
@@ -30,7 +35,7 @@
     display: none;
 }
 body {
-    background-color: #4d5155;  
+    background-color: #4d5155;
 }
 @font-face {
 	font-family: "Fanwood";
@@ -57,7 +62,7 @@ input {
     -moz-box-shadow: 0 -1px 0 0 px #000;
     -webkit-box-shadow: 0 -1px 0 0 px #000;
     box-shadow: 0 -1px 0 0 px #000;
-    
+
     border: none;
 
     width: 116px;
@@ -71,7 +76,7 @@ input {
   }
 .password{
 	float:left;
-	
+
 	margin:8px 0;
 
 	font-family:MisoRegular, Helvetica,Arial,sans-serif;
@@ -84,7 +89,7 @@ input {
 
 	color:#fff;
 
-	}	
+	}
 label {
     font-family: Helvetica,Arial,sans-serif;
     text-rtransform:uppercase;
@@ -136,7 +141,7 @@ button{
 
 	}
 
-		
+
 
 	button:hover{
 
@@ -150,7 +155,7 @@ button{
 
 	}
 
-	
+
 
 		button:active{
 
@@ -164,7 +169,7 @@ button{
 
 	`	}
 
-	
+
 
 input:focus:required:invalid {
 
@@ -173,26 +178,26 @@ input:focus:required:invalid {
 }
 
 
-}  
-#container{  
-    border:5px solid grey;  
-    width:800px;  
-    margin:0 auto;  
-    padding:10px;  
-}  
-#chatLog{  
-    padding:5px;  
-    border:1px solid black;  
-}  
-#chatLog p {  
-    margin:0;  
-}  
-.event {  
-    color:#999;  
-}  
-.warning{  
-    font-weight:bold;  
-    color:#CCC;  
+}
+#container{
+    border:5px solid grey;
+    width:800px;
+    margin:0 auto;
+    padding:10px;
+}
+#chatLog{
+    padding:5px;
+    border:1px solid black;
+}
+#chatLog p {
+    margin:0;
+}
+.event {
+    color:#999;
+}
+.warning{
+    font-weight:bold;
+    color:#CCC;
 }
 #ranking {
     display:none;
