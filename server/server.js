@@ -278,7 +278,7 @@ var Test = Maple.Class(function(clientClass) {
 			case 'CREATE_USER_REQ':
 			case 'CREATE_USER_STEP_TWO':
 			case 'CREATE_USER_STEP_THREE':
-				this.handleNewUserReq(url, response, client, type, data);
+				this.handleNewUserReq(querypath, client, type, data, response);
 				break;
 
 
@@ -380,20 +380,20 @@ var Test = Maple.Class(function(clientClass) {
 
     },
 
-    handlePitQuery: function(url, response, client, type, data) {
+    handlePitQuery: function(querypath, response, client, type, data) {
 		console.log('handling PitQuery' + response);
 		client.send(type, [response]);
     },
 
-    handleNewUserReq: function(url, response, client, type, data) {
+    handleNewUserReq: function(querypath, client, type, data, response) {
 
 		switch(type)
 		{
 			// Check for user existence
 			case 'CREATE_USER_REQ':
 				if("not_found" == JSON.parse(response).error) {
-					this.updatedb(url, client, 'CREATE_USER_STEP_TWO', data, '{"team":null, "history":null, "login":null}');
-					console.log("Created new user:", url.substring(1));
+					this.updatedb(querypath, client, 'CREATE_USER_STEP_TWO', data, '{"team":null, "history":null, "login":null}');
+					console.log("Created new user:", querypath.substring(1));
 				}
 				else {
 					console.log("user already exists");
@@ -404,7 +404,7 @@ var Test = Maple.Class(function(clientClass) {
 			case 'CREATE_USER_STEP_TWO':
 				if(response == undefined) {
 					client.send('CREATE_USER_RESP', ['{"response":"NOK", "reason": "Step two failed"}']);
-					console.log("handleNewUserReq : step CREATE_NEW_USER_STEP_TWO NOT OK (" + url + ")");
+					console.log("handleNewUserReq : step CREATE_NEW_USER_STEP_TWO NOT OK (" + querypath + ")");
 				}
 				else {
                     this.querydb('/users/'+JSON.parse(data).username, client, 'CREATE_USER_STEP_THREE', data);
@@ -430,7 +430,7 @@ var Test = Maple.Class(function(clientClass) {
                 user.login = {"salt": salt.digest('hex')};
 
                 console.log("Updating user:"+JSON.stringify(user));
-                this.updatedb(url, client, 'DONT_CARE', data, JSON.stringify(user));
+                this.updatedb(querypath, client, 'DONT_CARE', data, JSON.stringify(user));
 
             }
             break;
@@ -445,7 +445,7 @@ var Test = Maple.Class(function(clientClass) {
 
     },
 
-	handleHireGladiatorReq: function (url, client, type, data) {
+	handleHireGladiatorReq: function (querypath, client, type, data) {
 
 		//console.log("handleHireGladiatorReq: ", data);
 		//console.log("data.name: ", JSON.parse(data).name);
@@ -460,10 +460,10 @@ var Test = Maple.Class(function(clientClass) {
 
 	},
 
-    handleStartBattle: function( url, client, type, data)
+    handleStartBattle: function( querypath, client, type, data)
     {
         this.querydb( '/_uuids', client, type, data);
-        //this.updatedb( url, client, type, data, undefined);
+        //this.updatedb( querypath, client, type, data, undefined);
     },
 
 
@@ -688,7 +688,7 @@ var Test = Maple.Class(function(clientClass) {
 		  res.on('data', function (chunk) {
 			//console.log(chunk);
 			response += chunk;	// Collect the bits and pieces of the POST response
-			//srv.handleDbResponse(url, res, client, type, chunk);
+			//srv.handleDbResponse(querypath, res, client, type, chunk);
 		  });
 		  res.on('end', function () {
 			// Finally handle the whole response message
