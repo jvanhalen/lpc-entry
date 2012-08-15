@@ -578,7 +578,41 @@ function showManagerView()
 {
 
     g_currentView = "manager";
-    LoadTileMap( 'test.json');
+    LoadTileMap( 'manager.json');
+
+    // load dummy object sprites
+    Crafty.sprite(64, "../pics/combat_dummy/BODY_animation.png", {
+        dummy_move: [0,0]
+    });
+    Crafty.sprite(64, "../pics/combat_dummy/BODY_death.png", {
+        dummy_die: [0,0]
+    });
+    var NUM_GLADIATORS = 8;
+    // generate eight dummies for gladiators to train on
+    for( var i = 0; i< NUM_GLADIATORS;i++)
+    {
+        // compute offsets
+        var ypos = 320+i*96;
+        var xpos = 48;
+        // right side
+        if ( i >= 4 ) {
+            ypos = 320+((i-4)*96);
+            xpos = 48+640;
+        }
+        // create actual dummy object
+        Crafty.e("2D, DOM, Mouse, Sprite, SpriteAnimation, dummy_move")
+            .attr({x:xpos,y:ypos,z:7})
+            .animate("dummy_move", 0,0,7)
+            .bind("Click", function(){
+                this.animate("dummy_move", 20, 0);
+            })
+            .bind("EnterFrame",function(){
+                if ( this.isPlaying("dummy_move") == false)
+                {
+                    this.stop().sprite(0,0);
+                }
+            });
+    }
 
     // Add a title
     Crafty.e("2D, DOM, Text").attr({ w: 400, h: 20, x: 150, y: 10 })
