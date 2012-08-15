@@ -345,12 +345,13 @@ Crafty.c('Ape', {
         this.enableAnimation(this.thrust);
         if ( direction == 'left') 
         {
-
-            for(var i in this.thrust)
+            if ( !this.thrust.body.isPlaying("thrust_left"))
             {
-                if ( this.thrust[i] ) {
-
-                    this.thrust[i].animate("thrust_left"+this[0], 10, 1);
+                for(var i in this.thrust)
+                {
+                    if ( this.thrust[i] ) {
+                        this.thrust[i].animate("thrust_left", 20, 0);
+                    }
                 }
             }
         } 
@@ -360,8 +361,7 @@ Crafty.c('Ape', {
             {
                 if ( this.thrust[i] ) {
 
-
-                    this.thrust[i].animate("thrust_right"+this[0], 10, 1);
+                    this.thrust[i].animate("thrust_right", 20, 0);
                 }
             }
         }
@@ -370,7 +370,7 @@ Crafty.c('Ape', {
             for(var i in this.thrust)
             {
                 if ( this.thrust[i] ) {
-                    this.thrust[i].stop().animate("thrust_up", 10, 1);
+                    this.thrust[i].animate("thrust_up", 20, 1);
                 }
             }
         }
@@ -379,7 +379,7 @@ Crafty.c('Ape', {
             for(var i in this.thrust)
             {
                 if ( this.thrust[i] ) {
-                    this.thrust[i].stop().animate("thrust_down", 24, 1);
+                    this.thrust[i].animate("thrust_down", 20, 1);
                 }
             }
         }
