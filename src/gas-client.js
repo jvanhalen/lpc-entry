@@ -6,7 +6,14 @@ var g_currentGrid = null;
 var g_currentGladiator = null;
 var g_gladiators = [];
 var g_timer = { view: null, time: 0};
-
+Crafty.c('Dummy', {
+    dummyIndex: 0,
+    setDummyIndex: function(i)
+    {
+        this.dummyIndex = i;
+        return this;
+    }
+});
 
 // grid component responsible for "griddy" game object movement.
 Crafty.c('Grid', {
@@ -600,11 +607,33 @@ function showManagerView()
             xpos = 48+640;
         }
         // create actual dummy object
-        Crafty.e("2D, DOM, Mouse, Sprite, SpriteAnimation, dummy_move")
+        Crafty.e("2D, DOM, Dummy, Mouse, Sprite, SpriteAnimation, dummy_move")
             .attr({x:xpos,y:ypos,z:7})
+            .setDummyIndex(i)
             .animate("dummy_move", 0,0,7)
             .bind("Click", function(){
-                this.animate("dummy_move", 20, 0);
+
+                // make gladiator do something, too
+                if ( g_gladiators[this.dummyIndex] != undefined )
+                {
+                    // determine which direction object is facing
+                    // by position
+                    if ( this.dummyIndex < 4 )
+                        g_gladiators[this.dummyIndex].thrustAttack('left');
+                    else
+                        g_gladiators[this.dummyIndex].thrustAttack('right');
+
+                    // dummy rotates
+                    this.animate("dummy_move", 20, 0);
+                    // level goes up
+                    DisplayFadingText("+1", this.x, this.y);
+
+                }
+                else
+                {
+                    console.log('dummy at'+this.dummyIndex+' has no gladiator');
+                }
+                
             })
             .bind("EnterFrame",function(){
                 if ( this.isPlaying("dummy_move") == false)
@@ -878,8 +907,10 @@ var GAS = Class(function() {
     },
 
     update: function(t, tick) {
-
-        if ( this.paused == false)
+        // TODO fix Grid component. 
+        // manager view with updatemovement call breaks other animations.
+        if ( this.paused == false && 
+             g_currentView == 'arena') 
         {
             for ( var g in g_gladiators )
             {
@@ -1026,6 +1057,7 @@ var GAS = Class(function() {
         // create visualization for each gladiator in team.
         if ( g_currentView == "manager")
         {
+
             // if game is unfinished, resume
             if ( team.ingame != null)
             {
@@ -1055,7 +1087,7 @@ var GAS = Class(function() {
                     });
 
             }
-
+            g_gladiators = [];
             for (var i in team.gladiators )
             {
                 var anim = "";
@@ -1075,17 +1107,25 @@ var GAS = Class(function() {
                     offset = 1;
                 }
 
-
-                Crafty.e("2D, DOM, Grid, Multiway, Keyboard, LeftControls, Mouse, Ape, Sprite, transparent")
-                    .attr({x:222+(i*32), y:300+(offset*32), z:7})
+                // compute offsets
+                var ypos = 320+i*96;
+                var xpos = 48+80;
+                // right side
+                if ( i >= 4 ) {
+                    ypos = 320+((i-4)*96);
+                    xpos = 48+80+640;
+                }
+                
+                var g = Crafty.e("2D, DOM, Multiway, Mouse, Ape, Sprite, transparent")
+                    .attr({x:xpos, y:ypos, z:7})
                     .Ape()
                     .collision([16,32],[48,32],[48,64],[16,64])
-                    //.Grid(7+i,9+offset)
-                    .leftControls(1)
                     .setupAnimation(anim)
+                    .setupAnimation("long_spear")
                     .bind("Click", function(){
                         Crafty.scene("gladiatorView");
                     });
+                g_gladiators.push(g);
 
 
             }
