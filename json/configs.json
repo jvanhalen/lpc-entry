@@ -3,6 +3,7 @@
     "_id": 						"configs",
     "gladiatordb":				"gladiators",
     "usersdb":                  "users",
+    "battledb":                 "battles",
     "playerspershard":			"1000",
     "teamsizemax": 				"8",
     "teamsizematch": 			"4",
