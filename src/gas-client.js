@@ -6,6 +6,7 @@ var g_currentGrid = null;
 var g_currentGladiator = null;
 var g_gladiators = [];
 var g_timer = { view: null, time: 0};
+var loadAudio = true;
 Crafty.c('Dummy', {
     dummyIndex: 0,
     setDummyIndex: function(i)
@@ -126,6 +127,19 @@ function HandleMouseClick(x,y,passable)
 
 }
 
+function PreloadAudio() {
+
+	// use ffmpeg2theora for mp3 --> oga conversion, then rename oga to ogg
+	Crafty.audio.add({
+	granbatalla: ["../assets/audio/granbatalla.ogg",
+	"../assets/audio/granbatalla.m4a"],
+	soliloquy: ["../assets/audio/Soliloquy_1.ogg",
+	"../assets/audio/Soliloquy_1.m4a"]
+	});
+	loadAudio = false;
+
+}
+
 function PreloadAnimation(animFile) {
 
 	console.log('calling PreloadAnimation for = '+'../assets/equipment/'+animFile);
@@ -160,13 +174,9 @@ function LoadTileMap(file, createGrid)
 {
 
     var ASSET_PREFIX = '../assets/maps/';
-
-
-
     var grid = undefined;
 
     // try to read json tile map
-
 
     $.ajax({
         url: ASSET_PREFIX+file,
@@ -584,6 +594,12 @@ function showGladiatorView()
 function showManagerView()
 {
 
+	if(loadAudio==true)
+		PreloadAudio();
+
+	Crafty.audio.stop();
+	Crafty.audio.play("soliloquy", -1, 0.2);
+
     g_currentView = "manager";
     LoadTileMap( 'manager.json');
 
@@ -633,7 +649,7 @@ function showManagerView()
                 {
                     console.log('dummy at'+this.dummyIndex+' has no gladiator');
                 }
-                
+
             })
             .bind("EnterFrame",function(){
                 if ( this.isPlaying("dummy_move") == false)
@@ -644,18 +660,18 @@ function showManagerView()
     }
 
     // Add a title
-    Crafty.e("2D, DOM, Text").attr({ w: 400, h: 20, x: 150, y: 10 })
+    Crafty.e("2D, DOM, Text").attr({ w: 400, h: 20, x: 15, y: 10 })
         .text("Kalevala Heroes / GAS Valhalla")
         .css({
-            "text-align": "center",
+            "text-align": "left",
             "font-family": "Impact",
             "font-size": "24pt"
         });
     // Add some author info
-    Crafty.e("2D, DOM, Text").attr({ w: 400, h: 20, x: 150, y: 45 })
+    Crafty.e("2D, DOM, Text").attr({ w: 385, h: 20, x: 400, y: 20 })
         .text("by Team Oldman & Green (c) 2012")
         .css({
-            "text-align": "center",
+            "text-align": "right",
             "font-family": "Arial",
             "font-size": "8pt"
         });
@@ -695,6 +711,9 @@ function showManagerView()
 
 function showArenaView()
 {
+
+	Crafty.audio.stop();
+	Crafty.audio.play("granbatalla", -1, 0.3);
 
     g_currentView = "arena";
     g_currentGrid = LoadTileMap( 'arena.json', true );
@@ -907,10 +926,10 @@ var GAS = Class(function() {
     },
 
     update: function(t, tick) {
-        // TODO fix Grid component. 
+        // TODO fix Grid component.
         // manager view with updatemovement call breaks other animations.
-        if ( this.paused == false && 
-             g_currentView == 'arena') 
+        if ( this.paused == false &&
+             g_currentView == 'arena')
         {
             for ( var g in g_gladiators )
             {
@@ -1000,6 +1019,11 @@ var GAS = Class(function() {
 			console.log('Handling gladiator list');
 			pitCreateGladiators(JSON.parse(data));
 	break;
+
+	case 'CHAT_SYNC':
+		$('#chatbox').append('<div id="message">'+ JSON.parse(data).username + ': ' + JSON.parse(data).message + '<br /></div>');
+	break;
+
 	    case 50:
            console.log("Received: " + data[0].name);
 
@@ -1115,7 +1139,7 @@ var GAS = Class(function() {
                     ypos = 320+((i-4)*96);
                     xpos = 48+80+640;
                 }
-                
+
                 var g = Crafty.e("2D, DOM, Multiway, Mouse, Ape, Sprite, transparent")
                     .attr({x:xpos, y:ypos, z:7})
                     .Ape()

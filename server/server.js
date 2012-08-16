@@ -24,8 +24,8 @@ var clientToUsername = [];
 var PF = require('pathfinding');
 var configs = require('../json/configs'); 			// Game configuration file
 
-var reservedGladiatorsList = [];
-var availableGladiatorsList = [];
+var cachedGladiators = [];		// ["gladi_name": gladi_object], syntax: var attrib = cachedGladiators["name"].attribute
+var initialGladiatorsList = [];
 
 var LOGIC_RATE = 10; // Logic rate in milliseconds
 var TICK_RATE = 3; // Tick rate in milliseconds
@@ -194,10 +194,13 @@ var Test = Maple.Class(function(clientClass) {
 	    //tty.setRawMode(true);
 
 
-		// Create database for gladiators, then fill it with new gladiators
+		// Create database for gladiators, if empty fill it with new gladiators
 		this.querydb('/' + configs.gladiatordb, {'id': 'localhost'}, 'INIT_GLADIATOR_DATABASE', {'id': 'localhost'});
 		this.updatedb('/' + configs.usersdb, {'id': 'localhost'}, 'DONT_CARE', {'id': 'localhost'});
+		this.updatedb('/' + configs.battledb, {'id': 'localhost'}, 'DONT_CARE', {'id': 'localhost'});
 
+		// Load gladiators to main memory for better performance
+		this.querydb('/' + configs.gladiatordb + '/_all_docs?include_docs=true', {'id': 'localhost'}, 'LOAD_GLADIATORS', {'id': 'localhost'});
     },
 
     querydb: function(querypath, client, type, data) {
@@ -209,12 +212,19 @@ var Test = Maple.Class(function(clientClass) {
 		   querypath = '/' + querypath;
 		}
 		options.path = querypath;
-
-		//console.log("GET:", querypath);
+		var response = "";
+		console.log("GET:", querypath);
 		var req = http.get(options, function(res) {
 		  res.setEncoding('utf8');
-		  res.on('data', function (response) {
+		  res.on('data', function (chunk) {
+			//console.log(chunk);
+			response += chunk;	// Collect the bits and pieces of the POST response
+		  });
+		  res.on('end', function () {
+			// Finally handle the whole response message
+			console.log(response);
 		  	srv.handleDbResponse(querypath, client, type, data, response);
+			response = "";
 		  });
 		});
 
@@ -271,7 +281,7 @@ var Test = Maple.Class(function(clientClass) {
     },
 
     handleDbResponse: function(querypath, client, type, data, response) {
-		console.log("handleDbResponse: ", type, "querypath", querypath + " : " + data);
+		console.log("handleDbResponse: ", type, "querypath", querypath + " : " + data+ " : " + response);
 
 		switch(type)
 		{
@@ -284,10 +294,23 @@ var Test = Maple.Class(function(clientClass) {
 
 
 			case 'LOGIN_INIT_REQ':
-				if(JSON.parse(response).error)
+				if(JSON.parse(response).error) {
 				    client.send('LOGIN_INIT_RESP', ['{"response":"NOK"}']);
-				else
-				    client.send('LOGIN_INIT_RESP', ['{"response":"OK"}']);
+				}
+				else {
+					// Check if user has already logged in
+					var logged = false;
+					for(user in clientToUsername) {
+						if(clientToUsername[user] == JSON.parse(data).username) {
+							logged = true;
+							break;
+						}
+					}
+					if(true == logged)
+						client.send('LOGIN_INIT_RESP', ['{"response":"NOK", "reason":"user already in game"}']);
+					else
+						client.send('LOGIN_INIT_RESP', ['{"response":"OK"}']);
+				}
 				break;
 
 			case 'LOGIN_REQ':
@@ -317,8 +340,8 @@ var Test = Maple.Class(function(clientClass) {
 
 					for( var c=0; c < this.getClients().length; c++)
 					{
-					console.log("Updating:", this.getClients().getAt(c).id);
-					this.getClients().getAt(c).send("PLAYER_CONNECTED_PUSH", [playerNames]);
+						console.log("Updating:", this.getClients().getAt(c).id);
+						this.getClients().getAt(c).send("PLAYER_CONNECTED_PUSH", [playerNames]);
 					}
 				}
 
@@ -340,21 +363,21 @@ var Test = Maple.Class(function(clientClass) {
 			case 'CREATE_GLADIATORS':
 				this.generateGladiators();
 				break;
-            case 'TEAM_REQ':
-                client.send('TEAM_RESP', ['{"name":"TEAM_RESP", "team":'+JSON.stringify(JSON.parse(response).team)+'}']);
-                console.log(response);
-                break;
+			case 'TEAM_REQ':
+				client.send('TEAM_RESP', ['{"name":"TEAM_RESP", "team":'+JSON.stringify(JSON.parse(response).team)+'}']);
+				console.log(response);
+				break;
 
-            case 'START_BATTLE_REQ':
-                console.log('Received battle uuid: '+response);
-                this.updatedb('/battle/'+JSON.parse(response).uuids[0], client, 'START_BATTLE_STEP2_REQ', data, '{}');
-                //'{ "history":[], "player1":{"name":"'+JSON.parse(data).username+'"}'
-                break;
-            case 'START_BATTLE_STEP2_REQ':
-                console.log('Sending battle start to client: ');
-                client.send('START_BATTLE_RESP', ['{"done":true}']);
+			case 'START_BATTLE_REQ':
+				console.log('Received battle uuid: '+response);
+				this.updatedb('/battle/'+JSON.parse(response).uuids[0], client, 'START_BATTLE_STEP2_REQ', data, '{}');
+				//'{ "history":[], "player1":{"name":"'+JSON.parse(data).username+'"}'
+				break;
 
-                break;
+			case 'START_BATTLE_STEP2_REQ':
+				console.log('Sending battle start to client: ');
+				client.send('START_BATTLE_RESP', ['{"done":true}']);
+				break;
 
 			case 'HIRE_GLADIATOR_QUERY':
 				this.querydb('/' + configs.gladiatordb + '/' + JSON.parse(data).name, client, "HIRE_GLADIATOR_OK", data);
@@ -362,12 +385,12 @@ var Test = Maple.Class(function(clientClass) {
 				break;
 
 			case 'HIRE_GLADIATOR_OK':
-				client.send("HIRE_GLADIATOR_RESP", [{"type": "HIRE_GLADIATOR_RESP", "response": "OK", "name":  JSON.parse(data).name, "reason": "Ready to serve."}]);
+				client.send("HIRE_GLADIATOR_RESP", [{"type": "HIRE_GLADIATOR_RESP", "response": "OK", "name":  this.pickGladiator(JSON.parse(data).name), "reason": "Ready to serve."}]);
 				console.log(data);
 				break;
 
-			case 'UPDATE_AVAILABLE_GLADIATOR_LIST':
-
+			case 'LOAD_GLADIATORS':
+				this.loadGladiators(response);
 				break;
 
 			case 'DONT_CARE':
@@ -386,7 +409,7 @@ var Test = Maple.Class(function(clientClass) {
     },
 
     handleNewUserReq: function(querypath, client, type, data, response) {
-
+		console.log("handleNewUserReq,: ", data, response);
 		switch(type)
 		{
 			// Check for user existence
@@ -407,32 +430,36 @@ var Test = Maple.Class(function(clientClass) {
 					console.log("handleNewUserReq : step CREATE_NEW_USER_STEP_TWO NOT OK (" + querypath + ")");
 				}
 				else {
-                    this.querydb('/users/'+JSON.parse(data).username, client, 'CREATE_USER_STEP_THREE', data);
+                    			this.querydb('/users/'+JSON.parse(data).username, client, 'CREATE_USER_STEP_THREE', data);
 
 				}
 			  break;
 
-           case 'CREATE_USER_STEP_THREE':
-            if ( response !=  undefined )
-            {
+		   	case 'CREATE_USER_STEP_THREE':
+				if ( response !=  undefined )
+				{
 
-                // create user
-				var crypto = require('crypto');
-                var obj = {};
+					// create user
+					var crypto = require('crypto');
+					var obj = {};
 
-                var user = JSON.parse(response);
-                user.team = {"manager":JSON.parse(data).username, "ingame":null, "gladiators":[]};
-                user.history = {"created": Date.now(), "from": client.id.split(":",1) };
+					var user = JSON.parse(response);
+					var gladis = this.pickRandomGladiators(4);
+					console.log(gladis);
+					console.log(JSON.stringify(gladis));
+
+					user.team = {"manager": JSON.parse(data).username, "ingame": null, "gladiators": gladis};
+					user.history = {"created": Date.now(), "from": client.id.split(":",1) };
 
 
-				var salt = crypto.createHash('sha1');
-				salt.update(crypto.randomBytes(128));
-                user.login = {"salt": salt.digest('hex')};
+					var salt = crypto.createHash('sha1');
+					salt.update(crypto.randomBytes(128));
+					user.login = {"salt": salt.digest('hex')};
 
-                console.log("Updating user:"+JSON.stringify(user));
-                this.updatedb(querypath, client, 'DONT_CARE', data, JSON.stringify(user));
+					console.log("Updating user:" + JSON.stringify(user));
+					this.updatedb(querypath, client, 'DONT_CARE', data, JSON.stringify(user));
 
-            }
+				}
             break;
 
 			case 'DONT_CARE':
@@ -446,7 +473,7 @@ var Test = Maple.Class(function(clientClass) {
     },
 
 	handleHireGladiatorReq: function (querypath, client, type, data) {
-
+/*
 		//console.log("handleHireGladiatorReq: ", data);
 		//console.log("data.name: ", JSON.parse(data).name);
 		if(reservedGladiatorsList[JSON.parse(data).name]) {
@@ -457,7 +484,7 @@ var Test = Maple.Class(function(clientClass) {
         		this.querydb('/' + configs.gladiatordb + '/' + JSON.parse(data).name, client, "HIRE_GLADIATOR_QUERY", data);
 
 		}
-
+*/
 	},
 
     handleStartBattle: function( querypath, client, type, data)
@@ -500,8 +527,8 @@ var Test = Maple.Class(function(clientClass) {
 			// Return random gladiators to every request or the same set for everyone?
 			var gladilist = "";
 			for(var i = 0; i< configs.hirelistlength; i++) {
-				//var rand = this.rollDice("1d" + availableGladiatorsList.length + "-" + configs.hirelistlength);
-				gladilist += '"' + availableGladiatorsList[i] + '",';
+				//var rand = this.rollDice("1d" + initialGladiatorsList.length + "-" + configs.hirelistlength);
+				gladilist += '"' + initialGladiatorsList[i] + '",';
 			}
 			gladilist = gladilist.substr(0, gladilist.length-1); // Trim the trailing ,
 			console.log('{"keys":[' + gladilist + ']}')
@@ -531,8 +558,17 @@ var Test = Maple.Class(function(clientClass) {
         case 'START_BATTLE_REQ':
             this.handleStartBattle('/battle', client, type, data);
             break;
-		case 'DONT_CARE':
-			break;
+
+        case 'CLIENT_CHAT_REQ':
+		for( var c=0; c < this.getClients().length; c++)
+		{
+			//console.log("Updating:", this.getClients().getAt(c).id);
+			this.getClients().getAt(c).send("CHAT_SYNC", [data]);
+		}
+		break;
+
+	case 'DONT_CARE':
+		break;
 
 		default:
 
@@ -601,12 +637,12 @@ var Test = Maple.Class(function(clientClass) {
 
 		var bulk_set = parseInt(configs.gladiatorsindatabase); // Write the whole set one or two writes
 
-		for(i in availableGladiatorsList) {
+		for(i in initialGladiatorsList) {
 			if(i < parseInt(configs.gladiatorsindatabase)) {
 				var race = this.rollDice("1d"+racecount+"-1");
 				gladiator[i%bulk_set] = {
-					"_id": availableGladiatorsList[i],
-					"name": availableGladiatorsList[i],
+					"_id": initialGladiatorsList[i],
+					"name": initialGladiatorsList[i],
 					"race": races.race[race].name,
 					"team": null,
 					"age": 0,
@@ -706,6 +742,73 @@ var Test = Maple.Class(function(clientClass) {
 		req.write(postdata);
 		req.end();
 
+	},
+
+	pickRandomGladiators: function(amount) {
+		console.log("pickRandomGladiators: pick", amount,"gladiators");
+
+		var i=0;
+		var keys = [];
+		var reservedGladiators = [];
+		var gladis = [];
+		while(Object.keys(reservedGladiators).length < amount) {	// Count the amount of hash keys  (not reservedGladiators.length!!!)
+		    	var temp_key;
+		    	for(temp_key in cachedGladiators) {
+				if(cachedGladiators.hasOwnProperty(temp_key)) {
+					keys.push(temp_key);
+				}
+			}
+
+			i += 1;
+			var gladi = cachedGladiators[keys[Math.floor(Math.random() * keys.length)]];
+	    		reservedGladiators[cachedGladiators[gladi.name].name] = cachedGladiators[gladi.name];
+		}
+
+		// Delete the cached entries
+		for(key in reservedGladiators) {
+			delete cachedGladiators[reservedGladiators[key].name];
+			gladis.push(reservedGladiators[key]);
+		}
+
+		console.log("Reserved", Object.keys(reservedGladiators).length, "Free:", Object.keys(cachedGladiators).length);
+		console.log("Iterated", i, "times");
+		console.log(gladis);
+
+		return gladis;
+	},
+
+	pickGladiator: function(name) {
+		console.log("pickGladiator:", name);
+
+		var gladiator = cachedGladiators[name];
+		delete cachedGladiators[name];
+
+		return gladiator;
+	},
+
+	loadGladiators: function(http_response) {
+
+		// Now this is a bit more complicated structure...
+		var data = JSON.parse(JSON.stringify(http_response));
+		mydata = JSON.parse(data, function (key, value) {
+		    var type;
+		    if (value && typeof value === 'object') {
+			type = value.type;
+			if (typeof type === 'string' && typeof window[type] === 'function') {
+			    return new (window[type])(value);
+			}
+		    }
+		    return value;
+		});
+
+		// Finally iterate through the data we need
+		cachedGladiators = [];
+		for(var key in mydata.rows) {
+			//console.log(mydata.rows[key].doc.name);
+			var name = mydata.rows[key].doc.name;
+			cachedGladiators[name] = mydata.rows[key].doc; // Create ["name": gladi_object] hash
+		}
+		//this.pickRandomGladiators(10);
 	}
 
 });
@@ -713,7 +816,7 @@ var Test = Maple.Class(function(clientClass) {
 	var srv = new Test();
 	// Read gladiator names
 	var fs = require('fs');
-	availableGladiatorsList = fs.readFileSync('./rulesets/gladiatornames.txt').toString().split("\n");
+	initialGladiatorsList = fs.readFileSync('./rulesets/gladiatornames.txt').toString().split("\n");
 
 	srv.start({
 		port: 8080,

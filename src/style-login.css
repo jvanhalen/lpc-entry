@@ -1,3 +1,4 @@
+
 A:link {text-decoration: none; color: red;}
 A:visited {text-decoration: none; color: red;}
 A:active {text-decoration: none; color: red;}
@@ -53,6 +54,28 @@ body {
 	font-family: "Fanwood-Text-Italic";
 	src: url("../assets/fonts/Fanwood Text Italic.otf");
 }
+
+#chatbox {
+	float: left;
+	position: relative;
+	width:250px;
+	height:100px;
+	overflow:auto;
+	overflow-y:auto;
+	background-color: #2e1a20;
+    	color: white;
+    	font-family: 'Fanwood';
+    	font-size: 10pt;
+    	border:1px solid black;
+}
+.message {
+	position: relative;
+	float: left;
+	clear: both;
+    	font-size: 10pt;
+    	font-family: 'Fanwood-Text';
+}
+
 input {
     background-color: #303030;
     -webkit-border-radius: .4em;
@@ -172,9 +195,7 @@ button{
 
 
 input:focus:required:invalid {
-
 	color:#000;
-
 }
 
 
@@ -205,8 +226,11 @@ input:focus:required:invalid {
 }
 
 #cr-stage { border:2px solid black; margin:5px auto; color:white; float:left }
-#managers_title {     font-family: 'Fanwood'; font-size: 18pt;}
+#managers_title, #welcome_title {     font-family: 'Fanwood'; font-size: 18pt;}
+
 .manager-entry {
     font-size: 10pt;
     font-family: 'Fanwood-Text';
 }
+
+script { display: none; }

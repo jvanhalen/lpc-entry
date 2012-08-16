@@ -12,7 +12,8 @@
     "lobbychat": 				"true",
 	"startingmoney":			"200",
 	"basesalary": 		    	"5d4",
-    "gladiatorsindatabase": 	"10000",
+	"freegladiators":		    "2",
+    "gladiatorsindatabase": 	"100",
 	"hirelistlength":			"12"
 
 }
