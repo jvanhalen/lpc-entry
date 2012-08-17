@@ -53,7 +53,7 @@
 
 	  // TODO: Create a custom (animated) cursor for "manager"
 	   //$('*').css('cursor','pointer');
-	   $('*').css('cursor', 'url("../pics/gauntlet_cursor.png"), pointer');
+	   	$('*').css('cursor', 'url("../pics/gauntlet_cursor.png"), pointer');
 
         $('#loginform').validate({
          rules: {
@@ -68,12 +68,6 @@
 	$("#typearea").keydown(function(event) {
 		if(event.keyCode == 13) {
 			if($("#typearea").val() != "") {
-				if($("#typearea").val() != "clear;") {
-
-				}
-				else {
-
-				}
 				//$("#chatbox").val($("#typearea").val());
 				var user = JSON.parse($.cookie("gas-login")).username
 				var message = $("#typearea").val();
@@ -87,13 +81,7 @@
 				}
 
 				$("#typearea").val("");
-				// Textarea auto-scroll, does not work - yet
-				var messages = $('#chatbox');
-				var scrollTop = messages[0].scrollHeight - messages.height();
-				if(scrollTop > 0) {
-					messages.scrollTop(scrollTop);
-				}
-		    	}
+		    }
 		}
 	});
 

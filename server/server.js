@@ -25,6 +25,7 @@ var PF = require('pathfinding');
 var configs = require('../json/configs'); 			// Game configuration file
 
 var cachedGladiators = [];		// ["gladi_name": gladi_object], syntax: var attrib = cachedGladiators["name"].attribute
+var cachedPlayers = [];		// ["gladi_name": gladi_object], syntax: var attrib = cachedGladiators["name"].attribute
 var initialGladiatorsList = [];
 
 var LOGIC_RATE = 10; // Logic rate in milliseconds

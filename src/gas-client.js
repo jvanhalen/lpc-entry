@@ -4,6 +4,8 @@ var g_Animations = {}; /* storage of all animations objects used in pre-loading 
 var g_pitMessage = null;
 var g_currentGrid = null;
 var g_currentGladiator = null;
+var g_gladiatorShowCase = null;	// Gladiator at gladiatorView
+
 var g_gladiators = [];
 var g_timer = { view: null, time: 0};
 var loadAudio = true;
@@ -341,7 +343,7 @@ function LoadTileMap(file, createGrid)
     return grid;
 }
 
-var text = "Känsä the Skeleton<br>Health: 20<br>Strength:2<br>Dexterity: 5<br>Mana:7<br>Age:5/35<br>Salary:32<br>Fights: 0<br>KOs:2<br>Injury: 0<br>Melee weapon: Fist<br>missile weapon: None<br>Spell: None<br>Dodge: Dart<br>Magic res: 20%<br>Armour: None";
+//var text = "Känsä the Skeleton<br>Health: 20<br>Strength:2<br>Dexterity: 5<br>Mana:7<br>Age:5/35<br>Salary:32<br>Fights: 0<br>KOs:2<br>Injury: 0<br>Melee weapon: Fist<br>missile weapon: None<br>Spell: None<br>Dodge: Dart<br>Magic res: 20%<br>Armour: None";
 
 var shopListObjs = [];
 var magicItems = [
@@ -469,10 +471,10 @@ function showLoginView()
 function showGladiatorView()
 {
     g_currentView = "gladiator";
-    LoadTileMap( 'inventory.json');
+    LoadTileMap('inventory.json');
 
 
-    Crafty.sprite(64,'../pics/walkcycle/BODY_skeleton.png', {
+    Crafty.sprite(64,'../pics/walkcycle/BODY_' + (g_gladiatorShowCase.race) + '.png', {
         skeleton: [0,0]
     });
 
@@ -517,9 +519,10 @@ function showGladiatorView()
             this.sprite(0,1);
         });
 
+	//console.log(g_currentGladiator);
 
     Crafty.e("2D, DOM, Text").attr({ w: 400, h: 120, x: 520, y: 170, z: 3 })
-        .text(text)
+        .text(gladiatorHTML(g_gladiatorShowCase))
         .css({
             "text-align": "left",
             "font-weight":"bold",
@@ -726,7 +729,7 @@ function showArenaView()
 
     Crafty.e("2D, DOM, Mouse, Text")
         .attr({w:200, h:32, x:20, y:10, z:9})
-        .text('Quit')
+        .text('Back')
         .bind('Click', function(){
             Crafty.scene("managerView");
         });
@@ -798,7 +801,7 @@ function showGladiatorPitView()
 
     Crafty.e("2D, DOM, Mouse, Text")
         .attr({w:200, h:32, x:20, y:10})
-        .text('Quit')
+        .text('Back')
         .bind('Click', function(){
             Crafty.scene("managerView");
         });
@@ -835,22 +838,21 @@ function showGladiatorPitView()
 function gladiatorHTML(gladiator)
 {
     var HTMLstr =
-        'Name:'+gladiator.name+'<br>'+
-        'Age:'+gladiator.age+'<br>'+
-        'Health:'+gladiator.health+'<br>'+
-        'Nimbleness:'+gladiator.nimbleness+'<br>'+
-        'Strength:'+gladiator.strength+'<br>'+
-        'Mana:'+gladiator.mana+'<br>'+
-        'Salary:'+gladiator.salary+'<br>'+
-        'Fights:'+gladiator.fights+'<br>'+
-        'Knockouts:'+gladiator.knockouts+'<br>'+
+        'Name:'+gladiator.name+'<br />'+
+        'Age:'+gladiator.age+'<br />'+
+        'Health:'+gladiator.health+'<br />'+
+        'Nimbleness:'+gladiator.nimbleness+'<br />'+
+        'Strength:'+gladiator.strength+'<br />'+
+        'Mana:'+gladiator.mana+'<br />'+
+        'Salary:'+gladiator.salary+'<br />'+
+        'Fights:'+gladiator.fights+'<br />'+
+        'Knockouts:'+gladiator.knockouts+'<br />'+
         'Injured:'+gladiator.injured;
 
     return HTMLstr;
 }
 
 function pitCreateGladiators(gladiatorData){
-
 
     var pos = { "x" : 414,
                 "y" : 170 };
@@ -901,8 +903,8 @@ function pitCreateGladiators(gladiatorData){
                 g_pitMessage = null;
             })
 	    .bind('Click', function(){
-		var name = gladiator.doc.name;
-		gas.send("HIRE_GLADIATOR_REQ", ['{"type": "HIRE_GLADIATOR_REQ", "name": "' + gladiator.doc.name +'"}']);
+			var name = gladiator.doc.name;
+			gas.send("HIRE_GLADIATOR_REQ", ['{"type": "HIRE_GLADIATOR_REQ", "name": "' + gladiator.doc.name +'"}']);
 	    })
             .walk.body.stop().animate('walk_down',10,-1);
 
@@ -963,110 +965,116 @@ var GAS = Class(function() {
 
 	switch(type) {
 
-	case 'PLAYER_CONNECTED_PUSH':
-		console.log(data[0]);
+		case 'PLAYER_CONNECTED_PUSH':
+			console.log(data[0]);
             $('#managers_body').append('<div class="manager-entry" id="'+data[0].players[0]+'">'+data[0].players[0]+' [<a href="#" title="Challenge '+data[0].players[0]+' - show player rank and team info?">challenge</a>]</div>');
+			break;
 
-		break;
-	case 'PLAYER_DISCONNECTED_PUSH':
-		console.log(data[0]);
-		console.log("PLAYER", data[0].players[0], "DISCONNECTED");
-		$('#'+data[0].players[0]).remove();
+		case 'PLAYER_DISCONNECTED_PUSH':
+			console.log(data[0]);
+			console.log("PLAYER", data[0].players[0], "DISCONNECTED");
+			$('#'+data[0].players[0]).remove();
+			break;
 
-
-		break;
-
-	break;
 	    case 'CREATE_USER_RESP':
 	    case 'LOGIN_INIT_RESP':
-		if("OK" == JSON.parse(data).response) {
-            //console.log('I want salt for '+JSON.parse($.cookie("gas-login")).username);
-			this.send('USER_SALT_REQ', ['{"username":"' + JSON.parse($.cookie("gas-login")).username + '"}']);
-		}
-		else {
-			document.getElementById('username').value = '';
-			document.getElementById('password').value = '';
-		}
-		  break;
+			if("OK" == JSON.parse(data).response) {
+				//console.log('I want salt for '+JSON.parse($.cookie("gas-login")).username);
+				this.send('USER_SALT_REQ', ['{"username":"' + JSON.parse($.cookie("gas-login")).username + '"}']);
+			}
+			else {
+				alert(JSON.parse(data).response);
+				document.getElementById('username').value = '';
+				document.getElementById('password').value = '';
+			}
+			break;
 
 	    case 'USER_SALT_RESP':
 		    var hash = Sha1.hash(JSON.parse(data).salt + JSON.parse($.cookie("gas-login")).password);
 		    this.send('LOGIN_REQ', ['{"username":"' + JSON.parse($.cookie("gas-login")).username + '", "pwdhash":"' + hash + '"}']);
 		    //console.log('sending: [{"username":"' + $('#username').val() + '", "pwdhash":"' + hash + '"}]');
-	      break;
+			break;
 
-	    case 'LOGIN_RESP': // Authenticated by the server - proceed to game lobby
-		if("OK" === JSON.parse(data).response) {
+		case 'LOGIN_RESP': // Authenticated by the server - proceed to game lobby
+			if("OK" === JSON.parse(data).response) {
 
-		    $.cookie("gas-login", data);
-		    displayLogin();
+				$.cookie("gas-login", data);
+				displayLogin();
 
-            /*$('#login').fadeOut(500, function(){
-			    $('#login').empty();
-                $('#login').text('<h1>Welcome back, '+data.username+'!</h1>');
-                $('#login').fadeIn('slow', function(){
-                    Crafty.scene("managerView");
-                });
-		    });*/
-		}
-		else {
-            $.cookie("gas-login", null);
-			console.log("Login failed");
-		}
-	    break;
+				/*$('#login').fadeOut(500, function(){
+					$('#login').empty();
+					$('#login').text('<h1>Welcome back, '+data.username+'!</h1>');
+					$('#login').fadeIn('slow', function(){
+						Crafty.scene("managerView");
+					});
+				});*/
+			}
+			else {
+				$.cookie("gas-login", null);
+				console.log("Login failed");
+			}
+			break;
 
         case 'GET_AVAILABLE_GLADIATORS_RESP':
 			console.log('Handling gladiator list');
 			pitCreateGladiators(JSON.parse(data));
-	break;
+			break;
 
-	case 'CHAT_SYNC':
-		$('#chatbox').append('<div id="message">'+ JSON.parse(data).username + ': ' + JSON.parse(data).message + '<br /></div>');
-	break;
+		case 'CHAT_SYNC':
+			$('#chatbox').append('<div id="message"><a href="#" title="The coolest guy on Earth">'+ JSON.parse(data).username + ':</a>&nbsp;&nbsp;' + JSON.parse(data).message + '<br /></div>');
+				// Chatbox auto-scroll
+			var messages = $('#chatbox');
+			//console.log(messages[0].scrollHeight, "asdf", messages.height);
+			var scrollTop = messages[0].scrollHeight - messages.height();
+			if(scrollTop > 0) {
+				messages.scrollTop(scrollTop);
+			}
+
+			break;
 
 	    case 50:
            console.log("Received: " + data[0].name);
+			break;
 
-        break;
 
+		case 'HIRE_GLADIATOR_RESP':
+			console.log("Received: " + JSON.stringify(data));
+			break;
 
-	case 'HIRE_GLADIATOR_RESP':
-		console.log("Received: " + JSON.stringify(data));
-	break;
         case 'TEAM_RESP':
            console.log("Received team:"+ JSON.stringify(data));
            this.handleTeamResponse(JSON.parse(data[0]).team);
+			break;
 
-        break;
         case 'BATTLE_CONTROL_SYNC':
             var bc = data[0];
             this.paused = bc.paused;
             g_timer.time = bc.duration;
+			break;
 
-        break;
         case 'GET_ONLINE_PLAYERS_RESP':
-	$('#managers_title').empty();
-	$('#managers_body').empty();
-        $('#managers_title').append("Players currently online:");
+			$('#managers_title').empty();
+			$('#managers_body').empty();
+			$('#managers_title').append("Players currently online:");
 
-        console.log('received player list'+data[0].players); // Should we use the username of the team name? Also include the match statistics and gladiators in team? If so, use zlib to compress/decompress data
-	// Order by rank, name or something else?
-	data[0].players.sort(); // This time by name
-        for(var i in data[0].players){
-	// Should we prevent the challenging of lower rank players or make it "free-for-all"?
-	// Later on, make server push the online activity status changes to reduce data traffic
-            //console.log('online: ' +data[0].players[i]);
-	if(data[0].players[i] == JSON.parse($.cookie("gas-login")).username)
-		$('#managers_body').append('<div class="manager-entry" id="'+data[0].players[i]+'">'+data[0].players[i]+' [<a href="#" title="It\'s me! Show some stats?">my team</a>]</div>');
-	else
-		$('#managers_body').append('<div class="manager-entry" id="'+data[0].players[i]+'">'+data[0].players[i]+' [<a href="#" title="Challenge '+ data[0].players[i] +' - show player rank and team info?">challenge</a>]</div>');
-        }
-        break;
+			console.log('received player list'+data[0].players); // Should we use the username of the team name? Also include the match statistics and gladiators in team? If so, use zlib to compress/decompress data
+			// Order by rank, name or something else?
+			data[0].players.sort(); // This time by name
+			for(var i in data[0].players){
+				// Should we prevent the challenging of lower rank players or make it "free-for-all"?
+				// Later on, make server push the online activity status changes to reduce data traffic
+				//console.log('online: ' +data[0].players[i]);
+				if(data[0].players[i] == JSON.parse($.cookie("gas-login")).username)
+					$('#managers_body').append('<div class="manager-entry" id="'+data[0].players[i]+'">'+data[0].players[i]+' [<a href="#" title="It\'s me! Show some stats?">my team</a>]</div>');
+				else
+					$('#managers_body').append('<div class="manager-entry" id="'+data[0].players[i]+'">'+data[0].players[i]+' [<a href="#" title="Challenge '+ data[0].players[i] +' - show player rank and team info?">challenge</a>]</div>');
+			}
+			break;
 
         case 'START_BATTLE_RESP':
-        console.log('Starting battle:' + JSON.stringify(data[0]));
+			console.log('Starting battle:' + JSON.stringify(data[0]));
+		    break;
 
-        break;
 	    default:
 	      console.log("Default branch reached in 'message handling'");
 	      break;
@@ -1137,16 +1145,17 @@ var GAS = Class(function() {
                 // right side
                 if ( i >= 4 ) {
                     ypos = 320+((i-4)*96);
-                    xpos = 48+80+640;
+                    xpos = 640-32;	// Align gladiator to correct "slot"
                 }
 
                 var g = Crafty.e("2D, DOM, Multiway, Mouse, Ape, Sprite, transparent")
-                    .attr({x:xpos, y:ypos, z:7})
+                    .attr({x:xpos, y:ypos, z:7, gladiator: team.gladiators[i]})
                     .Ape()
                     .collision([16,32],[48,32],[48,64],[16,64])
                     .setupAnimation(anim)
                     .setupAnimation("long_spear")
                     .bind("Click", function(){
+						g_gladiatorShowCase = this.gladiator;
                         Crafty.scene("gladiatorView");
                     });
                 g_gladiators.push(g);
@@ -1164,12 +1173,12 @@ var GAS = Class(function() {
 
                 switch ( team.gladiators[i].race)
                 {
-                case "skeleton":
-                    anim = "skeleton_body";
-                    break;
-                case "human":
-                    anim = "human_body";
-                    break;
+					case "skeleton":
+						anim = "skeleton_body";
+						break;
+					case "human":
+						anim = "human_body";
+						break;
                 }
 
                var o = Crafty.e("2D, DOM, Multiway, Keyboard, Grid, Mouse, Ape, Sprite, transparent")
