@@ -57,13 +57,24 @@
 
         $('#loginform').validate({
          rules: {
-         username:"required",
-         password:"required"
-         },
-         messages: {
-           username:"Please enter username or email",
-           password:"Please enter password"
-         }})
+         	username: { required: true, minlength: 3, maxlength: 12 },
+         	password: { required: true, minlength: 4, maxlength: 12 }	// TODO: minlength 4 -> 6 before releasing the game
+         }});
+
+
+	$("#username").keypress(function(event) {
+		event.preventDefault;
+		var $th = $(this);
+		$th.val( $th.val().replace(/[^a-zA-Z0-9]/g, function(str) { return ''; } ) );
+
+	})
+
+	$("#username").keydown(function(event) {
+		event.preventDefault;
+		var $th = $(this);
+		$th.val( $th.val().replace(/[^a-zA-Z0-9]/g, function(str) { return ''; } ) );
+
+	})
 
 	$("#typearea").keydown(function(event) {
 		if(event.keyCode == 13) {
@@ -126,11 +137,11 @@
       <fieldset>
 	<div class="form-element">
           <label for="username">Username</label>
-          <input type="text" name="username" id="username" class="required" />
+          <input type="text" name="username" id="username" class="required" maxlength="12"/>
         </div>
 	<div class="form-element">
   	  <label for="password">Password</label>
-	  <input name="password" type="password" id="password" class="required" />
+	  <input name="password" type="password" id="password" class="required" maxlength="12" />
 	</div>
       </fieldset>
       <fieldset>
