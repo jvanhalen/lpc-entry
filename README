@@ -117,8 +117,10 @@ http://opengameart.org/content/extended-lpc-magic-pack
 
 AUDIO
 
-"Soliloquy"
+All audio filenames will be in lowercase, without underscores and whitespaces.
+
+"Soliloquy", soliloguy.ogg
 Licenced under Creative Commons (http://creativecommons.org/licenses/by-sa/3.0/) By Matthew Pablo (http://www.matthewpablo.com)
 
-"Gran Batalla"
+"Gran Batalla", granbatalla.ogg
 Licenced under Creative Commons (http://creativecommons.org/licenses/by-sa/3.0/) By Matthew Pablo (http://www.matthewpablo.com)
