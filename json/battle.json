@@ -1,7 +1,7 @@
 {
    "_id": "ee5d4d5c7dfdf1568be588ecab00015f",
    "_rev": "16-267750e124e9e819e9b3a6b7af781fd5",
-   "player1": "{
+   "defender": "{
    tick: 0,
    name: "test1",
    gladiators: [
@@ -84,7 +84,7 @@
    }
 ]
 }",
-   "player2": "{
+   "challenger": "{
    tick: 0,
    name: "hihi2",
    gladiators: [
@@ -171,7 +171,7 @@
    ],
    "initial_state": "{
   basetick: 250,
-  player1: {},
-  player2: {}
+  defender: {},
+  challenger: {}
 }"
 }
