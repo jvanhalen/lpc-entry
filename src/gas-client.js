@@ -135,8 +135,8 @@ function PreloadAudio() {
 	Crafty.audio.add({
 	granbatalla: ["../assets/audio/granbatalla.ogg",
 	"../assets/audio/granbatalla.m4a"],
-	soliloquy: ["../assets/audio/Soliloquy_1.ogg",
-	"../assets/audio/Soliloquy_1.m4a"]
+	soliloquy: ["../assets/audio/soliloquy.ogg",
+	"../assets/audio/soliloquy.m4a"]
 	});
 	loadAudio = false;
 
