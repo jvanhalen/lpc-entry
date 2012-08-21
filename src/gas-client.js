@@ -593,6 +593,9 @@ function showGladiatorView()
         });
 
 }
+
+
+
 /* A very crude code for displaying arena */
 function showManagerView()
 {
@@ -755,7 +758,11 @@ function showArenaView()
 
     var data = $.cookie('gas-login');
     //gas.send('GET_TEAM_REQ', [ '{"username":"'+ JSON.parse(data).username + '"}' ]);
-    gas.send('START_BATTLE_REQ', [ '{"username":"'+ JSON.parse(data).username + '"}' ]);
+
+
+
+
+
     /*
     var tmpObj = Crafty.e("2D, DOM, Multiway, Keyboard, Grid, Mouse, Ape, Sprite, transparent")
         .Ape()
@@ -959,6 +966,24 @@ var GAS = Class(function() {
         console.log('connected');
     },
 
+    challengePlayer: function(defender)
+    {
+        this.send('CHALLENGE_REQ', [ '{ "username":"'+ JSON.parse($.cookie("gas-login")).username + '",'+
+                                     '  "defender":"' + defender + '"}' ]);
+    },
+
+    replyChallenge: function(challenger, reply)
+    {
+        this.send('CHALLENGE_RES', [ '{ "username":"'+ JSON.parse($.cookie("gas-login")).username + '",'+
+                                     '  "challenger":"' + challenger + '",'+
+                                     '  "response":"'+(reply ? "OK" : "NOK")+'"}' ]);
+        // e
+        $("#challenge_"+challenger).fadeOut("slow", function(){
+            $(this).remove();
+        });
+
+    },
+
     message: function(type, tick, data) {
         //console.log('message:', type, tick, data);
 
@@ -967,7 +992,7 @@ var GAS = Class(function() {
 
 		case 'PLAYER_CONNECTED_PUSH':
 			console.log(data[0]);
-            $('#managers_body').append('<div class="manager-entry" id="'+data[0].players[0]+'">'+data[0].players[0]+' [<a href="#" title="Challenge '+data[0].players[0]+' - show player rank and team info?">challenge</a>]</div>');
+            $('#managers_body').append('<div class="manager-entry" id="'+data[0].players[0]+'">'+data[0].players[0]+' [<a href="#" title="Challenge '+data[0].players[0]+' - show player rank and team info?" onclick="gas.challengePlayer(\''+data[0].players[0]+'\');">challenge</a>]</div>');
 			break;
 
 		case 'PLAYER_DISCONNECTED_PUSH':
@@ -1067,14 +1092,38 @@ var GAS = Class(function() {
 				if(data[0].players[i] == JSON.parse($.cookie("gas-login")).username)
 					$('#managers_body').append('<div class="manager-entry" id="'+data[0].players[i]+'">'+data[0].players[i]+' [<a href="#" title="It\'s me! Show some stats?">my team</a>]</div>');
 				else
-					$('#managers_body').append('<div class="manager-entry" id="'+data[0].players[i]+'">'+data[0].players[i]+' [<a href="#" title="Challenge '+ data[0].players[i] +' - show player rank and team info?">challenge</a>]</div>');
+					$('#managers_body').append('<div class="manager-entry" id="'+data[0].players[i]+'">'+data[0].players[i]+' [<a href="#" title="Challenge '+ data[0].players[i] +' - show player rank and team info?" onclick="gas.challengePlayer(\''+data[0].players[i]+'\');">challenge</a>]</div>');
 			}
+
 			break;
+        case 'CHALLENGE_REQ':
+             console.log('Received challenge request from user:' + JSON.parse(data[0]).challenger);
 
-        case 'START_BATTLE_RESP':
-			console.log('Starting battle:' + JSON.stringify(data[0]));
+             $("#challenges").append("<div id=\"challenge_"+JSON.parse(data[0]).challenger+"\" class=\"challenge\">"+
+                                     "Challenge from "+JSON.parse(data[0]).challenger+
+                                     " <input type=\"button\" onclick=\"gas.replyChallenge('"+JSON.parse(data[0]).challenger+"', true);\" value=\"Accept\">"+
+                                     "<input type=\"button\" onclick=\"gas.replyChallenge('"+JSON.parse(data[0]).challenger+"', false);\" value=\"Decline\"></div>");
+
+
+        
+            //this.send('CHALLENGE_RES', ['{"response":"OK", "defender":"'+$.cookie("gas-login").username+'", "challenger":"'+JSON.parse(data[0]).challenger+'"}']);
+
+            break;
+        case 'CHALLENGE_RES':
+            if ( JSON.parse(data[0]).response === "OK" )
+            {
+                console.log('Challenge accepted: ' + JSON.stringify(data[0]));
+            }
+            else if ( JSON.parse(data[0]).response === "DELIVERED" )
+            {
+                console.log('Challenge delivered, waiting for response');
+            }
+            else 
+            {
+                console.log('Challenge not accepted:' + JSON.parse(data[0]).reason);
+            }
+			
 		    break;
-
 	    default:
 	      console.log("Default branch reached in 'message handling'");
 	      break;

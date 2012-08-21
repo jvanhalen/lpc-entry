@@ -52,7 +52,7 @@ var Test = Maple.Class(function(clientClass) {
     duration: 0, // for how long
 
     battleSessions: [], // which battles are active.
-
+    challenges: [], // which challenges are currently active
     started: function() {
 	console.log('Server initializing...');
 	this.init();
@@ -369,16 +369,8 @@ var Test = Maple.Class(function(clientClass) {
 				console.log(response);
 				break;
 
-			case 'START_BATTLE_REQ':
-				console.log('Received battle uuid: '+response);
-				this.updatedb('/battle/'+JSON.parse(response).uuids[0], client, 'START_BATTLE_STEP2_REQ', data, '{}');
-				//'{ "history":[], "player1":{"name":"'+JSON.parse(data).username+'"}'
-				break;
 
-			case 'START_BATTLE_STEP2_REQ':
-				console.log('Sending battle start to client: ');
-				client.send('START_BATTLE_RESP', ['{"done":true}']);
-				break;
+
 
 			case 'HIRE_GLADIATOR_QUERY':
 				this.querydb('/' + configs.gladiatordb + '/' + JSON.parse(data).name, client, "HIRE_GLADIATOR_OK", data);
@@ -490,10 +482,14 @@ var Test = Maple.Class(function(clientClass) {
 
     handleStartBattle: function( querypath, client, type, data)
     {
-        this.querydb( '/_uuids', client, type, data);
+        this.querydb( '/users/'+JSON.parse(data).username, client, type, data);
         //this.updatedb( querypath, client, type, data, undefined);
     },
 
+    createNewBattle: function(querypath, client, type, data)
+    {
+        this.querydb( '/_uuids', client, type, data);
+    },
 
 	handleClientRequest: function (client, type, tick, data) {
 
@@ -567,7 +563,92 @@ var Test = Maple.Class(function(clientClass) {
 			this.getClients().getAt(c).send("CHAT_SYNC", [data]);
 		}
 		break;
+        case 'CHALLENGE_REQ':
+    			console.log('Challenge started, asking defender\'s opinion');
 
+                // check whether user is online.
+                var defender = JSON.parse(data).defender;
+                var defenderClient = null;
+
+                for(user in clientToUsername) {
+					if(clientToUsername[user] == defender) 
+                    {
+                        for(var c=0; c<this.getClients().length;c++)
+                        {
+                            if (this.getClients().getAt(c).id == user)
+                            {
+ 			                    defenderClient = this.getClients().getAt(c);
+						        break;
+                            }
+                        }
+					}
+				}
+
+                if ( defenderClient == null )
+                { 
+                    // user marked as defender is offline, cannot accept.
+                    client.send('CHALLENGE_RES', 
+                           ['{"response":"NOK", "reason":"Defender not available."}'])
+                    
+                }
+                else 
+                {
+                    // user is online, ask for acceptance.
+                    this.challenges.push( { 
+                        "state":"WAITING_ACCEPTANCE", 
+                        "tick":this.getTick(), 
+                        "defenderclient":defenderClient, 
+                        "defender":defender,
+                        "challenger":clientToUsername[client.id]
+                    });
+                    // send challenge request for defender
+                    defenderClient.send('CHALLENGE_REQ', 
+                                        ['{"challenger":"'+ clientToUsername[client.id] + '"}']);
+                    // notify challenger for delivery
+                    client.send('CHALLENGE_RES', 
+                                ['{"response":"DELIVERED", "defender":"'+defender+'" }']);
+                }
+
+                /*if ( JSON.parse(response).team.ingame === null )
+                {
+                    //this.createNewBattle( client, CHALLENGE_ACCEPTED, 
+                }
+				this.updatedb('/battle/'+JSON.parse(response).uuids[0], client, 'START_BATTLE_STEP2_REQ', data, '{ "history":[], "initial_state":{"basetick":0, "player1": {}}}');*/
+				//'{ "history":[], "player1":{"name":"'+JSON.parse(data).username+'"}'
+				break;
+        case 'CHALLENGE_RES':
+            
+            var res = JSON.parse(data).response;
+            console.log('CHALLENGE_RES HERE' + JSON.stringify(data));
+
+            for(challenge in this.challenges)
+            {
+
+                var ch  = this.challenges[challenge];
+                console.log('Processing:' + (ch.state) + "/"+ch.defender);
+                if ( ch.state === "WAITING_ACCEPTANCE" &&
+                     ch.defender === JSON.parse(data).username )
+                {
+                    console.log('Found challenge!'); 
+                    if ( res == "OK" )
+                        this.challenges[challenge].state = "ACCEPTED";
+                    else
+                        this.challenges[challenge].state = "NOT_ACCEPTED";
+                    
+                    for( var c=0; c < this.getClients().length;c++)
+                    {
+                        if ( clientToUsername[this.getClients().getAt(c).id] == this.challenges[challenge].challenger )
+                        {
+                            this.getClients().getAt(c).send('CHALLENGE_RES', ['{ "response":"'+res+'", "defender":"'+ch.defender+'"}']);
+
+                            break;
+                        }
+                    }
+                }
+            }
+            
+			break;
+            
 	case 'DONT_CARE':
 		break;
 

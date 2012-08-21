@@ -238,4 +238,8 @@ input:focus:required:invalid {
     font-size: 10pt;
     font-family: 'Fanwood-Text';
 }
-
+#challenges {
+    font-family: 'Fanwood-Text'; 
+    font-size: 12pt;
+    color: white;
+}
