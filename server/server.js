@@ -202,8 +202,8 @@ var Test = Maple.Class(function(clientClass) {
 
 		// Load gladiators to main memory for better performance
 		this.querydb('/' + configs.gladiatordb + '/_all_docs?include_docs=true', {'id': 'localhost'}, 'LOAD_GLADIATORS', {'id': 'localhost'});
-    },
 
+    },
     querydb: function(querypath, client, type, data) {
 		var options = {host: '127.0.0.1', port: 5984, path: '/'};
 		var http = require('http');
@@ -223,7 +223,7 @@ var Test = Maple.Class(function(clientClass) {
 		  });
 		  res.on('end', function () {
 			// Finally handle the whole response message
-			console.log(response);
+			  console.log(response);
 		  	srv.handleDbResponse(querypath, client, type, data, response);
 			response = "";
 		  });
@@ -385,7 +385,97 @@ var Test = Maple.Class(function(clientClass) {
 			case 'LOAD_GLADIATORS':
 				this.loadGladiators(response);
 				break;
+           case 'BATTLE_START_CREATE_BATTLE_REQ':
+           case 'BATTLE_START_LOAD_CHALLENGER_REQ':
+           case 'BATTLE_START_LOAD_DEFENDER_REQ':
+           case 'BATTLE_START_LOAD_BATTLE_REQ':
+           case 'BATTLE_START_STORE_PLAYERS_REQ':
+           case 'BATTLE_START_STORE_PLAYERS_RES':
+           case 'BATTLE_START_UPDATE_CHALLENGER':
+           case 'BATTLE_START_UPDATE_DEFENDER':
+                this.handleCreateNewBattle(null, null, type, data, response);
+                break;
+           case 'CHALLENGE_REQ_DEFENDER_CHECK':
+                if ( JSON.parse(response) != null && JSON.parse(response).team.ingame == null )
+                {
+                    console.log('About to check  challenger...');
+                    this.querydb('/users/'+JSON.parse(data).username, client, 'CHALLENGE_REQ_ONLINE_CHECK', data);
+                }
+                else 
+                {
+                    console.log('Seeking challenger, negative response...');
+                    for(var c=0; c<this.getClients().length;c++)
+                    {
+                        if (clientToUsername[this.getClients().getAt(c).id] == JSON.parse(data).username)
+                        {
+                            console.log('Sending response to challenger');
+                            this.getClients().getAt(c).send('CHALLENGE_RES', ['{"response":"NOK", "reason":"defender already in battle. "}']);
+						    break;
+                        }
+                    }
+                }
+            break;
+        case 'CHALLENGE_REQ_ONLINE_CHECK':
 
+            if ( JSON.parse(response) == null ||
+                 JSON.parse(response).team.ingame != null )
+            {
+                for(var c=0; c<this.getClients().length;c++)
+                {
+                    if (clientToUsername[this.getClients().getAt(c).id] == JSON.parse(data).username)
+                    {
+                        this.getClients().getAt(c).send('CHALLENGE_RES', ['{"response":"NOK", "reason":"challenger already in battle. "}']);
+						break;
+                    }
+                }
+                break;
+            }
+
+            // check whether user is online.
+            var defender = JSON.parse(data).defender;
+            var defenderClient = null;
+            
+            for(user in clientToUsername) {
+				if(clientToUsername[user] == defender) 
+                {
+                    for(var c=0; c<this.getClients().length;c++)
+                    {
+                        if (this.getClients().getAt(c).id == user)
+                        {
+ 			                defenderClient = this.getClients().getAt(c);
+						    break;
+                        }
+                    }
+				}
+			}
+            
+            if ( defenderClient == null )
+            { 
+                // user marked as defender is offline, cannot accept.
+                client.send('CHALLENGE_RES', 
+                            ['{"response":"NOK", "reason":"Defender not available."}'])
+                
+            }
+            else 
+            {
+                // user is online, ask for acceptance.
+                this.challenges.push( { 
+                    "state":"WAITING_ACCEPTANCE", 
+                    "tick":this.getTick(), 
+                    "defenderclient":defenderClient, 
+                    "defender":defender,
+                    "challenger":clientToUsername[client.id]
+                });
+                // send challenge request for defender
+                defenderClient.send('CHALLENGE_REQ', 
+                                    ['{"challenger":"'+ clientToUsername[client.id] + '"}']);
+                // notify challenger for delivery
+                client.send('CHALLENGE_RES', 
+                            ['{"response":"DELIVERED", "defender":"'+defender+'" }']);
+            }
+
+            
+			break;
 			case 'DONT_CARE':
 				break;
 
@@ -480,15 +570,116 @@ var Test = Maple.Class(function(clientClass) {
 */
 	},
 
-    handleStartBattle: function( querypath, client, type, data)
+    
+    handleCreateNewBattle: function(querypath, client, type, data, response)
     {
-        this.querydb( '/users/'+JSON.parse(data).username, client, type, data);
-        //this.updatedb( querypath, client, type, data, undefined);
-    },
+        switch(type)
+        {
+        case 'BATTLE_START_REQ':
 
-    createNewBattle: function(querypath, client, type, data)
-    {
-        this.querydb( '/_uuids', client, type, data);
+            // get unique id for battle document
+            this.querydb( '/_uuids', null, 'BATTLE_START_CREATE_BATTLE_REQ', data);
+            break;
+        case 'BATTLE_START_CREATE_BATTLE_REQ':
+            data["path"]='/battle/'+JSON.parse(response).uuids[0];
+
+            // create battle doc
+            this.updatedb('/battle/'+JSON.parse(response).uuids[0], null, 
+                          'BATTLE_START_LOAD_CHALLENGER_REQ', data, '{ \
+                                "history":[], \
+                                "initial_state":{\
+                                      "basetick":0, \
+                                      "challenger": null, \
+                                      "defender": null\
+                                }, \
+                                "challenger":null, \
+                                "defender":null\
+                        }');
+            break;
+        case 'BATTLE_START_LOAD_CHALLENGER_REQ':
+
+            this.querydb('/users/'+data.challenger, null, 
+                         'BATTLE_START_LOAD_DEFENDER_REQ', data);
+            break;
+        case 'BATTLE_START_LOAD_DEFENDER_REQ':
+
+            var challenger = JSON.parse(response);
+            data.challenger = challenger;
+            console.log(data);
+            this.querydb('/users/'+data.defender, null, 
+                         'BATTLE_START_LOAD_BATTLE_REQ', data);
+            break;
+        case 'BATTLE_START_LOAD_BATTLE_REQ':
+            var defender = JSON.parse(response);
+            data.defender = defender;
+            console.log(data);
+            this.querydb(data.path, null, 
+                         'BATTLE_START_STORE_PLAYERS_REQ', data);
+            break;
+        case 'BATTLE_START_STORE_PLAYERS_REQ':
+            var battle = JSON.parse(response);
+            // create crude "copies"
+            battle.defender = JSON.parse(JSON.stringify(data.defender));
+            battle.challenger = JSON.parse(JSON.stringify(data.challenger));
+            
+            battle.initial_state.challenger = battle.challenger;
+            battle.initial_state.defender = battle.defender;
+
+            // cleanup unnecessary details
+            delete battle.challenger._rev;
+            battle.challenger["name"] = battle.challenger._id;
+            delete battle.challenger._id;
+            delete battle.defender._rev;
+            battle.defender["name"] = battle.defender._id;
+            delete battle.defender._id;
+
+            var battleStr = JSON.stringify(battle);
+            console.log(battleStr);
+            // set both players into game 
+            data.defender.team.ingame = battle._id;
+            data.challenger.team.ingame = battle._id;
+
+            // create battle doc
+            this.updatedb(data.path, null, 'BATTLE_START_STORE_PLAYERS_RES', data, battleStr );
+
+            
+            // Update player ingame property
+            this.updatedb('/users/'+data.challenger._id, null, 
+                          'BATTLE_START_UPDATE_CHALLENGER', data, 
+                          JSON.stringify(data.challenger));
+            
+            this.updatedb('/users/'+data.defender._id, null, 
+                          'BATTLE_START_UPDATE_DEFENDER', data, 
+                          JSON.stringify(data.defender));
+
+            break;
+        case 'BATTLE_START_STORE_PLAYERS_RES':
+            console.log('Players stored into battle doc, yay!');
+            break;
+        case 'BATTLE_START_UPDATE_CHALLENGER':
+
+            console.log('Challenger ingame updated');
+            // send info that game is ready
+            for(var c=0;c< this.getClients().length; c++) {
+				if(clientToUsername[this.getClients().getAt(c).id] == data.challenger._id) {
+					this.getClients().getAt(c).send('CHALLENGE_RES', 
+                     ['{"response":"READY_FOR_WAR", "battle":"'+data.challenger.team.ingame+'"}']);
+					break;
+				}
+			}
+            break;
+        case 'BATTLE_START_UPDATE_DEFENDER':
+            console.log('Defender ingame updated');
+            // send info that game is ready  
+            for(var c=0;c< this.getClients().length; c++) {
+				if(clientToUsername[this.getClients().getAt(c).id] == data.defender._id) {
+					this.getClients().getAt(c).send('CHALLENGE_RES', 
+                     ['{"response":"READY_FOR_WAR", "battle":"'+data.defender.team.ingame+'"}']);
+					break;
+				}
+			}
+            break;
+        }
     },
 
 	handleClientRequest: function (client, type, tick, data) {
@@ -552,9 +743,7 @@ var Test = Maple.Class(function(clientClass) {
             client.send('GET_ONLINE_PLAYERS_RESP', [playerNames]);
             break;
 
-        case 'START_BATTLE_REQ':
-            this.handleStartBattle('/battle', client, type, data);
-            break;
+
 
         case 'CLIENT_CHAT_REQ':
 		for( var c=0; c < this.getClients().length; c++)
@@ -564,58 +753,11 @@ var Test = Maple.Class(function(clientClass) {
 		}
 		break;
         case 'CHALLENGE_REQ':
-    			console.log('Challenge started, asking defender\'s opinion');
+    		console.log('Challenge started, asking defender\'s opinion');
 
-                // check whether user is online.
-                var defender = JSON.parse(data).defender;
-                var defenderClient = null;
+            this.querydb('/users/'+JSON.parse(data).defender, client, 'CHALLENGE_REQ_DEFENDER_CHECK', data);
+            break;
 
-                for(user in clientToUsername) {
-					if(clientToUsername[user] == defender) 
-                    {
-                        for(var c=0; c<this.getClients().length;c++)
-                        {
-                            if (this.getClients().getAt(c).id == user)
-                            {
- 			                    defenderClient = this.getClients().getAt(c);
-						        break;
-                            }
-                        }
-					}
-				}
-
-                if ( defenderClient == null )
-                { 
-                    // user marked as defender is offline, cannot accept.
-                    client.send('CHALLENGE_RES', 
-                           ['{"response":"NOK", "reason":"Defender not available."}'])
-                    
-                }
-                else 
-                {
-                    // user is online, ask for acceptance.
-                    this.challenges.push( { 
-                        "state":"WAITING_ACCEPTANCE", 
-                        "tick":this.getTick(), 
-                        "defenderclient":defenderClient, 
-                        "defender":defender,
-                        "challenger":clientToUsername[client.id]
-                    });
-                    // send challenge request for defender
-                    defenderClient.send('CHALLENGE_REQ', 
-                                        ['{"challenger":"'+ clientToUsername[client.id] + '"}']);
-                    // notify challenger for delivery
-                    client.send('CHALLENGE_RES', 
-                                ['{"response":"DELIVERED", "defender":"'+defender+'" }']);
-                }
-
-                /*if ( JSON.parse(response).team.ingame === null )
-                {
-                    //this.createNewBattle( client, CHALLENGE_ACCEPTED, 
-                }
-				this.updatedb('/battle/'+JSON.parse(response).uuids[0], client, 'START_BATTLE_STEP2_REQ', data, '{ "history":[], "initial_state":{"basetick":0, "player1": {}}}');*/
-				//'{ "history":[], "player1":{"name":"'+JSON.parse(data).username+'"}'
-				break;
         case 'CHALLENGE_RES':
             
             var res = JSON.parse(data).response;
@@ -630,23 +772,36 @@ var Test = Maple.Class(function(clientClass) {
                      ch.defender === JSON.parse(data).username )
                 {
                     console.log('Found challenge!'); 
-                    if ( res == "OK" )
-                        this.challenges[challenge].state = "ACCEPTED";
-                    else
-                        this.challenges[challenge].state = "NOT_ACCEPTED";
+                    if ( res == "OK" ) this.challenges[challenge].state = "ACCEPTED";
+                    else               this.challenges[challenge].state = "NOT_ACCEPTED";
                     
                     for( var c=0; c < this.getClients().length;c++)
                     {
                         if ( clientToUsername[this.getClients().getAt(c).id] == this.challenges[challenge].challenger )
                         {
-                            this.getClients().getAt(c).send('CHALLENGE_RES', ['{ "response":"'+res+'", "defender":"'+ch.defender+'"}']);
+                            
 
+
+                            // if challenge was accepted, initiate battle
+                            if ( this.challenges[challenge].state == "ACCEPTED")
+                            {
+                                this.getClients().getAt(c).send('CHALLENGE_RES', ['{ "response":"'+res+'", "defender":"'+ch.defender+'"}']);
+                                // initiate battle start
+                                this.handleCreateNewBattle(null, null, 'BATTLE_START_REQ', {
+                                    "challenger":ch.challenger, 
+                                    "defender":ch.defender
+                                });
+                                // remove challenge, no longer needed
+                            } else {
+                                this.getClients().getAt(c).send('CHALLENGE_RES', ['{ "response":"'+res+'", "defender":"'+ch.defender+'", "reason":"defender turned down the challenge"}']);
+                            }
+				            delete this.challenges[challenge];
                             break;
                         }
                     }
                 }
             }
-            
+                
 			break;
             
 	case 'DONT_CARE':
