@@ -9,6 +9,8 @@ var g_gladiatorShowCase = null;	// Gladiator at gladiatorView
 var g_gladiators = [];
 var g_timer = { view: null, time: 0};
 var loadAudio = true;
+var g_arenaWait = null;
+
 Crafty.c('Dummy', {
     dummyIndex: 0,
     setDummyIndex: function(i)
@@ -729,7 +731,7 @@ function showArenaView()
         console.log("WARNING: current grid is not set!");
     }
 
-
+    
     Crafty.e("2D, DOM, Mouse, Text")
         .attr({w:200, h:32, x:20, y:10, z:9})
         .text('Back')
@@ -757,9 +759,16 @@ function showArenaView()
               "font-size":"24pt"});
 
     var data = $.cookie('gas-login');
+
+    g_arenaWait = Crafty.e("2D, DOM, Text")
+        .attr({w:300, h:100, x:150, y:250, z:9})
+        .text('Waiting for the other party to join...')
+        .css({"font-family":"Impact",
+              "font-size":"24pt"});
+    
+    gas.send('ENTERING_ARENA', ['{"username":"'+ JSON.parse(data).username + '", "battle":"'+gas.activeBattle+'"}' ]);
+
     //gas.send('GET_TEAM_REQ', [ '{"username":"'+ JSON.parse(data).username + '"}' ]);
-
-
 
 
 
@@ -929,6 +938,8 @@ var GAS = Class(function() {
 }, Maple.Client, {
     paused: false,   // state
     pointOfReference: 0,
+    activeBattle: '',
+
     started: function() {
         console.log('started');
         this.pointOfReference = 0;
@@ -1109,6 +1120,9 @@ var GAS = Class(function() {
             //this.send('CHALLENGE_RES', ['{"response":"OK", "defender":"'+$.cookie("gas-login").username+'", "challenger":"'+JSON.parse(data[0]).challenger+'"}']);
 
             break;
+        case 'BATTLE_START':
+           console.log('Battle is starting in: '+JSON.parse(data[0]).startTick);
+           break;
         case 'CHALLENGE_RES':
             if ( JSON.parse(data[0]).response === "OK" )
             {
@@ -1138,7 +1152,7 @@ var GAS = Class(function() {
     },
     handleTeamResponse: function(team)
     {
-
+        this.activeBattle = team.ingame;
         // create visualization for each gladiator in team.
         if ( g_currentView == "manager")
         {
@@ -1152,7 +1166,7 @@ var GAS = Class(function() {
                     .css({
                         "text-align": "center",
                         "font-family": "Fanwood",
-                        "font-size": "13pt",
+                        "font-size": "23pt",
                     })
                     .bind('Click', function(){
                         Crafty.scene("arenaView");
@@ -1161,16 +1175,12 @@ var GAS = Class(function() {
             } else {
                 Crafty.e("2D, DOM, Mouse, Text")
                     .attr( {w:130, h:20, x:340, y:100, z:9})
-                    .text("Select battles")
+                    .text("Challenge someone")
                     .css({
                         "text-align": "center",
                         "font-family": "Fanwood",
-                        "font-size": "13pt",
-                    })
-                    .bind('Click', function(){
-                        Crafty.scene("arenaView");
+                        "font-size": "23pt",
                     });
-
             }
             g_gladiators = [];
             for (var i in team.gladiators )
