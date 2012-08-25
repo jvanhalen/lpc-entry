@@ -73,6 +73,16 @@ var Test = Maple.Class(function(clientClass) {
 
     },
 
+    getClientByUsername: function(username) {
+      	for( var c=0; c < this.getClients().length; c++)
+		{
+			if ( clientToUsername[this.getClients().getAt(c).id] === username ){
+                return this.getClients().getAt(c);
+            }
+		}  
+        return null;
+    },
+
     update: function(t, tick) {
         //console.log(this.getClients().length, 'client(s) connected', t, tick, this.getRandom());
 
@@ -203,6 +213,7 @@ var Test = Maple.Class(function(clientClass) {
 		// Load gladiators to main memory for better performance
 		this.querydb('/' + configs.gladiatordb + '/_all_docs?include_docs=true', {'id': 'localhost'}, 'LOAD_GLADIATORS', {'id': 'localhost'});
 
+        console.log("Socket will be " + JSON.stringify(this._socket));
     },
     querydb: function(querypath, client, type, data) {
 		var options = {host: '127.0.0.1', port: 5984, path: '/'};
@@ -404,7 +415,13 @@ var Test = Maple.Class(function(clientClass) {
                 else 
                 {
                     console.log('Seeking challenger, negative response...');
-                    for(var c=0; c<this.getClients().length;c++)
+                    var cli = this.getClientByUsername( JSON.parse(data).username);
+                    if ( cli != null ) {
+                        console.log('Sending response to challenger');
+                        cli.send('CHALLENGE_RES', ['{"response":"NOK", "reason":"defender already in battle. "}']);
+                    }
+                        
+                    /*for(var c=0; c<this.getClients().length;c++)
                     {
                         if (clientToUsername[this.getClients().getAt(c).id] == JSON.parse(data).username)
                         {
@@ -412,7 +429,7 @@ var Test = Maple.Class(function(clientClass) {
                             this.getClients().getAt(c).send('CHALLENGE_RES', ['{"response":"NOK", "reason":"defender already in battle. "}']);
 						    break;
                         }
-                    }
+                    }*/
                 }
             break;
         case 'CHALLENGE_REQ_ONLINE_CHECK':
@@ -420,22 +437,25 @@ var Test = Maple.Class(function(clientClass) {
             if ( JSON.parse(response) == null ||
                  JSON.parse(response).team.ingame != null )
             {
-                for(var c=0; c<this.getClients().length;c++)
+                var cli = this.getClientByUsername( JSON.parse(data).username)
+                if ( cli != null ) {
+                    cli.send('CHALLENGE_RES', ['{"response":"NOK", "reason":"challenger already in battle. "}']);
+                }
+                /*for(var c=0; c<this.getClients().length;c++)
                 {
                     if (clientToUsername[this.getClients().getAt(c).id] == JSON.parse(data).username)
                     {
                         this.getClients().getAt(c).send('CHALLENGE_RES', ['{"response":"NOK", "reason":"challenger already in battle. "}']);
 						break;
                     }
-                }
+                }*/
                 break;
             }
 
             // check whether user is online.
             var defender = JSON.parse(data).defender;
-            var defenderClient = null;
-            
-            for(user in clientToUsername) {
+            var defenderClient = this.getClientByUsername(defender);
+            /*for(user in clientToUsername) {
 				if(clientToUsername[user] == defender) 
                 {
                     for(var c=0; c<this.getClients().length;c++)
@@ -447,7 +467,7 @@ var Test = Maple.Class(function(clientClass) {
                         }
                     }
 				}
-			}
+			}*/
             
             if ( defenderClient == null )
             { 
@@ -476,6 +496,59 @@ var Test = Maple.Class(function(clientClass) {
 
             
 			break;
+        case 'ENTERING_ARENA_RES':
+            var d = JSON.parse(data);
+            var battle = JSON.parse(response);
+
+            var currentBattleSession = null;
+            // compare that battle exists and player is who (s)he says to be
+            if ( d.battle != null && d.username == clientToUsername[client.id])
+            {
+                // search battle session data
+                for( b in this.battleSessions)
+                {
+                    if (this.battleSessions[b].battle == d.battle )
+                    {
+                        currentBattleSession = this.battleSessions[b].battle;
+                        break;
+                    }
+                        
+                }
+                // add session if does not exist yet
+                if ( currentBattleSession == null) {
+                    var len = this.battleSessions.push( { 
+                        "battle":JSON.parse(data).battle, 
+                        "challenger":null, 
+                        "defender":null 
+                    } );
+                    currentBattleSession = this.battleSessions[len-1];
+                }
+                // store names into battle session data
+                if ( clientToUsername[client.id] == battle.defender._id ) {
+                    currentBattleSession.defender = battle.defender._id;
+                }
+                else if ( clientToUsername[client.id] == battle.challenger._id ) {
+                    currentBattleSession.challenger = battle.challenger._id;
+                }
+                // if both names exist in session, game is at foot!
+                if ( currentBattleSession.challenger != null &&
+                     currentBattleSession.defender   != null )
+                {
+                    var challenger = this.getClientByUsername( currentBattleSession.challenger );
+                    var startTick = (this.getTick()+THIRTY_SECONDS);
+
+                    if ( challenger ) {
+                        challenger.send('BATTLE_START', ['{"startTick":'+startTick+'}']);
+                    }
+                    
+                    var defender = this.getClientByUsername( currentBattleSession.challenger );
+                    if ( defender ){
+                        defender.send('BATTLE_START', ['{"startTick":'+startTick+'}']);
+                    }
+                }
+            }
+
+            break;
 			case 'DONT_CARE':
 				break;
 
@@ -739,6 +812,8 @@ var Test = Maple.Class(function(clientClass) {
             {
                 playerNames.players.push(clientToUsername[this.getClients().getAt(c).id]);
             }
+           
+
             console.log('sending now'+ JSON.stringify([playerNames]));
             client.send('GET_ONLINE_PLAYERS_RESP', [playerNames]);
             break;
@@ -803,9 +878,11 @@ var Test = Maple.Class(function(clientClass) {
             }
                 
 			break;
-            
-	case 'DONT_CARE':
-		break;
+        case 'ENTERING_ARENA':
+            this.querydb('/battle/'+JSON.parse(data).battle, client, 'ENTERING_ARENA_RES', data);
+            break;
+	    case 'DONT_CARE':
+		    break;
 
 		default:
 
