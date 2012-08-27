@@ -668,6 +668,7 @@ function showManagerView()
     // Add a title
     Crafty.e("2D, DOM, Text").attr({ w: 400, h: 20, x: 15, y: 10 })
         .text("Kalevala Heroes / GAS Valhalla")
+        .text("Gladiaattoripeli")
         .css({
             "text-align": "left",
             "font-family": "Impact",
@@ -837,6 +838,7 @@ function showGladiatorPitView()
 
     window.setTimeout(function(){
         // pray tell, server, best deals for today?
+		console.log("sending GET_AVAILABLE_GLADIATORS_REQ");
         gas.send('GET_AVAILABLE_GLADIATORS_REQ', []);
     }, 1000);
 
@@ -860,6 +862,7 @@ function gladiatorHTML(gladiator)
 }
 
 function pitCreateGladiators(gladiatorData){
+function pitCreateGladiators(data){
 
     var pos = { "x" : 414,
                 "y" : 170 };
@@ -870,14 +873,19 @@ function pitCreateGladiators(gladiatorData){
     gladiatorData2 = gladiatorData.rows;
 
     $.each(gladiatorData2, function(key,gladiator)
+    $.each(data.gladiatorlist, function(key,gladiator)
     {
 		console.log(key, ":", gladiator.doc.name);
 
         console.log('Creating gladiator showcase for ' + gladiator.doc.name);
+        console.log('Creating gladiator showcase for ' + gladiator.name);
 
         var body = "human_body";
         if ( gladiator.doc.race == "skeleton" )
+        if ( gladiator.race == "skeleton" )
             body = "skeleton_body";
+
+		var hidden = false;
 
         var xPos = pos.x+(offset.x*(count%3));
         var yPos = pos.y+(offset.y*(Math.floor(count/3)));
@@ -888,6 +896,14 @@ function pitCreateGladiators(gladiatorData){
                 this.hideAll();
                 this.enableAnimation(this.walk);
                 this.walk.body.stop().animate("walk_left", 20, -1);
+				if(!hidden) {
+					this.enableAnimation(this.walk);
+					this.walk.body.stop().animate("walk_left", 20, -1);
+				}
+				else {
+					// TODO: Mark gladiator "hired"
+					this.hideAll();
+				}
 
                 // remove previous and replace with new description
                 if ( g_pitMessage ) g_pitMessage.destroy();
@@ -900,6 +916,7 @@ function pitCreateGladiators(gladiatorData){
                         "color": "#5c3111"
                     })
                     .text(gladiatorHTML(gladiator.doc));
+                    .text(gladiatorHTML(gladiator));
             })
             .bind("MouseOut", function(e){
                 this.hideAll();
@@ -912,6 +929,10 @@ function pitCreateGladiators(gladiatorData){
 	    .bind('Click', function(){
 			var name = gladiator.doc.name;
 			gas.send("HIRE_GLADIATOR_REQ", ['{"type": "HIRE_GLADIATOR_REQ", "name": "' + gladiator.doc.name +'"}']);
+			var name = gladiator.name;
+			var user = JSON.parse($.cookie("gas-login")).username;
+			gas.send("HIRE_GLADIATOR_REQ", [JSON.stringify({ type: "HIRE_GLADIATOR_REQ", username: user, gladiator: name })]);
+			this.hideAll();
 	    })
             .walk.body.stop().animate('walk_down',10,-1);
 
@@ -977,6 +998,7 @@ var GAS = Class(function() {
         this.send('CHALLENGE_RES', [ '{ "username":"'+ JSON.parse($.cookie("gas-login")).username + '",'+
                                      '  "challenger":"' + challenger + '",'+
                                      '  "response":"'+ ( reply == true ? "OK" : "NOK")+'"}' ]);
+                                     '  "response":"'+(reply ? "OK" : "NOK")+'"}' ]);
         // e
         $("#challenge_"+challenger).fadeOut("slow", function(){
             $(this).remove();
@@ -1118,11 +1140,6 @@ var GAS = Class(function() {
             {
                 console.log('Challenge delivered, waiting for response');
             }
-            else if ( JSON.parse(data[0]).response == "READY_FOR_WAR" )
-            {
-                console.log('Time to make last minute adjustments...');
-            }
-            else 
             {
                 console.log('Challenge not accepted:' + JSON.parse(data[0]).reason);
             }
