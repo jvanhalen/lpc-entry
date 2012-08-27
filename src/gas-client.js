@@ -979,7 +979,7 @@ var GAS = Class(function() {
     {
         this.send('CHALLENGE_RES', [ '{ "username":"'+ JSON.parse($.cookie("gas-login")).username + '",'+
                                      '  "challenger":"' + challenger + '",'+
-                                     '  "response":"'+(reply ? "OK" : "NOK")+'"}' ]);
+                                     '  "response":"'+(reply == true ? "OK" : "NOK")+'"}' ]);
         // e
         $("#challenge_"+challenger).fadeOut("slow", function(){
             $(this).remove();
@@ -1108,6 +1108,9 @@ var GAS = Class(function() {
             {
                 console.log('Challenge delivered, waiting for response');
             }
+			else if (JSON.parse(data[0]).response === "READY_FOR_WAR") {
+				console.log('Time to make last minute adjustments...');
+			}
             else
             {
                 console.log('Challenge not accepted:' + JSON.parse(data[0]).reason);

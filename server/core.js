@@ -66,7 +66,12 @@ var core = {
 	},
 
 	createUser: function(username, password) {
-		console.log("core.createUser: ", username);
+		//console.log("core.createUser: ", username, password);
+
+		if(null == username || null == password) {
+			console.log("ERROR: core.createUser: ", username, password);
+			return null;
+		}
 
 		var crypto = require('crypto');
 		var newuser = core.user;

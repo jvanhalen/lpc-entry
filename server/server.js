@@ -1,5 +1,5 @@
 /**
-  * Copyright (c) 2012 Ivo Wetzel.
+  * Copyright (c) 2012 GAS team.
   *
   * Permission is hereby granted, free of charge, to any person obtaining a copy
   * of this software and associated documentation files (the "Software"), to deal
@@ -49,7 +49,7 @@ var GASServer = Maple.Class(function(clientClass) {
     paused: false,   // state
     duration: 0, // for how long
 
-    battleSessions: [], // which battles are active.
+    battlesSessions: [], // which battless are active.
     challenges: [], // which challenges are currently active
     started: function() {
 	console.log('Server initializing...');
@@ -91,7 +91,7 @@ var GASServer = Maple.Class(function(clientClass) {
                 var data = [];
                 data.push(msg);
                 // sends to ALL clients at the moment, but needs to send for
-                // only battlers and potential viewers.
+                // only battlesrs and potential viewers.
                 for(var c = 0; c< this.getClients().length; c++)
                 {
                     this.getClients().getAt(c).send(data[0].name, data);
@@ -111,7 +111,7 @@ var GASServer = Maple.Class(function(clientClass) {
                     "start":this.pointOfReference
                 }];
                 // sends to ALL clients at the moment, but needs to send for
-                // only battlers and potential viewers.
+                // only battlesrs and potential viewers.
                 for(var c = 0; c< this.getClients().length; c++)
                 {
                     this.getClients().getAt(c).send(msg[0].name, msg);
@@ -288,9 +288,10 @@ var GASServer = Maple.Class(function(clientClass) {
 			case 'BATTLE_START_UPDATE_DEFENDER':
 				 this.handleCreateNewBattle(null, null, type, data, response);
 			break;
-		
+
 			case 'CHALLENGE_REQ_DEFENDER_CHECK':
-				 if ( JSON.parse(response) != null && JSON.parse(response).team.ingame == null )
+				console.log(response);
+				 if ( JSON.parse(response) != null && JSON.parse(response).ingame == null )
 				 {
 					 console.log('About to check  challenger...');
 					 this.querydb('/users/'+JSON.parse(data).username, client, 'CHALLENGE_REQ_ONLINE_CHECK', data);
@@ -303,7 +304,7 @@ var GASServer = Maple.Class(function(clientClass) {
 						 if (clientToUsername[this.getClients().getAt(c).id] == JSON.parse(data).username)
 						 {
 							 console.log('Sending response to challenger');
-							 this.getClients().getAt(c).send('CHALLENGE_RES', ['{"response":"NOK", "reason":"defender already in battle. "}']);
+							 this.getClients().getAt(c).send('CHALLENGE_RES', ['{"response":"NOK", "reason":"defender already in battles. "}']);
 							 break;
 						 }
 					 }
@@ -313,13 +314,13 @@ var GASServer = Maple.Class(function(clientClass) {
         case 'CHALLENGE_REQ_ONLINE_CHECK':
 
             if ( JSON.parse(response) == null ||
-                 JSON.parse(response).team.ingame != null )
+                 JSON.parse(response).ingame != null )
             {
                 for(var c=0; c<this.getClients().length;c++)
                 {
                     if (clientToUsername[this.getClients().getAt(c).id] == JSON.parse(data).username)
                     {
-                        this.getClients().getAt(c).send('CHALLENGE_RES', ['{"response":"NOK", "reason":"challenger already in battle. "}']);
+                        this.getClients().getAt(c).send('CHALLENGE_RES', ['{"response":"NOK", "reason":"challenger already in battles. "}']);
 						break;
                     }
                 }
@@ -390,10 +391,10 @@ var GASServer = Maple.Class(function(clientClass) {
         switch(type)
         {
 			case 'BATTLE_START_CREATE_BATTLE_REQ':
-				data["path"]='/battle/'+JSON.parse(response).uuids[0];
+				data["path"]=configs.battledb + '/' + JSON.parse(response).uuids[0];
 
-				// create battle doc
-				this.updatedb('/battle/'+JSON.parse(response).uuids[0], null,
+				// create battles doc
+				this.updatedb(configs.battledb + '/' + JSON.parse(response).uuids[0], null,
 							  'BATTLE_START_LOAD_CHALLENGER_REQ', data, '{ \
 									"history":[], \
 									"initial_state":{\
@@ -430,30 +431,30 @@ var GASServer = Maple.Class(function(clientClass) {
 			break;
 
 			case 'BATTLE_START_STORE_PLAYERS_REQ':
-				var battle = JSON.parse(response);
+				var battles = JSON.parse(response);
 				// create crude "copies"
-				battle.defender = JSON.parse(JSON.stringify(data.defender));
-				battle.challenger = JSON.parse(JSON.stringify(data.challenger));
+				battles.defender = JSON.parse(JSON.stringify(data.defender));
+				battles.challenger = JSON.parse(JSON.stringify(data.challenger));
 
-				battle.initial_state.challenger = battle.challenger;
-				battle.initial_state.defender = battle.defender;
+				battles.initial_state.challenger = battles.challenger;
+				battles.initial_state.defender = battles.defender;
 
 				// cleanup unnecessary details
-				delete battle.challenger._rev;
-				battle.challenger["name"] = battle.challenger._id;
-				delete battle.challenger._id;
-				delete battle.defender._rev;
-				battle.defender["name"] = battle.defender._id;
-				delete battle.defender._id;
+				delete battles.challenger._rev;
+				battles.challenger["name"] = battles.challenger._id;
+				delete battles.challenger._id;
+				delete battles.defender._rev;
+				battles.defender["name"] = battles.defender._id;
+				delete battles.defender._id;
 
-				var battleStr = JSON.stringify(battle);
-				console.log(battleStr);
+				var battlesStr = JSON.stringify(battles);
+				console.log(battlesStr);
 				// set both players into game
-				data.defender.team.ingame = battle._id;
-				data.challenger.team.ingame = battle._id;
+				data.defender.team.ingame = battles._id;
+				data.challenger.team.ingame = battles._id;
 
-				// create battle doc
-				this.updatedb(data.path, null, 'BATTLE_START_STORE_PLAYERS_RES', data, battleStr );
+				// create battles doc
+				this.updatedb(data.path, null, 'BATTLE_START_STORE_PLAYERS_RES', data, battlesStr );
 
 
 				// Update player ingame property
@@ -468,7 +469,7 @@ var GASServer = Maple.Class(function(clientClass) {
 			break;
 
 			case 'BATTLE_START_STORE_PLAYERS_RES':
-				console.log('Players stored into battle doc, yay!');
+				console.log('Players stored into battles doc, yay!');
 			break;
 
 			case 'BATTLE_START_UPDATE_CHALLENGER':
@@ -478,7 +479,7 @@ var GASServer = Maple.Class(function(clientClass) {
 				for(var c=0;c< this.getClients().length; c++) {
 					if(clientToUsername[this.getClients().getAt(c).id] == data.challenger._id) {
 						this.getClients().getAt(c).send('CHALLENGE_RES',
-						 ['{"response":"READY_FOR_WAR", "battle":"'+data.challenger.team.ingame+'"}']);
+						 ['{"response":"READY_FOR_WAR", "battles":"'+data.challenger.team.ingame+'"}']);
 						break;
 					}
 				}
@@ -490,7 +491,7 @@ var GASServer = Maple.Class(function(clientClass) {
 				for(var c=0;c< this.getClients().length; c++) {
 					if(clientToUsername[this.getClients().getAt(c).id] == data.defender._id) {
 						this.getClients().getAt(c).send('CHALLENGE_RES',
-						 ['{"response":"READY_FOR_WAR", "battle":"'+data.defender.team.ingame+'"}']);
+						 ['{"response":"READY_FOR_WAR", "battles":"'+data.defender.team.ingame+'"}']);
 						break;
 					}
 				}
@@ -621,11 +622,11 @@ var GASServer = Maple.Class(function(clientClass) {
 
 
 
-								// if challenge was accepted, initiate battle
+								// if challenge was accepted, initiate battles
 								if ( this.challenges[challenge].state == "ACCEPTED")
 								{
 									this.getClients().getAt(c).send('CHALLENGE_RES', ['{ "response":"'+res+'", "defender":"'+ch.defender+'"}']);
-									// initiate battle start
+									// initiate battles start
 									this.handleCreateNewBattle(null, null, 'BATTLE_START_REQ', {
 										"challenger":ch.challenger,
 										"defender":ch.defender
@@ -690,7 +691,8 @@ var GASServer = Maple.Class(function(clientClass) {
         }
 
         return grid;
-    },
+    }
+
 })
 
 	// Create server
