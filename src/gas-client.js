@@ -667,7 +667,6 @@ function showManagerView()
 
     // Add a title
     Crafty.e("2D, DOM, Text").attr({ w: 400, h: 20, x: 15, y: 10 })
-        .text("Kalevala Heroes / GAS Valhalla")
         .text("Gladiaattoripeli")
         .css({
             "text-align": "left",
@@ -703,10 +702,6 @@ function showManagerView()
                 Crafty.scene("gladiatorPitView");
             }
         });
-
-
-
-
 
     var data = $.cookie("gas-login");
     gas.send('TEAM_REQ', [ '{"username":"'+ JSON.parse(data).username + '"}' ]);
@@ -861,7 +856,6 @@ function gladiatorHTML(gladiator)
     return HTMLstr;
 }
 
-function pitCreateGladiators(gladiatorData){
 function pitCreateGladiators(data){
 
     var pos = { "x" : 414,
@@ -870,18 +864,11 @@ function pitCreateGladiators(data){
                    "y": 128 };
     var count = 0;
 
-    gladiatorData2 = gladiatorData.rows;
-
-    $.each(gladiatorData2, function(key,gladiator)
     $.each(data.gladiatorlist, function(key,gladiator)
     {
-		console.log(key, ":", gladiator.doc.name);
-
-        console.log('Creating gladiator showcase for ' + gladiator.doc.name);
         console.log('Creating gladiator showcase for ' + gladiator.name);
 
         var body = "human_body";
-        if ( gladiator.doc.race == "skeleton" )
         if ( gladiator.race == "skeleton" )
             body = "skeleton_body";
 
@@ -894,8 +881,6 @@ function pitCreateGladiators(data){
             .setupAnimation(body)
             .bind("MouseOver", function(e){
                 this.hideAll();
-                this.enableAnimation(this.walk);
-                this.walk.body.stop().animate("walk_left", 20, -1);
 				if(!hidden) {
 					this.enableAnimation(this.walk);
 					this.walk.body.stop().animate("walk_left", 20, -1);
@@ -915,7 +900,6 @@ function pitCreateGladiators(data){
                         "font-size": "10pt",
                         "color": "#5c3111"
                     })
-                    .text(gladiatorHTML(gladiator.doc));
                     .text(gladiatorHTML(gladiator));
             })
             .bind("MouseOut", function(e){
@@ -927,8 +911,6 @@ function pitCreateGladiators(data){
                 g_pitMessage = null;
             })
 	    .bind('Click', function(){
-			var name = gladiator.doc.name;
-			gas.send("HIRE_GLADIATOR_REQ", ['{"type": "HIRE_GLADIATOR_REQ", "name": "' + gladiator.doc.name +'"}']);
 			var name = gladiator.name;
 			var user = JSON.parse($.cookie("gas-login")).username;
 			gas.send("HIRE_GLADIATOR_REQ", [JSON.stringify({ type: "HIRE_GLADIATOR_REQ", username: user, gladiator: name })]);
@@ -997,7 +979,6 @@ var GAS = Class(function() {
     {
         this.send('CHALLENGE_RES', [ '{ "username":"'+ JSON.parse($.cookie("gas-login")).username + '",'+
                                      '  "challenger":"' + challenger + '",'+
-                                     '  "response":"'+ ( reply == true ? "OK" : "NOK")+'"}' ]);
                                      '  "response":"'+(reply ? "OK" : "NOK")+'"}' ]);
         // e
         $("#challenge_"+challenger).fadeOut("slow", function(){
@@ -1024,26 +1005,13 @@ var GAS = Class(function() {
 			break;
 
 	    case 'CREATE_USER_RESP':
-	    case 'LOGIN_INIT_RESP':
-			if("OK" == JSON.parse(data).response) {
-				//console.log('I want salt for '+JSON.parse($.cookie("gas-login")).username);
-				this.send('USER_SALT_REQ', ['{"username":"' + JSON.parse($.cookie("gas-login")).username + '"}']);
-			}
-			else {
-				alert(JSON.parse(data).response);
-				document.getElementById('username').value = '';
-				document.getElementById('password').value = '';
-			}
+			console.log(JSON.parse(data));
 			break;
 
-	    case 'USER_SALT_RESP':
-		    var hash = Sha1.hash(JSON.parse(data).salt + JSON.parse($.cookie("gas-login")).password);
-		    this.send('LOGIN_REQ', ['{"username":"' + JSON.parse($.cookie("gas-login")).username + '", "pwdhash":"' + hash + '"}']);
-		    //console.log('sending: [{"username":"' + $('#username').val() + '", "pwdhash":"' + hash + '"}]');
-			break;
 
 		case 'LOGIN_RESP': // Authenticated by the server - proceed to game lobby
-			if("OK" === JSON.parse(data).response) {
+			console.log(JSON.parse(data))
+			if("OK" == JSON.parse(data).response) {
 
 				$.cookie("gas-login", data);
 				displayLogin();
@@ -1057,14 +1025,14 @@ var GAS = Class(function() {
 				});*/
 			}
 			else {
-				$.cookie("gas-login", null);
+				//$.cookie("gas-login", null);
 				console.log("Login failed");
 			}
 			break;
 
         case 'GET_AVAILABLE_GLADIATORS_RESP':
 			console.log('Handling gladiator list');
-			pitCreateGladiators(JSON.parse(data));
+			pitCreateGladiators(data[0]);
 			break;
 
 		case 'CHAT_SYNC':
@@ -1090,7 +1058,7 @@ var GAS = Class(function() {
 
         case 'TEAM_RESP':
            console.log("Received team:"+ JSON.stringify(data));
-           this.handleTeamResponse(JSON.parse(data[0]).team);
+           this.handleTeamResponse((data[0]).team);
 			break;
 
         case 'BATTLE_CONTROL_SYNC':
@@ -1127,7 +1095,7 @@ var GAS = Class(function() {
                                      "<input type=\"button\" onclick=\"gas.replyChallenge('"+JSON.parse(data[0]).challenger+"', false);\" value=\"Decline\"></div>");
 
 
-        
+
             //this.send('CHALLENGE_RES', ['{"response":"OK", "defender":"'+$.cookie("gas-login").username+'", "challenger":"'+JSON.parse(data[0]).challenger+'"}']);
 
             break;
@@ -1140,10 +1108,11 @@ var GAS = Class(function() {
             {
                 console.log('Challenge delivered, waiting for response');
             }
+            else
             {
                 console.log('Challenge not accepted:' + JSON.parse(data[0]).reason);
             }
-			
+
 		    break;
 	    default:
 	      console.log("Default branch reached in 'message handling'");
@@ -1155,7 +1124,6 @@ var GAS = Class(function() {
     },
     handleTeamResponse: function(team)
     {
-
         // create visualization for each gladiator in team.
         if ( g_currentView == "manager")
         {
@@ -1190,8 +1158,10 @@ var GAS = Class(function() {
 
             }
             g_gladiators = [];
+			console.log("team.gladiators", team.gladiators);
             for (var i in team.gladiators )
             {
+				console.log(i);
                 var anim = "";
 
                 switch ( team.gladiators[i].race)
