@@ -27,6 +27,7 @@ var configs = require('../json/configs'); 			// Game configuration file
 var cachedGladiators = [];		// ["gladi_name": gladi_object], syntax: var attrib = cachedGladiators["name"].attribute
 var cachedPlayers = [];		// ["gladi_name": gladi_object], syntax: var attrib = cachedGladiators["name"].attribute
 var initialGladiatorsList = [];
+var api = require('./api');
 
 var LOGIC_RATE = 10; // Logic rate in milliseconds
 var TICK_RATE = 3; // Tick rate in milliseconds
@@ -43,6 +44,7 @@ var MANAGEMENT_PERIOD = FIVE_SECONDS; 				// Management period after the initial
 
 // Test -----------------------------------------------------------------------
 var Test = Maple.Class(function(clientClass) {
+var GASServer = Maple.Class(function(clientClass) {
     Maple.Server(this, clientClass);
 
 }, Maple.Server, {
@@ -146,6 +148,7 @@ var Test = Maple.Class(function(clientClass) {
     stopped: function() {
         console.log('Server stopped');
 	this.broadcast(0, ['-- server halted --']);
+		this.broadcast(0, ['-- server halted --']);
     },
 
     connected: function(client) {
@@ -170,6 +173,8 @@ var Test = Maple.Class(function(clientClass) {
 
 	var playerNames = { players:[] }
 	playerNames.players.push( clientToUsername[client.id]);
+		var playerNames = { players:[] }
+		playerNames.players.push( clientToUsername[client.id]);
 
 	for( var c=0; c < this.getClients().length; c++)
 	{
@@ -178,6 +183,13 @@ var Test = Maple.Class(function(clientClass) {
 	}
 	delete clientToUsername[client.id];
         console.log('Disconnected:', client.id);
+		for( var c=0; c < this.getClients().length; c++)
+		{
+		console.log("Updating:", this.getClients().getAt(c).id);
+		this.getClients().getAt(c).send("PLAYER_DISCONNECTED_PUSH", [playerNames]);
+		}
+		delete clientToUsername[client.id];
+			console.log('Disconnected:', client.id);
     },
 
     init: function() {
