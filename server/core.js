@@ -1,0 +1,1072 @@
+/**
+  * Copyright (c) 2012 GAS team.
+  *
+  * Permission is hereby granted, free of charge, to any person obtaining a copy
+  * of this software and associated documentation files (the "Software"), to deal
+  * in the Software without restriction, including without limitation the rights
+  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+  * copies of the Software, and to permit persons to whom the Software is
+  * furnished to do so, subject to the following conditions:
+  *
+  * The above copyright notice and this permission notice shall be included in
+  * all copies or substantial portions of the Software.
+  *
+  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+  * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+  * THE SOFTWARE.
+  */
+
+var configs = require('../json/configs'); 			// Game configuration file
+var counter = 0;
+var allownewedits = true;			// True by default, allow new revisions of documents -> this will increase the DB size every time a doc is updated
+/* GAS server core */
+/* All the internal data should be handled as Javascript objects */
+/* NOTE! Use core.toJSON(myObject) and core.toObject(myJSON) if you need to change the format */
+
+var core = {
+
+	init: function() {
+		console.log("core: init()");
+
+		// Initialize database
+		core.dbcore.init();
+
+		// Cache gladiators
+		this.dbcore.read(configs.gladiatordb + "/_all_docs?include_docs=true", function(err, body) {
+			// Double check that the gladiatordb contains gladiators
+			if(body.total_rows == 0)
+				core.dbcore.generateGladiators();
+			else
+				core.dbcore.initGladiators(body);
+		});
+
+		// Cache users/players
+		this.dbcore.read(configs.userdb + "/_all_docs?include_docs=true", function(err, body) {
+			if(body.total_rows == 0)
+				console.log("core.init: userdb is empty");
+			else
+				core.dbcore.initUsers(body);
+		});
+
+		// Write cached data periodically to the database, so let's create an interval timer
+		setInterval(core.dbcore.writeCache, configs.cachewriteperiod);
+
+		// Prints some statistics
+		setInterval(core.dbcore.printStatistics, configs.statswriteperiod);
+
+
+	},
+
+	dbresponse: function(response) {
+			console.log(response);
+	},
+
+	createUser: function(username, password) {
+		console.log("core.createUser: ", username);
+
+		var crypto = require('crypto');
+		var newuser = core.user;
+		var len = password.length;
+
+		if((null == core.usercache.read(username)) && (len == 40)) {
+			var salt = crypto.createHash('sha1');
+			salt.update(crypto.randomBytes(128));
+			console.log("salt:", salt);
+
+			// Create new user
+			newuser._id = username;
+			newuser.name = username;
+			newuser.login.salt = salt.digest('hex');
+			newuser.login.created = Date.now();
+			newuser.login.password = password;
+
+			console.log("createUser", newuser._id);
+			// Store user/player to database
+
+			this.dbcore.insert(configs.userdb, newuser._id, newuser, function(err, body) {
+				if(err) {
+					console.log("ERROR: dbcore.createUser: ", err.reason, body);
+				}
+				else {
+					// Add user _rev to cached data
+					console.log("INFO: dbcore.insert: added user", body);
+					var userdata = core.getUser(body.id);
+					userdata._rev = body.rev;
+					core.usercache.write(body.id, userdata);
+					}
+			});
+
+			// Write current user data to the usercache for gladiator hiring.
+			core.usercache.write(username, newuser);
+			// Pick the gladiators for the new user
+			var freegladis = core.pickRandomFreeGladiators(configs.freegladiators);
+			newuser.gladiators = [];
+			//console.log("freegladis", freegladis);
+			for(i=0; i<configs.freegladiators; i++) {
+				//console.log("query gladi:", freegladis[i]);
+				core.hireGladiator(newuser._id, freegladis[i]);
+			}
+		}
+		else {
+			return null;
+		}
+
+		//console.log(newuser);
+		return newuser;	// Caller: check that user data is not null
+	},
+
+	// Hire gladiator to a team (also "pushes" gladiator to the teams gladiatorlist)
+	hireGladiator: function(username, gladiator_name) {
+ 		console.log("core.hireGladiator:", username, gladiator_name);
+
+		var gladiator = core.gladiatorcache.read(gladiator_name);
+		if(gladiator == null) {
+			console.log("core.hireGladiator: gladiator", gladiator_name, "not found.");
+			return null;
+		}
+
+		var user = core.usercache.read(username);
+		if(user == null) {
+			console.log("core.hireGladiator: user", username, "not found.");
+			return null;
+		}
+
+		// Check that gladiator is free to serve his/her new master
+		if(gladiator.status!="free") {
+			console.log("core.hireGladiator: gladiator already on duty");
+			return null;
+		}
+
+		// IF ALL PRECONDITIONS OK
+		//console.log("hiring gladiator", gladiator, user);
+		gladiator.manager = user.name;
+		gladiator.status = "onduty";
+
+		// Add gladiator to users team
+		user.gladiators.push(gladiator);
+
+		// Update cache
+		core.usercache.write(user._id, user);
+		core.gladiatorcache.write(gladiator._id, gladiator);
+
+		return gladiator;
+	},
+
+	getGladiator: function(name) {
+ 		console.log("core.getGladiator:", name);
+
+		var gladiator = core.gladiatorcache.read(name);
+		if(gladiator == null) {
+			console.log("ERROR: core.getGladiator: gladiator", name, "not found.");
+			return null;
+		}
+		return gladiator;
+	},
+
+	editGladiator: function(name, attributelist) {
+ 		//console.log("core.editGladiator:", name);
+
+		var gladiator = core.gladiatorcache.read(name);
+		if(gladiator == null) {
+			console.log("ERROR: core.editGladiator: gladiator", name, "not found.");
+			return null;
+		}
+
+		// Edit gladiator attributes
+		for(var item in attributelist) {
+			switch(item) {
+				case "status":
+					gladiator.status = attributelist[item];
+					break;
+				case "manager":
+					gladiator.manager = attributelist[item];
+					break;
+				case "age":
+					gladiator.age = attributelist[item];
+					break;
+				case "health":
+					gladiator.health = attributelist[item];
+					break;
+				case "nimbleness":
+					gladiator.nimbleness = attributelist[item];
+					break;
+				case "strength":
+					gladiator.strength = attributelist[item];
+					break;
+				case "mana":
+					gladiator.mana = attributelist[item];
+					break;
+				case "salary":
+					gladiator.salary = attributelist[item];
+					break;
+				case "fights":
+					gladiator.fights = attributelist[item];
+					break;
+				case "knockouts":
+					gladiator.knockouts = attributelist[item];
+					break;
+				case "injured":
+					gladiator.injured = attributelist[item];
+					break;
+				case "icon":
+					gladiator.icon = attributelist[item];
+					break;
+				default:
+					console.log("ERROR: core.editGladiator: invalid attribute:", item)
+			}
+		}
+
+		// Also update the team
+		if(gladiator.status != "free") {
+			var user = core.usercache.read(gladiator.manager);
+			if(user != null) {
+				//user.gladiators indexes: 0, 1, 2, ...
+				for(var index in user.gladiators) {
+					if(user.gladiators[index].name == gladiator.name) {
+						user.gladiators[index] = gladiator;
+						break;
+					}
+				}
+				//console.log(user._id, user);
+				core.usercache.write(user._id, user);
+				core.gladiatorcache.write(gladiator._id, gladiator);
+			}
+			else {
+				console.log("core.editGladiator: user", gladiator.manager, "not found");
+				return null;
+			}
+
+		}
+
+		return core.gladiatorcache.read(name);
+	},
+
+	rollDice: function(dice) {
+		var roll = require('roll');
+		return roll.roll(dice).result;
+	},
+
+	// Provide some functions to ease the pain
+	toJSON: function(object) {	// Javascript object to JSON string
+		return JSON.stringify(object);
+	},
+
+	toObject: function(json) {	// JSON string to Javascript object
+		// Now this is a bit more complicated structure...
+		var data = JSON.parse(JSON.stringify(json));
+		var mydata = JSON.parse(data, function (key, value) {
+			var type;
+			if (value && typeof value === 'object') {
+				type = value.type;
+				if (typeof type === 'string' && typeof window[type] === 'function') {
+					return new (window[type])(value);
+				}
+			}
+			return value;
+		});
+		return mydata;
+	},
+
+	getUser: function(username) {
+		console.log("core.getUser:", username);
+
+		var user = core.usercache.read(username);
+		if(null != user)
+			return user;
+		else
+			return null;
+	},
+
+	getTeamSize: function(username) {
+		console.log("core.getTeamSize:", username);
+
+		var user = core.usercache.read(username);
+		console.log(user.gladiators.length);
+
+		if(null != user)
+			return user.gladiators.length;
+		else
+			return null;
+
+	},
+
+	pickRandomFreeGladiators: function(amount) {
+		console.log("core.pickRandomFreeGladiators: picking", amount, "gladiators");
+
+		var i=0;
+		var keys = [];
+		var reservedGladiators = [];
+		var gladis = [];
+		var freegladis = 0;
+
+		// This may take a while if amount of free gladiators is small - TODO: make another hash for reservedGladiators.
+		while(Object.keys(reservedGladiators).length < amount) {	// Count the amount of hash keys  (not reservedGladiators.length!!!)
+				var temp_key;
+				for(temp_key in core.gladiatorcache.internalhash) {
+				if(core.gladiatorcache.internalhash.hasOwnProperty(temp_key)) {
+					if(core.gladiatorcache.internalhash[temp_key].status == "free")
+						keys.push(temp_key);
+				}
+			}
+
+			i += 1;
+			var gladi = core.gladiatorcache.internalhash[keys[Math.floor(Math.random() * keys.length)]];
+
+			if(gladi) {
+				if(gladi.status == "free") {
+					var name = gladi.name;
+					reservedGladiators[name] = name;
+				}
+			}
+		}
+
+		for(key in reservedGladiators) {
+			gladis.push(reservedGladiators[key]);
+		}
+
+		return gladis;
+	},
+
+	// DB CORE
+	dbcore: {
+		nano: null,
+
+		init: function () {
+			console.log("dbcore: init()")
+			this.nano = require('nano')('http://localhost:5984');
+
+			// init databases
+			var dbnames = [configs.gladiatordb, configs.userdb, configs.battledb];
+			for(item in dbnames) {
+				if(dbnames[item])
+					this.initGameDb(dbnames[item]);
+				else
+					console.log("ERROR: dbcore.init: failed to create " + dbnames[item]);
+			}
+
+		},
+
+		initGameDb: function(dbname) {
+			this.nano.db.create(dbname, function(err, body) {
+				if (!err) {
+					console.log('INFO: dbcore.initGameDb: database ' + '/' + dbname + ' created!');
+					if(dbname == configs.gladiatordb) {
+						core.dbcore.generateGladiators();
+					}
+				}
+				else {
+					//console.log("ERROR: dbcore.initGameDb: ", err.reason, "(" + dbname + ")");
+				}
+			});
+		},
+
+		generateGladiators: function () {
+			//console.log("dbcore.generateGladiators: generating gladiators");
+			var fs = require('fs');
+			var races = require('../json/races'); // read races.json
+			var gladiators = [];
+			var racecount = 0;
+
+			initialGladiatorsList = fs.readFileSync('../rulesets/gladiatornames.txt').toString().split("\n");
+
+			//console.log("Available races:");
+			for(key in races.race) {
+				//console.log(races.race[key].name);
+				racecount += 1;
+			}
+
+			for(i in initialGladiatorsList) {
+				if(i < parseInt(configs.gladiatorsindatabase)) {
+					var race = core.rollDice("1d"+racecount+"-1");
+					gladiators[i] = {
+						"_id": initialGladiatorsList[i],
+						"name": initialGladiatorsList[i],
+						"status": "free",
+						"race": races.race[race].name,
+						"manager": "null",
+						"age": "0",
+						"health": core.rollDice(races.race[race].health),
+						"nimbleness": core.rollDice(races.race[race].nimbleness),
+						"strength": core.rollDice(races.race[race].strength),
+						"mana": core.rollDice(races.race[race].mana),
+						"salary": core.rollDice(configs.basesalary),
+						"fights": "0",
+						"knockouts": "0",
+						"injured": "0",
+						"icon": races.race[race].icon
+					}
+					// Fill in gladiator cache
+					var name = gladiators[i].name;
+				}
+
+			}
+
+			this.bulkinsert(configs.gladiatordb, gladiators, true, function(err, body) {
+				if(err) {
+					console.log("ERROR: dbcore.generateGladiators: ", err.reason, body);
+				}
+				else {
+					// Read the new data and init gladiatorcache
+					core.dbcore.read(configs.gladiatordb + "/_all_docs?include_docs=true", function(err, body) {
+								// Double check that the gladiatordb contains gladiators
+								if(body.total_rows == 0) {
+									console.log("ERROR: core.dbcore.generateGladiators: gladiators could not be created");
+									// HALT SERVER?
+								}
+								else {
+									core.dbcore.initGladiators(body);
+								}
+							});
+				}
+			});
+			//console.log(core.gladiatorcache);
+		},
+
+		initGladiators: function(http_response) {
+
+			// Iterate through the data we need
+			core.gladiatorcache.flush();
+			var gladiators = {};
+			for(var key in http_response.rows) {
+				//console.log(http_response.rows[key].doc);
+				var name = http_response.rows[key].doc.name;
+				gladiators[name] = http_response.rows[key].doc;
+			}
+			core.gladiatorcache.prefill(gladiators);
+		},
+
+		initUsers: function(http_response) {
+			//console.log(http_response);
+			// Iterate through the data we need
+			core.usercache.flush();
+			var users = {};
+			for(var key in http_response.rows) {
+				var name = http_response.rows[key].doc.name
+				users[name] = http_response.rows[key].doc;
+			}
+			core.usercache.prefill(users);
+		},
+
+		checkDbExistence: function(dbname, callback) {
+			this.nano.db.get(dbname, function(err, body) {
+				if (!err) {
+					callback(true);
+				}
+				else {
+					callback(false);
+				}
+			});
+		},
+
+		read: function(dbname, callback) {
+
+			if(dbname[0] != '/') {
+			  dbname = '/' + dbname;
+			}
+
+			this.nano.db.get(dbname, function(err, body) {
+				if (!err) {
+					callback(err, body);
+				}
+				else {
+					console.log("ERROR: dbcore.read:", dbname, err.reason);
+				}
+			});
+		},
+
+		bulkread: function(dbname, callback) {
+			/*
+			this.nano.db.get(dbname+ '/_all_docs?include_docs=true', function(err, body) {
+			  if (!err)
+				//console.log(dbname);
+				callback(body);
+			});
+			*/
+			console.log("WARNING: dbcore.bulkread: not implemented");
+		},
+
+		insert: function(db, doc, data, callback) {
+
+			this.nano.request({ db: db,
+								doc: doc,
+								method: 'put',
+								body: data
+			   }, callback);
+		},
+
+		bulkinsert: function(dbname, data, newedit, callback) {
+
+			if(newedit != true)
+				newedit = false;
+
+			var bulkdata = {"new_edits":true, docs: data};
+			//var bulkdata = {docs: data};
+			//console.log("bulkinsert:", counter++, bulkdata);
+			this.nano.request({ db: dbname,
+								doc: '_bulk_docs',
+								method: 'post',
+								//Correct format:
+								//body: {"docs":[{"_id":"Itedod","name":"Itedod","race":"skeleton","team":"null","age":"0","health":11,"nimbleness":14,"strength":14,"mana":14,"salary":13,"fights":"0","knockouts":"0","injured":"0","icon":"\"skeleton.png\""},{"_id":"Igoasop","name":"Igoasop","race":"skeleton","team":"null","age":"0","health":9,"nimbleness":12,"strength":10,"mana":12,"salary":14,"fights":"0","knockouts":"0","injured":"0","icon":"\"skeleton.png\""}]}
+								body: bulkdata
+			   }, callback);
+		},
+
+		// Write cached data to the database periodically (every 10 seconds?)
+		writeCache: function() {
+			//console.log("Writing cached data to db!")
+			core.gladiatorcache.save();
+			core.usercache.save();
+			core.itemcache.save();
+
+		},
+
+		printStatistics: function() {
+			var freegladis = 0;
+			var totalgladis = 0;
+			for(var key in core.gladiatorcache.internalhash) {
+				totalgladis++;
+				if(core.gladiatorcache.internalhash[key].status == "free") {
+					freegladis++;
+				}
+			}
+
+			console.log("Statistics:");
+			console.log("\tTotal gladiators:", totalgladis);
+			console.log("\tFree gladiators:", freegladis, "(" + parseFloat((100*(freegladis/totalgladis))).toFixed(2) + "%)");
+			console.log("\tCaches (r/w): gladiator ("+core.gladiatorcache.reads + "/" + core.gladiatorcache.writes+ "), user (" + core.usercache.reads + "/" + core.usercache.writes+"), item ("+core.itemcache.reads + "/" + core.itemcache.writes+")");
+		}
+	}, // dbcore
+
+// MESSAGE STRUCTURES
+	message: {
+
+		// Should we provide an api function, or just the message structures? Or should we use the messages.json instead?
+		// Api would be nice for statistics, e.g. amount of messages created/sent and the total bytes sent/received
+		/*
+		create: function(message) {
+
+			switch(message) {
+				case 'CREATE_USER_REQ':
+				case 'CREATE_USER_RESP':
+					this.message();
+				default:
+					console.log("ERROR: message.create: invalid message request", message)
+					break;
+			}
+
+			return newmsg;
+		}, */
+
+		CREATE_USER_REQ: {
+				"type": 1, // Add this field automatically?
+				"name": "CREATE_USER_REQ",
+				"username": "username",
+				"password": "hashedpwd"
+		},
+
+
+		CREATE_USER_RESP: {
+				message: {
+					"type": 1, // Add this field automatically?
+					"name": "CREATE_USER_RESP",
+					"username": "username",
+					"response": "OK/NOK",
+					"reason": "additional reason, e.g. user exists"
+				},
+				init: function(username, response, reason) {
+					this.message.username = username;
+					this.message.response = response;
+					this.message.reason = reason;
+
+					return JSON.parse(JSON.stringify(this.message));
+				}
+
+		},
+
+		LOGIN_REQ: {
+					"type": 1, // Add this field automatically?
+					"name": "LOGIN_REQ",
+					"username": "username",
+					"password": "empty string or salted password"
+		},
+
+		LOGIN_RESP: {
+				message: {
+					"type": 1, // Add this field automatically?
+					"name": "LOGIN_RESP",
+					"username": "username",
+					"response": "OK/NOK",
+					"reason": "additional reason, e.g. invalid username/password",
+					"salt": "user specific salt"
+				},
+				init: function(username, response, reason) {
+					this.message.username = username;
+					this.message.response = response;
+					this.message.reason = reason;
+
+					return JSON.parse(JSON.stringify(this.message));
+				}
+		},
+
+		GET_AVAILABLE_GLADIATORS_REQ: {
+					"type": 1, // Add this field automatically?
+					"name": "GET_AVAILABLE_GLADIATORS_REQ",
+		},
+
+		GET_AVAILABLE_GLADIATORS_RESP: {
+				message: {
+					"type": 1, // Add this field automatically?
+					"name": "GET_AVAILABLE_GLADIATORS_RESP",
+					"gladiatorlist": [],
+				},
+				init: function() {
+					this.message.gladiatorlist = [];
+					var tmplist = core.pickRandomFreeGladiators(configs.hirelistlength);
+					// Delete revisions from the listings ?
+					for(i in tmplist) {
+						this.message.gladiatorlist[i] = core.gladiatorcache.read(tmplist[i]);
+					}
+					return JSON.parse(JSON.stringify(this.message));
+				}
+		},
+
+		HIRE_GLADIATOR_REQ: {
+				message: {
+					"type": 1, // Add this field automatically?
+					"name": "HIRE_GLADIATOR_REQ",
+					"user": "username",
+					"gladiator": "gladiator's name"
+				},
+		},
+
+		HIRE_GLADIATOR_RESP: {
+				message: {
+					"type": 1, // Add this field automatically?
+					"name": "HIRE_GLADIATOR_RESP",
+					"gladiator": "gladiator's name",
+					"response": "OK/NOK",
+					"reason": "Not available anymore."
+				},
+				init: function(gladiator, response, reason) {
+					this.message.gladiator = gladiator,
+					this.message.response = response,
+					this.message.reason = reason
+					return JSON.parse(JSON.stringify(this.message));
+				},
+				ok: function(gladiator) {
+					this.message.gladiator = gladiator,
+					this.message.response = "OK",
+					this.message.reason = "Gladiator hired."
+					return JSON.parse(JSON.stringify(this.message));
+				},
+				nok: function(gladiator) {
+					this.message.gladiator = gladiator,
+					this.message.response = "NOK",
+					this.message.reason = "Gladiator could not be hired."
+					return JSON.parse(JSON.stringify(this.message));
+				}
+		},
+
+		FIRE_GLADIATOR_REQ: {
+					"type": 1, // Add this field automatically?
+					"name": "FIRE_GLADIATOR_REQ",
+					"user": "username",
+					"sessionid": "to verify the user action?",
+					"gladiator": "gladiator's name"
+		},
+
+		FIRE_GLADIATOR_RESP: {
+				message: {
+					"type": 1, // Add this field automatically?
+					"name": "FIRE_GLADIATOR_RESP",
+					"gladiator": "gladiator's name",
+					"response": "OK",
+					"reason": "I don't wanna leave you!",
+				},
+				init: function(gladiator, response, reason) {
+					this.message.gladiator = gladiator,
+					this.message.response = response,
+					this.message.reason = reason
+					return JSON.parse(JSON.stringify(this.message));
+				}
+		},
+
+		TEAM_RESP: {
+				message: {
+					"type": 1,
+					"name": "TEAM_RESP",
+					"team": []
+				},
+				init: function(user) {
+					// Make a "deep copy" using JSON-functions.
+					this.message.team = JSON.parse(JSON.stringify(core.getUser(user)));
+					delete this.message.team.login;
+					return JSON.parse(JSON.stringify(this.message));
+				}
+
+		},
+
+		MATCH_SYNC: {
+					"type": 1,
+					"name": "MATCH_SYNC",
+					"team1": {"name": "My team", "gladiator":   [{"name": "Mauri", "pos": [{"x": "1", "y": "1"}]},
+																 {"name": "Kaensae", "pos": [{"x": "1", "y": "1"}]}]}, // Include all the gladiator data
+					"team2": {"name": "Your team", "gladiator": [{"name": "Mauri", "pos": [{"x": "1", "y": "1"}]},
+																 {"name": "Kaensae", "pos": [{"x": "1", "y": "1"}]}]}, // Include all the gladiator data
+		},
+
+	}, // Messages
+
+	gladiator: {
+		"status": null,	//free/onduty
+		"_id": null,
+		"name": null,
+		"manager": null,
+		"race": null,
+		"age": null,
+		"health": null,
+		"nimbleness": null,
+		"strength": null,
+		"mana": null,
+		"salary": null,
+		"fights": null,
+		"knockouts": null,
+		"injured": null,
+		"melee": [
+			{
+				"name": "astalo",
+				"damage": "2d6",
+				"description": "Hurts bad."
+			}
+		],
+		"missile":
+			{
+				"name": "shuriken",
+				"damage": "1d4",
+				"description": "Throw and try to hit the target."
+			},
+		"spell":
+			{
+				"name": "iputaspellonyou",
+				"damage": "1d4"
+			},
+		"head":
+			{	"armor": "leather",
+				"icon": "leatherhelmet.png",
+				"description": "A fine piece of leather.",
+				"armourvalue": "1d2+1"
+			},
+		"torso":
+			{	"armor": "chain",
+				"icon": "chainhauberk.png",
+				"description": "Elven crafted chain hauberk. (Do we have elves?)",
+				"armourvalue": "1d3+2"
+			},
+		"legs":
+			{	"armor": "leather",
+				"icon": "lederhosen.png",
+				"description": "Ugly but useful. May contain sauerkraut.",
+				"armourvalue": "1d2"
+			},
+		"feet":
+			{	"armor": "leather",
+				"icon": "leatherboots.png",
+				"description": "A brown pair of boots.",
+				"armourvalue": "1d2"
+			},
+		"hands":
+			{	"armor": "none",
+				"icon": "",
+				"description": "Bare hands.",
+				"armourvalue": "0"
+			},
+		"shield":
+			{	"armor": "wood",
+				"icon": "roundwoodenshield.png",
+				"description": "A firm round wooden shield to cover your limbs and arteries.",
+				"toblock": "50%",
+				"armourvalue": "1d4"
+			},
+		"icon": null
+	}, //gladiator
+
+	user:  {
+		"_id": null,
+		"name": null,
+		"team": null,
+		"ingame": null,
+		"battleteam":[],
+		"gladiators":
+			[{}
+/*			"name": "Kaensae the Skeleton",
+			"race": "skeleton",
+			"age": "5",
+			"health": "20",
+			"nimbleness": "10",
+			"strength": "2",
+			"mana": "10",
+			"salary": "10",
+			"fights": "0",
+			"knockouts": "0",
+			"injured":"0",
+			"melee":
+					  [{"name": "astalo",
+						"damage": "2d6",
+						"description": "Hurts bad."}],
+			"missile":
+					  [{"name": "shuriken",
+						"damage": "1d4",
+						"description": "Throw and try to hit the target."}],
+			"spells":
+					  [{"name": "iputaspellonyou",
+						"damage": "1d4"},
+					   {"name": "healwounds",
+						"damage": "-1d4"}],
+			"armour":
+					  [{"head":"leather",
+						"icon":"leatherhelmet.png",
+						"description":"A fine piece of leather.",
+						"armourvalue":"1d2+1"},
+					   {"torso":"chain",
+						"icon":"chainhauberk.png",
+						"description":"Elven crafted chain hauberk. (Do we have elves?)",
+						"armourvalue":"1d3+2"},
+					   {"legs":"leather",
+						"icon":"lederhosen.png",
+						"description":"Ugly but useful. May contain sauerkraut.",
+						"armourvalue":"1d2"},
+					   {"feet":"leather",
+						"icon":"leatherboots.png",
+						"description":"A brown pair of boots.",
+						"armourvalue":"1d2"},
+					   {"hands":"",
+						"icon":"",
+						"description":"Bare hands.",
+						"armourvalue":"0"},
+					   {"shield":"wood",
+						"icon":"roundwoodenshield.png",
+						"description":"A firm round wooden shield to cover your limbs and arteries.",
+						"toblock":"50%",
+						"armourvalue":"1d4"
+						}],
+		   "icon": "skeleton.png"
+        },
+            {"name": "Mauri the Mighty",
+             "race": "human",
+             "age": "25",
+             "health": "18",
+             "nimbleness": "15",
+             "strength": "18",
+             "mana": "20",
+             "salary": "25",
+             "fights": "100",
+             "knockouts": "48",
+             "injured":"0",
+             "melee":
+                       [{"name": "astalo",
+                         "damage": "2d6",
+                         "description": "Hurts bad."}],
+             "missile":
+                       [{"name": "shuriken",
+                         "damage": "1d4",
+                         "description": "Throw and try to hit the target."}],
+             "spells":
+                       [{"name": "iputaspellonyou",
+                         "damage": "1d4"},
+                        {"name": "healwounds",
+                         "damage": "-1d4"}],
+             "armour":
+                       [{"head":"leather",
+                         "icon":"leatherhelmet.png",
+                         "description":"A fine piece of leather.",
+                         "armourvalue":"1d2+1"},
+                        {"torso":"chain",
+                         "icon":"chainhauberk.png",
+                         "description":"Elven crafted chain hauberk. (Do we have elves?)",
+                         "armourvalue":"1d3+2"},
+                        {"legs":"leather",
+                         "icon":"lederhosen.png",
+                         "description":"Ugly but useful. May contain sauerkraut.",
+                         "armourvalue":"1d2"},
+                        {"feet":"leather",
+                         "icon":"leatherboots.png",
+                         "description":"A brown pair of boots.",
+                         "armourvalue":"1d2"},
+                        {"hands":"",
+                         "icon":"",
+                         "description":"Bare hands.",
+                         "armourvalue":"0"},
+                        {"shield":"wood",
+                         "icon":"roundwoodenshield.png",
+                         "description":"A firm round wooden shield to cover your limbs and arteries.",
+                         "toblock":"50%",
+                         "armourvalue":"1d4"
+                         }],
+            "icon": "skeleton.png"*/
+         ],
+		"created": null,
+		"login": {"salt": null,
+				  "password": null,
+				  "history": [{"ip": null, "timestamp": null, "duration": null, "failed": null}]
+				 }
+	},
+
+	// CACHES
+	gladiatorcache: {
+		internalhash: {},	// Cached data
+		dirtykeys: {},		// Key to changed data
+		reads: 0,
+		writes: 0,
+
+		prefill: function(gladiators) {
+			var i = 0;
+
+			for(var key in gladiators) {
+				this.internalhash[key] = gladiators[key];
+				i++;
+			}
+
+			console.log("INFO: gladiatorcache prefilled with", i, "gladiators.");
+		},
+		flush: function() { console.log("gladiatorcache emptied!"); this.internalhash = []; this.dirtykeys = []; this.reads = 0; this.writes = 0;},
+		write: function(key, data) { this.writes++; this.internalhash[key] = data;	this.dirtykeys[key] = true; },
+		read: function(key) { this.reads++; return this.internalhash[key]; },
+		getCacheLength: function() { return Object.keys(this.internalhash).length },
+		getDirtyLength: function() { return Object.keys(this.dirtykeys).length },
+		save: function() {
+			var retdata = [];
+			var i = 0;
+			for(var key in this.dirtykeys) {
+				retdata[i] = this.internalhash[key];
+				i++;
+			}
+
+			// Update only if there are dirty entries
+			if(this.getDirtyLength() > 0) {
+				console.log("gladiatorcache: dirty entries", retdata);
+				core.dbcore.bulkinsert(configs.gladiatordb, retdata, false, function(err, body) {
+					if(err) {
+						console.log("ERROR: core.gladiatorcache.save ", err.reason);
+					}
+					else {
+						console.log("gladiatorcache: bulkinserted", err, body);
+						for(var i in body) {
+							core.gladiatorcache.internalhash[body[i].id]._rev = body[i].rev;
+						}
+						// Clear the dirty entries
+						for(var key in core.gladiatorcache.dirtykeys) {
+							delete core.gladiatorcache.dirtykeys[key];
+						}
+					}
+				});
+			}
+		}
+	},
+
+	itemcache: {
+		internalhash: {},	// Cached data
+		dirtykeys: {},		// Key to changed data
+		reads: 0,
+		writes: 0,
+
+		prefill: function(items) {
+			var i = 0;
+			for(var key in items) {
+				this.internalhash[key] = items[key];
+				i++;
+			}
+			console.log("INFO: itemcache prefilled with", i, "items.");
+		},
+		flush: function() { console.log("itemcache emptied!"); this.internalhash = []; this.dirtykeys = []; this.reads = 0; this.writes = 0;},
+		write: function(key, data) { this.writes++; this.internalhash[key] = data;	this.dirtykeys[key] = true; },
+		read: function(key) { this.reads++; return this.internalhash[key]; },
+		getCacheLength: function() { return Object.keys(this.internalhash).length },
+		getDirtyLength: function() { return Object.keys(this.dirtykeys).length },
+		save: function() {
+			var retdata = [];
+			var i = 0;
+			for(var key in this.dirtykeys) {
+				retdata[i] = this.internalhash[key];
+				i++;
+			}
+
+			// Update only if there are dirty entries
+			if(this.getDirtyLength() > 0) {
+				//console.log("itemcache: dirty entries", retdata);
+				core.dbcore.bulkinsert(configs.itemdb, retdata, false, function(err, body) {
+					if(err) {
+						console.log("ERROR: core.itemcache.save ", err.reason);
+					}
+					else {
+						for(var i in body) {
+							core.itemcache.internalhash[body[i].id]._rev = body[i].rev;
+						}
+						// Clear the dirty entries
+						for(var key in core.itemcache.dirtykeys) {
+							delete core.itemcache.dirtykeys[key];
+						}
+					}
+				});
+			}
+		}
+	},
+
+	usercache: {
+		internalhash: {},	// Cached data
+		dirtykeys: {},		// Key to changed data
+		reads: 0,
+		writes: 0,
+
+		prefill: function(users) {
+			var i = 0;
+			for(var key in users) {
+				this.internalhash[key] = users[key];
+				i++;
+			}
+			console.log("INFO: usercache prefilled with", i, "users.");
+		},
+		flush: function() { console.log("usercache emptied!"); this.internalhash = []; this.dirtykeys = []; this.reads = 0; this.writes = 0;},
+		write: function(key, data) { this.writes++; console.log("write usercache", key, data); this.internalhash[key] = data; this.dirtykeys[key] = true; },
+		read: function(key) { this.reads++; return this.internalhash[key]; },
+		getCacheLength: function() { return Object.keys(this.internalhash).length },
+		getDirtyLength: function() { return Object.keys(this.dirtykeys).length },
+		save: function() {
+			var retdata = [];
+			var i = 0;
+			for(var key in this.dirtykeys) {
+				retdata[i] = this.internalhash[key];
+				i++;
+			}
+
+			// Update only if there are dirty entries
+			if(this.getDirtyLength() > 0) {
+				//console.log("usercache: dirty entries", retdata);
+				core.dbcore.bulkinsert(configs.userdb, retdata, false, function(err, body) {
+					var tmp = core.usercache.internalhash[body.id];
+					console.log(tmp);
+					if(err) {
+						console.log("ERROR: core.usercache.save ", err);
+					}
+					else {
+						//console.log("usercache: bulkinserted", err, body;
+						// Clear the dirty entries
+						//console.log(core.usercache.internalhash);
+						for(var i in body) {
+							core.usercache.internalhash[body[i].id]._rev = body[i].rev;
+						}
+						for(var key in core.usercache.dirtykeys) {
+							delete core.usercache.dirtykeys[key];
+						}
+					}
+				});
+			}
+		}
+	}
+
+}
+
+module.exports = core;
