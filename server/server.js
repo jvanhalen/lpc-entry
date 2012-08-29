@@ -45,29 +45,30 @@ var GASServer = Maple.Class(function(clientClass) {
 
 }, Maple.Server, {
 
-    pointOfReference: 0, // ticks
-    paused: false,   // state
-    duration: 0, // for how long
+	pointOfReference: 0, 	// ticks
+	paused: false,   		// state
+	duration: 0, 			// for how long
+	ai: false,					// Game ai
 
-    battlesSessions: [], // which battless are active.
-    challenges: [], // which challenges are currently active
-    started: function() {
+	battlesSessions: [], // which battless are active.
+	challenges: [], // which challenges are currently active
+	started: function() {
 	console.log('Server initializing...');
 	this.init();
-        console.log('Server startup complete.');
-        /*
-          how to use createGridFromFile:
-          -----------------------------
-          var grid = this.createGridFromFile('arena');
+		console.log('Server startup complete.');
+		/*
+		  how to use createGridFromFile:
+		  -----------------------------
+		  var grid = this.createGridFromFile('arena');
 
-          how to use A* to get path from point a to point b:
-          -------------------------------------------------
-          var finder = new PF.AStarFinder();
-          var path = finder.findPath( 8,13,  8,14,  grid.clone() );
-          console.log('Path:'+JSON.stringify(path));
-          path = finder.findPath( 8,13,   9,13,   grid.clone() );
-          console.log('Path:'+JSON.stringify(path));
-        */
+		  how to use A* to get path from point a to point b:
+		  -------------------------------------------------
+		  var finder = new PF.AStarFinder();
+		  var path = finder.findPath( 8,13,  8,14,  grid.clone() );
+		  console.log('Path:'+JSON.stringify(path));
+		  path = finder.findPath( 8,13,   9,13,   grid.clone() );
+		  console.log('Path:'+JSON.stringify(path));
+		*/
 
     },
 
@@ -190,7 +191,29 @@ var GASServer = Maple.Class(function(clientClass) {
 	            process.exit();
 	        }
 	    });
-	    //tty.setRawMode(true);
+
+		// Init game AI
+		if(false == this.ai) {
+			var aiProcess = require('child_process');
+
+			this.ai = aiProcess.fork('./server/ai');
+			// Handle messages coming from the CHILD process
+			this.ai.on('message', function(message) {
+			  console.log('PARENT received message from ai CHILD process', message);
+
+			  switch(message.name) {
+
+				case 'SOME_RESPONSE':
+					break;
+
+				default:
+					console.log("Unhandled message from CHILD process:", message)
+			  }
+
+			});
+			// Send a message to the CHILD process
+			this.ai.send({type: 2, name: 'AI_MESSAGE_EXAMPLE', action: "cast a nice spell", params: {name: "Magic missile", type: "attack", damage: "2d4" } });
+		}
 
 		// Initialize api
 		api.init();
