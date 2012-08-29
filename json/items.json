@@ -1,0 +1,84 @@
+{
+    "items":
+    [{
+        "name": "Magic missile I",
+		"type": "spell",
+        "subtype": "attack",
+        "slot": "hand",
+		"price": "50",
+		"tohit": "90", "toblock": null,	"tocrit": "5", "armourvalue": null, "damage": "1d4", "delay": "2", "range": null,
+		"health": "0", "nimbleness": null, "strength": null, "mana": "-1d5", "age": null,
+		"icon": null,
+        "description": "A crude iron sword."
+        },{
+        "name": "Iron sword",
+		"type": "weapon",
+        "subtype": "sword",
+        "slot": "hand",
+		"price": "100",
+		"tohit": "50", "toblock": "10",	"tocrit": "4", "armourvalue": "1d3", "damage": "1d6",
+		"health": "0", "nimbleness": null, "strength": null, "mana": null, "age": null,
+		"icon": null,
+        "description": "A crude iron sword."
+        },{
+        "name": "Steel sword",
+		"type": "weapon",
+        "subtype": "sword",
+        "slot": "hand",
+		"price": "150",
+		"tohit": "50", "toblock": "12",	"tocrit": "6", "armourvalue": "1d4", "damage": "2d4+1",
+		"health": "0", "nimbleness": null, "strength": null, "mana": null, "age": null,
+		"icon": null,
+        "description": "A sharp steel sword."
+        },{
+        "name": "Wooden staff",
+		"type": "weapon",
+        "subtype": "staff",
+        "slot": "hand",
+		"price": "10",
+		"tohit": "60", "toblock": "25",	"tocrit": "6", "armourvalue": "1d4", "damage": "1d6",
+		"health": "0", "nimbleness": "-1", "strength": null, "mana": null, "age": null,
+		"icon": null,
+        "description": "A sharp steel sword."
+        },{
+        "name": "Morning-star",
+		"type": "weapon",
+        "subtype": "flail",
+        "slot": "hand",
+		"price": "80",
+		"tohit": "45", "toblock": "4",	"tocrit": "10", "armourvalue": "1d2", "damage": "2d4+3",
+		"health": "0", "nimbleness": null, "strength": null, "mana": null, "age": null,
+		"icon": null,
+        "description": "A nasty spiked iron club."
+        },{
+        "name": "Plate armor",
+		"type": "armor",
+        "subtype": "plate",
+        "slot": "body",
+		"price": "1200",
+		"tohit": null, "toblock": "98", "tocrit": null, "armourvalue": "2d4+2", "damage": null,
+		"health": null, "nimbleness": "-2", "strength": null, "mana": null, "age": null,
+		"icon": null,
+        "description": "A full plate armor."
+        },{
+        "name": "Chain armor",
+		"type": "armor",
+        "subtype": "chain",
+        "slot": "body",
+		"price": "800",
+		"tohit": null, "toblock": "95", "tocrit": null, "armourvalue": "2d3+1", "damage": null,
+		"health": null, "nimbleness": null, "strength": null, "mana": null, "age": null,
+		"icon": null,
+        "description": "A full chain armor."
+        },{
+        "name": "Leather armor",
+		"type": "armor",
+        "subtype": "leather",
+        "slot": "body",
+		"price": "100",
+		"tohit": null, "toblock": "90", "tocrit": null, "armourvalue": "1d3", "damage": null,
+		"health": null, "nimbleness": null, "strength": null, "mana": null, "age": null,
+		"icon": null,
+        "description": "A full leather armor."
+    }]
+}

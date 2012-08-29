@@ -52,6 +52,17 @@ var core = {
 				core.dbcore.initUsers(body);
 		});
 
+		// Cache items
+		this.dbcore.read(configs.itemdb + "/_all_docs?include_docs=true", function(err, body) {
+			if(body.total_rows == 0) {
+				console.log("core.init: itemdb is empty");
+				core.dbcore.generateItems(body);
+			}
+			else {
+				core.dbcore.initItems(body);
+			}
+		});
+
 		// Write cached data periodically to the database, so let's create an interval timer
 		setInterval(core.dbcore.writeCache, configs.cachewriteperiod);
 
@@ -345,7 +356,7 @@ var core = {
 			this.nano = require('nano')('http://localhost:5984');
 
 			// init databases
-			var dbnames = [configs.gladiatordb, configs.userdb, configs.battledb];
+			var dbnames = [configs.gladiatordb, configs.userdb, configs.battledb, configs.itemdb];
 			for(item in dbnames) {
 				if(dbnames[item])
 					this.initGameDb(dbnames[item]);
@@ -361,6 +372,9 @@ var core = {
 					console.log('INFO: dbcore.initGameDb: database ' + '/' + dbname + ' created!');
 					if(dbname == configs.gladiatordb) {
 						core.dbcore.generateGladiators();
+					}
+					if(dbname == configs.itemdb) {
+						core.dbcore.generateItems();
 					}
 				}
 				else {
@@ -431,6 +445,38 @@ var core = {
 			//console.log(core.gladiatorcache);
 		},
 
+		generateItems: function () {
+			//console.log("dbcore.generateItems: generating items");
+			var fs = require('fs');
+			var items = require('../json/items.json');
+			var racecount = 0;
+			var itemlist = [];
+
+			for(var i in items.items) {
+				itemlist[i] = items.items[i];
+				console.log(item, items.items[i])
+			}
+
+			this.bulkinsert(configs.itemdb, itemlist, true, function(err, body) {
+				if(err) {
+					console.log("ERROR: dbcore.generateItems: ", err.reason, body);
+				}
+				else {
+					// Read the new data and init itemcache
+					core.dbcore.read(configs.itemdb + "/_all_docs?include_docs=true", function(err, body) {
+						// Double check that the gladiatordb contains gladiators
+						if(body.total_rows == 0) {
+							console.log("ERROR: core.dbcore.generateItems: items could not be created");
+							// HALT SERVER?
+						}
+						else {
+							core.dbcore.initItems(body);
+						}
+					});
+				}
+			});
+		},
+
 		initGladiators: function(http_response) {
 
 			// Iterate through the data we need
@@ -454,6 +500,18 @@ var core = {
 				users[name] = http_response.rows[key].doc;
 			}
 			core.usercache.prefill(users);
+		},
+
+		initItems: function(http_response) {
+			//console.log(http_response);
+			// Iterate through the data we need
+			core.itemcache.flush();
+			var items = {};
+			for(var key in http_response.rows) {
+				var name = http_response.rows[key].doc.name
+				items[name] = http_response.rows[key].doc;
+			}
+			core.itemcache.prefill(items);
 		},
 
 		checkDbExistence: function(dbname, callback) {
@@ -618,8 +676,8 @@ var core = {
 		},
 
 		GET_AVAILABLE_GLADIATORS_REQ: {
-					"type": 1, // Add this field automatically?
-					"name": "GET_AVAILABLE_GLADIATORS_REQ",
+				"type": 1, // Add this field automatically?
+				"name": "GET_AVAILABLE_GLADIATORS_REQ",
 		},
 
 		GET_AVAILABLE_GLADIATORS_RESP: {
@@ -677,11 +735,11 @@ var core = {
 		},
 
 		FIRE_GLADIATOR_REQ: {
-					"type": 1, // Add this field automatically?
-					"name": "FIRE_GLADIATOR_REQ",
-					"user": "username",
-					"sessionid": "to verify the user action?",
-					"gladiator": "gladiator's name"
+				"type": 1, // Add this field automatically?
+				"name": "FIRE_GLADIATOR_REQ",
+				"user": "username",
+				"sessionid": "to verify the user action?",
+				"gladiator": "gladiator's name"
 		},
 
 		FIRE_GLADIATOR_RESP: {
@@ -716,14 +774,31 @@ var core = {
 		},
 
 		MATCH_SYNC: {
-					"type": 1,
-					"name": "MATCH_SYNC",
-					"team1": {"name": "My team", "gladiator":   [{"name": "Mauri", "pos": [{"x": "1", "y": "1"}]},
-																 {"name": "Kaensae", "pos": [{"x": "1", "y": "1"}]}]}, // Include all the gladiator data
-					"team2": {"name": "Your team", "gladiator": [{"name": "Mauri", "pos": [{"x": "1", "y": "1"}]},
-																 {"name": "Kaensae", "pos": [{"x": "1", "y": "1"}]}]}, // Include all the gladiator data
+			message: {
+				"type": 1,
+				"name": "MATCH_SYNC",
+				"team1": {"name": "My team", "gladiator":   [{"name": "Mauri", "pos": [{"x": "1", "y": "1"}]},
+															 {"name": "Kaensae", "pos": [{"x": "1", "y": "1"}]}]}, // Include all the gladiator data
+				"team2": {"name": "Your team", "gladiator": [{"name": "Mauri", "pos": [{"x": "1", "y": "1"}]},
+															 {"name": "Kaensae", "pos": [{"x": "1", "y": "1"}]}]}, // Include all the gladiator data
+			}
 		},
 
+		ITEM_SYNC: {
+			message: {
+				"type": 1,
+				"name": "ITEM_SYNC",
+				"itemlist": []
+			},
+			getItems: function(){
+				var index = 0;
+				//console.log(core.itemcache.internalhash);
+				for(var item in core.itemcache.internalhash) {
+					this.message.itemlist[index++] = core.itemcache.internalhash[item];
+				}
+				return JSON.parse(JSON.stringify(this.message));
+			}
+		}
 	}, // Messages
 
 	gladiator: {
@@ -918,6 +993,32 @@ var core = {
 				  "password": null,
 				  "history": [{"ip": null, "timestamp": null, "duration": null, "failed": null}]
 				 }
+	},
+
+
+	item: {	// See items.json for item listing
+		"_id": null,			// Unique item identifier (created on init (per server))
+		"name": null,			// Name of the item
+		"type": null,			// {weapon, spell, armour, ring, necklace}
+		"subtype": null,		// sword, club, spear, etc. for later use (more specific damage modeling)
+		"slot": null,			// {head, torso, neck, arm, hand, lhand, rhand, waist, leg, foot}
+		"price": null,
+
+		// tohit, tocrit, toblock scale 0-100 (%)
+		"tohit": null,
+		"toblock": null,
+		"tocrit": null,
+		"armourvalue": null,
+		// modifiers (minus sign for decrease, plus  (or no sign) for increase)
+		"health": null,			// for healing spells and items providing bonus health
+		"damage": null,			// for wapons and attack spells
+		"nimbleness": null,
+		"strength": null,
+		"mana": null,
+		"age":	null,
+
+		"icon": null,
+		"description": null
 	},
 
 	// CACHES

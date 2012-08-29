@@ -9,8 +9,6 @@ var g_gladiatorShowCase = null;	// Gladiator at gladiatorView
 var g_gladiators = [];
 var g_timer = { view: null, time: 0};
 var loadAudio = true;
-var g_arenaWait = null;
-
 Crafty.c('Dummy', {
     dummyIndex: 0,
     setDummyIndex: function(i)
@@ -348,36 +346,32 @@ function LoadTileMap(file, createGrid)
 //var text = "Känsä the Skeleton<br>Health: 20<br>Strength:2<br>Dexterity: 5<br>Mana:7<br>Age:5/35<br>Salary:32<br>Fights: 0<br>KOs:2<br>Injury: 0<br>Melee weapon: Fist<br>missile weapon: None<br>Spell: None<br>Dodge: Dart<br>Magic res: 20%<br>Armour: None";
 
 var shopListObjs = [];
-var magicItems = [
-    {
-        name:'Rain Ward',
-        mana:1,
-        duration:10,
-        effect: 'Subtracts damage by 1 point(s)',
-        cost:100,
-        desc:'This spell has made rain capes unnecessary'
-    },
-    {
-        name:'Punch Ward',
-        mana:2,
-	    duration:10,
-	    effect:'Subtracts damage by 2 point(s)',
-	    cost:200,
-	    desc:'Wards from a punch'
-    }
-];
-var mightItems = [
-    {
-        name:'Sharp Stick',
-        effect:'2-5',
-	    cost:70
-    },
-	{
-        name:'Cheap Spear',
-	    effect:'2-7',
-	    cost:129
-    }
-];
+var magicItems = [];
+var mightItems = [];
+
+function handleItemSync(data) {
+
+	magicItems = [];
+	mightItems = [];
+
+	for(var key in data.itemlist) {
+		switch(data.itemlist[key].type) {
+			case "weapon":
+				mightItems[mightItems.length] = data.itemlist[key];
+				break;
+			case "spell":
+				magicItems[magicItems.length] = data.itemlist[key];
+				break;
+			case "armour":
+				break;
+			case "consumable":
+				break;
+			default:
+				console.log("handleItemSync: Unidentified non-Flying Object (UnFO).");
+				break;
+	}
+
+}
 
 function showMagicView()
 {
@@ -427,7 +421,7 @@ function showMightView()
         _y = _y + 32;
         shopListObjs.push(
             Crafty.e("2D, DOM, Text, Mouse").attr({w:200, h:32, x: 102, y: _y, z: 3 })
-                .text(item.name+' ' +item.effect + ' ' + item.cost )
+                .text(item.name+'<br />  ' +item.type + '/' +item.subtype+ ' ' + item.price )
                 .css({
                     "text-align": "left",
                     "font-family": "Arial",
@@ -727,7 +721,7 @@ function showArenaView()
         console.log("WARNING: current grid is not set!");
     }
 
-    
+
     Crafty.e("2D, DOM, Mouse, Text")
         .attr({w:200, h:32, x:20, y:10, z:9})
         .text('Back')
@@ -755,16 +749,9 @@ function showArenaView()
               "font-size":"24pt"});
 
     var data = $.cookie('gas-login');
-
-    g_arenaWait = Crafty.e("2D, DOM, Text")
-        .attr({w:300, h:100, x:150, y:250, z:9})
-        .text('Waiting for the other party to join...')
-        .css({"font-family":"Impact",
-              "font-size":"24pt"});
-    
-    gas.send('ENTERING_ARENA', ['{"username":"'+ JSON.parse(data).username + '", "battle":"'+gas.activeBattle+'"}' ]);
-
     //gas.send('GET_TEAM_REQ', [ '{"username":"'+ JSON.parse(data).username + '"}' ]);
+
+
 
 
 
@@ -941,8 +928,6 @@ var GAS = Class(function() {
 }, Maple.Client, {
     paused: false,   // state
     pointOfReference: 0,
-    activeBattle: '',
-
     started: function() {
         console.log('started');
         this.pointOfReference = 0;
@@ -1046,6 +1031,11 @@ var GAS = Class(function() {
 			pitCreateGladiators(data[0]);
 			break;
 
+		case 'ITEM_SYNC':
+			console.log('Handling item list');
+			handleItemSync(data[0]);
+			break;
+
 		case 'CHAT_SYNC':
 			$('#chatbox').append('<div id="message"><a href="#" title="The coolest guy on Earth">'+ JSON.parse(data).username + ':</a>&nbsp;&nbsp;' + JSON.parse(data).message + '<br /></div>');
 				// Chatbox auto-scroll
@@ -1110,9 +1100,6 @@ var GAS = Class(function() {
             //this.send('CHALLENGE_RES', ['{"response":"OK", "defender":"'+$.cookie("gas-login").username+'", "challenger":"'+JSON.parse(data[0]).challenger+'"}']);
 
             break;
-        case 'BATTLE_START':
-           console.log('Battle is starting in: '+JSON.parse(data[0]).startTick);
-           break;
         case 'CHALLENGE_RES':
             if ( JSON.parse(data[0]).response === "OK" )
             {
@@ -1141,9 +1128,6 @@ var GAS = Class(function() {
     },
     handleTeamResponse: function(team)
     {
-
-        this.activeBattle = team.ingame;
-
         // create visualization for each gladiator in team.
         if ( g_currentView == "manager")
         {
@@ -1157,7 +1141,7 @@ var GAS = Class(function() {
                     .css({
                         "text-align": "center",
                         "font-family": "Fanwood",
-                        "font-size": "23pt",
+                        "font-size": "13pt",
                     })
                     .bind('Click', function(){
                         Crafty.scene("arenaView");
@@ -1166,12 +1150,16 @@ var GAS = Class(function() {
             } else {
                 Crafty.e("2D, DOM, Mouse, Text")
                     .attr( {w:130, h:20, x:340, y:100, z:9})
-                    .text("Challenge someone")
+                    .text("Select battles")
                     .css({
                         "text-align": "center",
                         "font-family": "Fanwood",
-                        "font-size": "23pt",
+                        "font-size": "13pt",
+                    })
+                    .bind('Click', function(){
+                        Crafty.scene("arenaView");
                     });
+
             }
             g_gladiators = [];
 			console.log("team.gladiators", team.gladiators);
