@@ -367,10 +367,10 @@ function handleItemSync(data) {
 			case "consumable":
 				break;
 			default:
-				console.log("handleItemSync: Unidentified non-Flying Object (UnFO).");
+				console.log("handleItemSync: Unidentified non-Flying Object (UN-FO).");
 				break;
+		}
 	}
-
 }
 
 function showMagicView()
