@@ -1,19 +1,26 @@
 {
 
     "_id": 						"configs",
-    "gladiatordb":				"gladiators",
-    "usersdb":                  "users",
-    "battledb":                 "battles",
-    "playerspershard":			"1000",
-    "teamsizemax": 				"8",
-    "teamsizematch": 			"4",
-    "challengerankmax": 		"10",
+    "playerspershard":			1000,
+    "teamsizemax": 				8,
+    "teamsizematch": 			4,
+    "challengerankmax": 		10,
     "matchchat": 				"false",
     "lobbychat": 				"true",
-	"startingmoney":			"200",
+	"startingmoney":			200,
 	"basesalary": 		    	"5d4",
-	"freegladiators":		    "2",
-    "gladiatorsindatabase": 	"100",
-	"hirelistlength":			"12"
+	"freegladiators":		    2,
+    "gladiatorsindatabase": 	100,
+	"hirelistlength":			12,
+
+	"SERVER_CACHE_CONTROLS":	true,
+	"cachewriteperiod":			5000,
+	"statswriteperiod":			120000,
+
+	"DATABASE":					true,
+    "gladiatordb":				"gladiators",
+    "userdb":                 	"users",
+    "battledb":                 "battles",
+	"itemdb":					"items"
 
 }

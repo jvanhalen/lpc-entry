@@ -42,8 +42,8 @@
       var hashPass = Sha1.hash($('#password').val());
       var login = $('#username').val();
        // set cookie for later use
-       $.cookie('gas-login', JSON.stringify({"username":login, "password":hashPass}));
-       gas.send(type, [ '{"username":"'+login+'"}' ]);
+       $.cookie('gas-login', JSON.stringify({"username":login, "sessionid":hashPass}));
+       gas.send(type, [ JSON.stringify({"username":login, "password":hashPass}) ]);
      }
      });
      // ****************************************
@@ -95,9 +95,7 @@
 		    }
 		}
 	});
-
-
-      });
+ })
 
     </script>
 
@@ -107,7 +105,7 @@
       {
 	Crafty.audio.stop();
 	Crafty.stop();
-        $.cookie("gas-login").username = null;
+        //$.cookie("gas-login").username = null;
 	location.reload(true);
 
       }
@@ -145,7 +143,7 @@
 	</div>
       </fieldset>
       <fieldset>
-        <button type="submit" id="loginbtn" title="Log in to an existing account" onclick="setType('LOGIN_INIT_REQ');"> >>&nbsp;&nbsp;Login</button>
+        <button type="submit" id="loginbtn" title="Log in to an existing account" onclick="setType('LOGIN_REQ');"> >>&nbsp;&nbsp;Login</button>
 	<button type="submit" id="createbtn" title="Create new team" onclick="setType('CREATE_USER_REQ');"> >>&nbsp;&nbsp;Create</button>
       </fieldset>
     </form>
@@ -197,11 +195,14 @@
     });
     Crafty.scene("loginView");
 
+
     if ( $.cookie("gas-login")) {
-
-          gas.send('LOGIN_INIT_REQ', [ '{"username":"' + JSON.parse($.cookie("gas-login")).username+'"}' ]);
-
-    }
+		var loginstring = {
+		'username': JSON.parse($.cookie("gas-login")).username,
+		'sessionid': JSON.parse($.cookie("gas-login")).sessionid
+		}
+        gas.send('LOGIN_REQ', [ JSON.stringify(loginstring) ]);
+	}
 
     // Ignore login for development..
 /*    $('#login').fadeOut(500, function(){
@@ -223,7 +224,7 @@
       </div>
       <div id="challenges">
         What now?
-      </div>  
+      </div>
   </div>
 
 </body>
