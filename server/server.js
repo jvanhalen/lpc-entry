@@ -594,6 +594,11 @@ var GASServer = Maple.Class(function(clientClass) {
 				client.send(api.message.TEAM_RESP.message.name, [api.message.TEAM_RESP.init(JSON.parse(data).username)]);
 			break;
 
+			case 'BUY_ITEM_REQ':
+				// Fourth alternative, let the api crunch the whole message
+				api.buyItem(data);
+			break;
+
 			case 'GET_AVAILABLE_GLADIATORS_REQ':
 				// Return random gladiators to every request or the same set for everyone?
 				client.send(api.message.GET_AVAILABLE_GLADIATORS_RESP.message.name, [api.message.GET_AVAILABLE_GLADIATORS_RESP.init()]);

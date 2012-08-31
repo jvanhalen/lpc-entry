@@ -290,11 +290,15 @@ var core = {
 	getUser: function(username) {
 		console.log("core.getUser:", username);
 
-		var user = core.usercache.read(username);
-		if(null != user)
-			return user;
-		else
-			return null;
+		return JSON.parse(JSON.stringify(core.usercache.read(username)));
+
+	},
+
+	getItem: function(item) {
+		console.log("core.getItem:", item);
+
+		return JSON.parse(JSON.stringify(core.itemcache.read(item)));
+
 	},
 
 	getTeamSize: function(username) {
@@ -372,9 +376,6 @@ var core = {
 					console.log('INFO: dbcore.initGameDb: database ' + '/' + dbname + ' created!');
 					if(dbname == configs.gladiatordb) {
 						core.dbcore.generateGladiators();
-					}
-					if(dbname == configs.itemdb) {
-						core.dbcore.generateItems();
 					}
 				}
 				else {
@@ -756,6 +757,25 @@ var core = {
 					this.message.reason = reason
 					return JSON.parse(JSON.stringify(this.message));
 				}
+		},
+
+
+		BUY_ITEM_REQ: {
+				message: {
+					"type": 1, // Add this field automatically?
+					"name": "BUY_ITEM_REQ",
+					"user": "username",
+					"item": "item id"
+				},
+		},
+
+		BUY_ITEM_RESP: {
+				message: {
+					"type": 1, // Add this field automatically?
+					"name": "BUY_ITEM_RESP",
+					"user": "username",
+					"item": "item id"
+				},
 		},
 
 		TEAM_RESP: {

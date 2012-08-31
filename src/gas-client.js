@@ -348,11 +348,13 @@ function LoadTileMap(file, createGrid)
 var shopListObjs = [];
 var magicItems = [];
 var mightItems = [];
+var armourItems = [];
 
 function handleItemSync(data) {
 
 	magicItems = [];
 	mightItems = [];
+	armourItems = [];
 
 	for(var key in data.itemlist) {
 		switch(data.itemlist[key].type) {
@@ -363,8 +365,10 @@ function handleItemSync(data) {
 				magicItems[magicItems.length] = data.itemlist[key];
 				break;
 			case "armour":
+				armourItems[armourItems.length] = data.itemlist[key];
 				break;
 			case "consumable":
+				magicItems[magicItems.length] = data.itemlist[key];
 				break;
 			default:
 				console.log("handleItemSync: Unidentified non-Flying Object (UN-FO).");
@@ -386,23 +390,25 @@ function showMagicView()
         var item = magicItems[i];
         _y = _y + 32;
         shopListObjs.push(
-            Crafty.e("2D, DOM, Text, Mouse").attr({w:300,h:32, x: 102, y: _y, z: 3 })
-                .text(item.name+' ' + item.mana + ' ' + item.duration + ' ' + item.effect + ' ' + item.cost + ' ' + item.desc)
+            Crafty.e("2D, DOM, Text, Mouse").attr({w:300,h:32, x: 102, y: _y, z: 3, item: item })
+                .text('<a href="#" title="Print more specific info here">'+item.name+'</a> mana:' + item.mana + ' delay: ' + item.delay + ' price: ' + item.price + '<br /> ' + item.description)
                 .css({
                     "text-align": "left",
                     "font-family": "Arial",
-                    "font-size": "8pt",
+                    "font-size": "10pt",
                     "color": "#000000"
                 })
                 .bind('Click', function(){
-                    alert('Selected spell'+this[0]);
-                })
+                    //alert('Selected spell'+this[0]);
+					gas.send("BUY_ITEM_REQ", [JSON.stringify({type: "BUY_ITEM_REQ", name:"BUY_ITEM_REQ", user: JSON.parse($.cookie("gas-login")).username, item: this.item })]);
+					})
         );
         shopListObjs.push(
             Crafty.e("2D, DOM, Sprite, Mouse, staff"+i)
-                .attr({x: 54, y: _y, z: 3 })
+                .attr({x: 54, y: _y, z: 3 , item: item})
                 .bind('Click', function(){
-                    alert('Selected equipment'+this[0]);
+                    //alert('Selected equipment'+this[0]);
+					gas.send("BUY_ITEM_REQ", [JSON.stringify({type: "BUY_ITEM_REQ", name:"BUY_ITEM_REQ", user: JSON.parse($.cookie("gas-login")).username, item: this.item })]);
                 }));
     }
 }
@@ -420,23 +426,63 @@ function showMightView()
         var item = mightItems[i];
         _y = _y + 32;
         shopListObjs.push(
-            Crafty.e("2D, DOM, Text, Mouse").attr({w:200, h:32, x: 102, y: _y, z: 3 })
-                .text(item.name+'<br />  ' +item.type + '/' +item.subtype+ ' ' + item.price )
+            Crafty.e("2D, DOM, Text, Mouse").attr({w:200, h:32, x: 102, y: _y, z: 3, item: item })
+                .text('<a href="#" title="' + item + '">'+item.name+'</a><br />  ' +item.type + '/' +item.subtype+ ' ' + item.price + ' ' + item.damage )
                 .css({
                     "text-align": "left",
                     "font-family": "Arial",
-                    "font-size": "8pt",
+                    "font-size": "10pt",
                     "color": "#000000"
                 })
                 .bind('Click', function(){
-                    alert('Selected equipment'+this[0]);
+                    //alert('Selected equipment'+this[0]);
+					gas.send("BUY_ITEM_REQ", [JSON.stringify({type: "BUY_ITEM_REQ", name:"BUY_ITEM_REQ", user: JSON.parse($.cookie("gas-login")).username, item: this.item })]);
+
                 })
         );
         shopListObjs.push(
             Crafty.e("2D, DOM, Sprite, Mouse, spear"+i)
-                .attr({x: 54, y: _y, z: 3 })
+                .attr({x: 54, y: _y, z: 3, item: item })
                 .bind('Click', function(){
-                    alert('Selected equipment'+this[0]);
+                    //alert('Selected equipment'+this[0]);
+					gas.send("BUY_ITEM_REQ", [JSON.stringify({type: "BUY_ITEM_REQ", name:"BUY_ITEM_REQ", user: JSON.parse($.cookie("gas-login")).username, item: this.item })]);
+                }));
+    }
+}
+
+function showArmourView()
+{
+    var _y = 200;
+    for( var i in shopListObjs )
+    {
+        shopListObjs[i].destroy();
+    }
+    shopListObjs = [];
+    for( var i in armourItems )
+    {
+        var item = armourItems[i];
+        _y = _y + 32;
+        shopListObjs.push(
+            Crafty.e("2D, DOM, Text, Mouse").attr({w:200, h:32, x: 102, y: _y, z: 3, item: item })
+                .text('<a href="#" title="' + item + '">'+item.name+'</a><br />  ' +item.type + '/' +item.subtype+ ' ' + item.price + ' ' + item.armourvalue )
+                .css({
+                    "text-align": "left",
+                    "font-family": "Arial",
+                    "font-size": "10pt",
+                    "color": "#000000"
+                })
+                .bind('Click', function(){
+                    //alert('Selected equipment'+this[0]);
+					gas.send("BUY_ITEM_REQ", [JSON.stringify({type: "BUY_ITEM_REQ", name:"BUY_ITEM_REQ", user: JSON.parse($.cookie("gas-login")).username, item: this.item })]);
+
+                })
+        );
+        shopListObjs.push(
+            Crafty.e("2D, DOM, Sprite, Mouse, plate"+i)
+                .attr({x: 54, y: _y, z: 3, item: item })
+                .bind('Click', function(){
+                    //alert('Selected equipment'+this[0]);
+					gas.send("BUY_ITEM_REQ", [JSON.stringify({type: "BUY_ITEM_REQ", name:"BUY_ITEM_REQ", user: JSON.parse($.cookie("gas-login")).username, item: this.item })]);
                 }));
     }
 }
@@ -571,7 +617,18 @@ function showGladiatorView()
         .bind('Click', function(e){
             showMagicView();
         });
-
+    Crafty.e("2D, DOM, Text, Mouse").attr({x: 250, y: 200, z: 3 })
+        .text("Armour")
+        .css({
+            "text-align": "left",
+            "font-family": "Arial",
+            "font-size": "12pt",
+            "color": "#000000"
+        })
+        .areaMap([0,0],[0,60],[60,60],[60,0])
+        .bind('Click', function(e){
+            showArmourView();
+        });
 
 
 
@@ -600,7 +657,7 @@ function showManagerView()
 		PreloadAudio();
 
 	Crafty.audio.stop();
-	Crafty.audio.play("soliloquy", -1, 0.2);
+	Crafty.audio.play("soliloquy", -1, 0.1);
 
     g_currentView = "manager";
     LoadTileMap( 'manager.json');
@@ -663,7 +720,7 @@ function showManagerView()
 
     // Add a title
     Crafty.e("2D, DOM, Text").attr({ w: 400, h: 20, x: 15, y: 10 })
-        .text("Gladiaattoripeli")
+        .text("Gladiator's hall")
         .css({
             "text-align": "left",
             "font-family": "Impact",
@@ -1037,15 +1094,16 @@ var GAS = Class(function() {
 			break;
 
 		case 'CHAT_SYNC':
-			$('#chatbox').append('<div id="message"><a href="#" title="The coolest guy on Earth">'+ JSON.parse(data).username + ':</a>&nbsp;&nbsp;' + JSON.parse(data).message + '<br /></div>');
-				// Chatbox auto-scroll
-			var messages = $('#chatbox');
-			//console.log(messages[0].scrollHeight, "asdf", messages.height);
-			var scrollTop = messages[0].scrollHeight - messages.height();
-			if(scrollTop > 0) {
-				messages.scrollTop(scrollTop);
+			if(JSON.parse($.cookie("gas-login")).sessionid) {
+				$('#chatbox').append('<div id="message"><a href="#" title="The coolest guy on Earth">'+ JSON.parse(data).username + ':</a>&nbsp;&nbsp;' + JSON.parse(data).message + '<br /></div>');
+					// Chatbox auto-scroll
+				var messages = $('#chatbox');
+				//console.log(messages[0].scrollHeight, "asdf", messages.height);
+				var scrollTop = messages[0].scrollHeight - messages.height();
+				if(scrollTop > 0) {
+					messages.scrollTop(scrollTop);
+				}
 			}
-
 			break;
 
 	    case 50:

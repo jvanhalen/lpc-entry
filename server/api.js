@@ -79,21 +79,61 @@ var api = {
 	attack: function (attacker, target) {
 
 		// Check weapon data
+		var def = 0;
+		var weapon = 0;
 
-		// Check toHit percentage
+		// Check user validity
+		var validparams = attacker.name && target.name;
+		if(validparams) {
+			// Check gladiator existence
+			var att = core.gladiatorcache.read(attacker.name);
+			var tgt = core.gladiatorcache.read(target.name);
+		}
+		else {
+			console.log("ERROR: api.attack failed, params:", attacker, target);
+			return null;
+		}
 
-		// Check target defense modifiers
+		var valid = (att && target);
 
-		// If hit, calculate damage and pick a hit location
+		if(valid) {
+			// Check hit / miss
+			weapon = att.melee;
 
-		// Modify changed attributes @ attacker / target
+			// Check target defense modifiers
+			if(tgt.armour.shield)
+				def = tgt.armour.shield.toblock
+			def += tgt.nimbleness;
+
+			// If hit, calculate damage and pick a hit location
+			var dmg = core.rollDice(weapon.damage);
+			var armourvalue = 0;
+			for(var item in target.armour) {
+				armourvalue += core.rollDice(target.armour[item].armourvalue);
+			}
+			dmg -= armourvalue;
+
+			if(dmg < 0)
+				dmg = 0;
+
+			// Modify changed attributes @ attacker / target
+
+			// "Illustrate/stringify" the action ,e.g. "Ouch! Mauri hit Hermanni with astalo to location for xx points of damage"
+			return true;
+		}
+		else {
+			console.log("ERROR: api.attack failed, params:", attacker, target, att, tgt);
+			return null;
+		}
 	},
 
 
 	cast: function(caster, target) {
 
 		// Check spells data
+		var cast = core.usercache.read(caster);
 
+		if(cst) {
 		// Check toHit percentage
 
 		// Check target defense modifiers or current health if healing spell is used
@@ -101,6 +141,11 @@ var api = {
 		// If hit, calculate damage and pick a hit location / heal target
 
 		// Modify changed attributes @ caster / target
+
+		}
+		else {
+
+		}
 
 	},
 
@@ -115,6 +160,28 @@ var api = {
 
 	toObject: function(myJSON) {
 		return core.toJSON(myJSON);
+	},
+
+	buyItem: function(BUY_ITEM_REQ_msg) {
+		console.log(BUY_ITEM_REQ_msg);
+		
+		var isValid = null;
+
+		if(BUY_ITEM_REQ_msg) {
+			isValid = (BUY_ITEM_REQ_msg.item && BUY_ITEM_REQ_msg.user)
+		}
+
+		if(isValid) {
+			// Check if user has enough money for the item
+			var user = core.getUser(BUY_ITEM_REQ_msg.user);
+			var item = core.getItem(BUY_ITEM_REQ_msg.item);
+			if(user) {
+				console.log(item, user);
+			}
+		}
+		else {
+			return null;
+		}
 	}
 }
 
