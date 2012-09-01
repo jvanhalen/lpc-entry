@@ -9,16 +9,19 @@ Crafty.c('Targetpos', {
     }
 });
 
-function DisplayFadingText( text, xpos, ypos )
+function DisplayFadingText( text, xpos, ypos, size, font )
 {
 
+    if ( !size ) size="34pt";
+    if ( !font) font ="Impact";
+    
     var e = Crafty.e("2D, DOM, Targetpos, Tween, Text")
         .attr({alpha: 1.0, x:xpos, y:ypos,z:8})
         .setTarget(xpos,ypos-100)
         .text(text)
         .css({
-            "font-family":"Impact",
-            "font-size":"34pt",
+            "font-family":font,
+            "font-size":size,
             "font-weight":"bold"
         })
         .bind("TweenEnd", function(){

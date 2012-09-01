@@ -1259,6 +1259,9 @@ var GAS = Class(function() {
                     .bind("Click", function(){
 						g_gladiatorShowCase = this.gladiator;
                         Crafty.scene("gladiatorView");
+                    })
+                    .bind("MouseOver", function(){
+                        DisplayFadingText(this.gladiator.name, this.x, this.y, "20pt", "Fanwood");                        
                     });
                 g_gladiators.push(g);
 
