@@ -73,7 +73,9 @@ var api = {
 	getUser: function(username) {
 		// The objects are passed as reference, so editing the returned object would cause the original object to change too - that is not what we want,
 		// so make and return a copy of the original object
-		return JSON.parse(JSON.stringify(core.getUser(username)));
+        var user= core.getUser(username) ;
+        if ( user === undefined ) return user;
+		else                      return JSON.parse(JSON.stringify(user));
 	},
 
 	attack: function (attacker, target) {

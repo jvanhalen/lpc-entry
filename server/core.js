@@ -289,8 +289,9 @@ var core = {
 
 	getUser: function(username) {
 		console.log("core.getUser:", username);
-
-		return JSON.parse(JSON.stringify(core.usercache.read(username)));
+        var user = core.usercache.read(username);
+        if ( user === undefined )  return user;
+		else                       return JSON.parse(JSON.stringify(user));
 
 	},
 
