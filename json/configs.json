@@ -21,6 +21,8 @@
     "gladiatordb":				"gladiators",
     "userdb":                 	"users",
     "battledb":                 "battles",
-	"itemdb":					"items"
-
+	"itemdb":					"items",
+    
+    "npcs":                     ["Morons"]
+        
 }
