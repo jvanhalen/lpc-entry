@@ -678,7 +678,7 @@ var core = {
 
 			console.log("Statistics:");
 			console.log("\tTotal gladiators:", totalgladis, "\tFree gladiators:", freegladis, "(" + parseFloat((100*(freegladis/totalgladis))).toFixed(2) + "%)");
-			console.log("\tCaches (r/w): gladiator ("+core.gladiatorcache.reads + "/" + core.gladiatorcache.writes+ "), user (" + core.usercache.reads + "/" + core.usercache.writes+"), item ("+core.itemcache.reads + "/" + core.itemcache.writes+")");
+			console.log("\tCaches (r/w): gladiator ("+core.gladiatorcache.reads + "/" + core.gladiatorcache.writes+ "), user (" + core.usercache.reads + "/" + core.usercache.writes+"), item ("+core.itemcache.reads + "/" + core.itemcache.writes+", battle ("+core.battlecache.reads + "/" + core.battlecache.writes+")");
 		}
 	}, // dbcore
 
