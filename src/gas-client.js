@@ -5,7 +5,7 @@ var g_pitMessage = null;
 var g_currentGrid = null;
 var g_currentGladiator = null;
 var g_gladiatorShowCase = null;	// Gladiator at gladiatorView
-
+var g_enterArenaButton = null;
 var g_gladiators = [];
 var g_timer = { view: null, time: 0};
 var loadAudio = true;
@@ -108,6 +108,50 @@ Crafty.c('Grid', {
 
 
 });
+
+function SetArenaEnabled(value){
+    // destroy old one
+    if ( g_enterArenaButton ) g_enterArenaButton.destroy();
+    
+    if ( value == true) {
+        g_enterArenaButton = Crafty.e("2D, DOM, Mouse, Text")
+            .attr( {w:130, h:20, x:340, y:100, z:9})
+            .text("Battle awaits you...")
+            .css({
+                "text-align": "center",
+                "font-family": "Fanwood",
+                "font-size": "13pt",
+            })
+            .bind('Click', function(){
+                Crafty.scene("arenaView");
+            });
+        
+    } else {
+        g_enterArenaButton = Crafty.e("2D, DOM, Mouse, Text")
+            .attr( {w:130, h:20, x:340, y:100, z:9})
+            .text("Thou shall not pass!")
+            .css({
+                "text-align": "center",
+                "font-family": "Fanwood",
+                "font-size": "13pt",
+            })
+            .bind('Click', function(){
+                
+                if ( g_pitMessage ) g_pitMessage.destroy();
+                g_pitMessage = Crafty.e("2D, DOM, Text")
+                    .attr({w:200, h:232, x:100, y:300, z:8})
+                    .css({
+                        "text-align": "left",
+                        "font-family": "Fanwood-Text",
+                        "font-size": "15pt",
+                        "color": "#5c3111"
+                    })
+                    .text("Please challenge someone first!");
+            });
+        
+    }
+    
+}
 
 function HandleMouseClick(x,y,passable)
 {
@@ -772,6 +816,9 @@ function showManagerView()
 
 function showArenaView()
 {
+    // notify that player has entered battle
+    var login = $.cookie('gas-login');
+    gas.send('ENTER_ARENA_REQ', [ '{"username":"'+ JSON.parse(login).username + '"}' ]);
 
 	playAudio("granbatalla", -1, 0.2);
 
@@ -810,9 +857,8 @@ function showArenaView()
         .css({"font-family":"Impact",
               "font-size":"24pt"});
 
-    var data = $.cookie('gas-login');
-    //gas.send('GET_TEAM_REQ', [ '{"username":"'+ JSON.parse(data).username + '"}' ]);
 
+    
 
 
 
@@ -1133,7 +1179,7 @@ var GAS = Class(function() {
 
         case 'TEAM_RESP':
            console.log("Received team:"+ JSON.stringify(data));
-           this.handleTeamResponse((data[0]).team);
+           this.handleTeamResponse((data[0]));
 			break;
 
         case 'BATTLE_CONTROL_SYNC':
@@ -1187,6 +1233,7 @@ var GAS = Class(function() {
             }
 			else if (JSON.parse(data[0]).response === "READY_FOR_WAR") {
 				console.log('Time to make last minute adjustments...');
+                SetArenaEnabled(true);
 			}
             else
             {
@@ -1196,47 +1243,21 @@ var GAS = Class(function() {
 		    break;
 	    default:
 	      console.log("Default branch reached in 'message handling'");
-	      break;
+	    break;
 	}
 
         return true; // return true to mark this message as handled
 
     },
-    handleTeamResponse: function(team)
+    handleTeamResponse: function(data)
     {
+        var team = data.team;
         // create visualization for each gladiator in team.
         if ( g_currentView == "manager")
         {
-
-            // if game is unfinished, resume
-            if ( team.ingame != null)
-            {
-                Crafty.e("2D, DOM, Mouse, Text")
-                    .attr( {w:130, h:20, x:340, y:100, z:9})
-                    .text("Resume battle!")
-                    .css({
-                        "text-align": "center",
-                        "font-family": "Fanwood",
-                        "font-size": "13pt",
-                    })
-                    .bind('Click', function(){
-                        Crafty.scene("arenaView");
-                    });
-
-            } else {
-                Crafty.e("2D, DOM, Mouse, Text")
-                    .attr( {w:130, h:20, x:340, y:100, z:9})
-                    .text("Select battles")
-                    .css({
-                        "text-align": "center",
-                        "font-family": "Fanwood",
-                        "font-size": "13pt",
-                    })
-                    .bind('Click', function(){
-                        Crafty.scene("arenaView");
-                    });
-
-            }
+            // if battle is active
+            SetArenaEnabled((data.ingame != null));
+            
             g_gladiators = [];
 			console.log("team.gladiators", team.gladiators);
             for (var i in team.gladiators )
