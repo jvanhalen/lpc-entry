@@ -84,7 +84,7 @@ var api = {
         var battle = core.getBattle(battleid);
         if ( battle == undefined ) return battle;
         else                  return JSON.parse(JSON.stringify(battle));
-    }
+    },
     
     editBattle: function(battleid, attributelist){
         return core.editBattle(name,attributelist);
