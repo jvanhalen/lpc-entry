@@ -70,7 +70,7 @@ var GASServer = Maple.Class(function(clientClass) {
         }
     },					// Game ai
 
-	battlesSessions: [], // which battless are active.
+	battleSessions: {}, // which battless are active.
 	challenges: [], // which challenges are currently active
 	started: function() {
 	console.log('Server initializing...');
@@ -91,6 +91,32 @@ var GASServer = Maple.Class(function(clientClass) {
 		*/
 
     },
+
+    /* returns Maple client by username.              
+     * when parameter for withAIplayers is passed, checks also 
+     * AI players.
+     */
+    getClientByUsername: function(username, withAIplayers) {
+        for( var c=0; c < this.getClients().length; c++)
+        {
+            if ( clientToUsername[this.getClients().getAt(c).id] === username ){
+                return this.getClients().getAt(c);
+            }
+        }
+
+        if ( withAIplayers ) {
+            for( user in configs.npcs )
+            {
+                if ( configs.npcs[user] == username )
+                {
+                    return this.ai;
+                }
+            }
+        }
+        
+        return null;
+    },
+
 
     update: function(t, tick) {
         //console.log(this.getClients().length, 'client(s) connected', t, tick, this.getRandom());
@@ -319,10 +345,10 @@ var GASServer = Maple.Class(function(clientClass) {
 				}
 			})
     },
-
+    
     handleDbResponse: function(querypath, client, type, data, response) {
 		console.log("handleDbResponse: ", type, "querypath", querypath + " : " + data+ " : " + response);
-
+        
 		switch(type)
 		{
 			case 'BATTLE_START_CREATE_BATTLE_REQ':
@@ -359,51 +385,20 @@ var GASServer = Maple.Class(function(clientClass) {
 			break;
 
         case 'CHALLENGE_REQ_ONLINE_CHECK':
-
-            if ( JSON.parse(response) == null ||
-                 JSON.parse(response).ingame != null )
+            
+            if ( JSON.parse(response) == null || JSON.parse(response).ingame != null )
             {
-                for(var c=0; c<this.getClients().length;c++)
-                {
-                    if (clientToUsername[this.getClients().getAt(c).id] == JSON.parse(data).username)
-                    {
-                        this.getClients().getAt(c).send('CHALLENGE_RES', ['{"response":"NOK", "reason":"challenger already in battles. "}']);
-						break;
-                    }
+                var cli = this.getClientByUsername( JSON.parse(data).username)
+                if ( cli != null ) {
+                    cli.send('CHALLENGE_RES', ['{"response":"NOK", "reason":"challenger already in battle. "}']);
+                    break;
                 }
-                break;
             }
 
             // check whether user is online.
             var defender = JSON.parse(data).defender;
-            var defenderClient = null;
-
-            for(user in clientToUsername) {
-				if(clientToUsername[user] == defender)
-                {
-                    for(var c=0; c<this.getClients().length;c++)
-                    {
-                        if (this.getClients().getAt(c).id == user)
-                        {
- 			                defenderClient = this.getClients().getAt(c);
-						    break;
-                        }
-                    }
-				}
-			}
-
-            // ok, no live player - check for NPCs
-            if ( defenderClient == null ) {
-                for( user in configs.npcs )
-                {
-                    if ( configs.npcs[user] == defender )
-                    {
-                        defenderClient = this.ai;
-                        break;
-                    }
-                }
-            }
-
+            // check both live and AI players
+            var defenderClient = this.getClientByUsername(defender,true);
 
             if ( defenderClient == null )
             {
@@ -429,9 +424,9 @@ var GASServer = Maple.Class(function(clientClass) {
                 client.send('CHALLENGE_RES',
                             ['{"response":"DELIVERED", "challenger":"'+clientToUsername[client.id]+'","defender":"'+defender+'" }']);
             }
-		break;
+		        break;
 
-		case 'DONT_CARE':
+		    case 'DONT_CARE':
 		break;
 
 		default:
@@ -540,40 +535,26 @@ var GASServer = Maple.Class(function(clientClass) {
 
 				console.log('Challenger ingame updated');
 			    // send info that game is ready
+                var cli = this.getClientByUsername(data.challenger._id);
 
-				for(var c=0;c< this.getClients().length; c++) {
-					if(clientToUsername[this.getClients().getAt(c).id] == data.challenger._id) {
-						this.getClients().getAt(c).send('CHALLENGE_RES',
+                if ( cli )
+                    cli.send('CHALLENGE_RES',
 						 ['{"response":"READY_FOR_WAR", "battles":"'+data.challenger.ingame+'"}']);
-					    break;
-					}
-				}
+			    
                 // NPCs never throw a challenge
 
 			break;
 
 			case 'BATTLE_START_UPDATE_DEFENDER':
 				console.log('Defender ingame updated');
-                var livePlayerFound = false;
-				// send info that game is ready
-				for(var c=0;c< this.getClients().length; c++) {
-					if(clientToUsername[this.getClients().getAt(c).id] == data.defender._id) {
-						this.getClients().getAt(c).send('CHALLENGE_RES',
-						 ['{"response":"READY_FOR_WAR", "battles":"'+data.defender.ingame+'"}']);
-						break;
-					}
-				}
-                // NPCs may be on the receiving end
-                if ( livePlayerFound == false) {
 
-   			        for(i in configs.npcs) {
-					    if(configs.npcs[i] == data.defender._id) {
-						    this.ai.send('CHALLENGE_RES',
-						                 ['{"response":"READY_FOR_WAR", "battles":"'+data.defender.ingame+'"}']);
-						    break;
-					    }
-				    }
-                }
+                // Defender, check also NPCs since they may be on the receiving end
+                var cli = this.getClientByUsername(data.defender._id, true);
+                if ( cli ) {
+                    cli.send('CHALLENGE_RES',
+						     ['{"response":"READY_FOR_WAR", "battles":"'+data.defender.ingame+'"}']);
+
+				}
 			break;
 		}
     },
@@ -605,7 +586,7 @@ var GASServer = Maple.Class(function(clientClass) {
 				var username = JSON.parse(data).username;
    			    var userdata = api.getUser(username);
 				var logged = false;
-
+            
 				for(user in clientToUsername) {
 					if(clientToUsername[user] == JSON.parse(data).username) {
 						logged = true;
@@ -685,6 +666,7 @@ var GASServer = Maple.Class(function(clientClass) {
 					toUser = toUser.substring(1, toUser.length);
 					console.log("username:", toUser);
 				}
+                
 				for( var c=0; c < this.getClients().length; c++ )
 				{
 					//console.log("Updating:", this.getClients().getAt(c).id);
@@ -745,30 +727,9 @@ var GASServer = Maple.Class(function(clientClass) {
 						if ( res == "OK" ) this.challenges[challenge].state = "ACCEPTED";
 						else               this.challenges[challenge].state = "NOT_ACCEPTED";
 
-                        // search client from live players
-                        var challengerClient = null;
-
-						for( var c=0; c < this.getClients().length;c++)
-						{
-							if ( clientToUsername[this.getClients().getAt(c).id] == this.challenges[challenge].challenger ) {
-                                challengerClient = this.getClients().getAt(c);
-                                break;
-
-							}
-						}
-                        console.log('here goes');
-                        // not found? then it is got to be computer AI
-                        if ( challengerClient == null ){
-
-                            for( i in configs.npcs ){
-                                if ( configs.npcs[i] == this.challenges[challenge].challenger ){
-                                    challengerClient = this.ai;
-                                    break;
-                                }
-                            }
-                        }
-
-
+                        // search client from live players (AI does not throw a challenge)
+                        var challengerClient = this.getClientByUsername(this.challenges[challenge].challenger);
+                        
                         // TODO: add safety check for challenger client that does not exist?
                         if ( challengerClient == null ) {
                             console.log("CHALLENGER IS MISSING: SOMETHING IS VERY BADLY WRONG HERE!!!!");
@@ -794,8 +755,43 @@ var GASServer = Maple.Class(function(clientClass) {
 				}
 
 			break;
+            case 'ENTER_ARENA_REQ':
+               var user = api.getUser(JSON.parse(data).username);
+               var battle = api.getBattle( user.ingame );
+               
+               if ( battle != null ) {
+                   if ( !this.battleSessions[user.ingame] ) {
+                       this.battleSessions[user.ingame] = {}
+                   }
 
-			case 'DONT_CARE':
+                   if ( battle.defender == user ) { 
+                       this.battleSessions[user.ingame]["defender"] = user;
+                       client.send('ENTER_ARENA_RES', ['{"response":"OK", "defender":"'+user+'","battleid":"'+user.ingame+'"}']);
+                   }
+                   
+                   if ( battle.challenger == user ) {
+                       this.battleSessions[user.ingame]["challenger"] = user;
+                       client.send('ENTER_ARENA_RES', ['{"response":"OK", "challenger":"'+user+'","battleid":"'+user.ingame+'"}']);
+                   }
+                   
+                   // if both parties have joined the arena
+                   if ( this.battleSessions[user.ingame].defender  &&
+                        this.battleSessions[user.ingame].challenger ){
+
+                       // enable challenger
+                       var chal = this.getClientByUsername(battle.challenger);
+                       if ( chal ) chal.send('BATTLE_START', [JSON.stringify(battle)]);
+
+                       // enable defender
+                       var def = this.getClientByUsername(battle.defender,true);
+                       if ( def ) def.send('BATTLE_START', [JSON.stringify(battle)]);
+
+                   }
+                        
+               }
+
+            break;
+   		case 'DONT_CARE':
 			break;
 
 			default:
