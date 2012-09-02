@@ -80,6 +80,16 @@ var api = {
 			return JSON.parse(JSON.stringify(user));
 	},
 
+    getBattle: function(battleid) {
+        var battle = core.getBattle(battleid);
+        if ( battle == undefined ) return battle;
+        else                  return JSON.parse(JSON.stringify(battle));
+    }
+    
+    editBattle: function(battleid, attributelist){
+        return core.editBattle(name,attributelist);
+    },
+
 	attack: function (attacker, target) {
 
 		// Check weapon data
