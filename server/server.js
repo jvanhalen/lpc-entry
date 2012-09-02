@@ -664,7 +664,7 @@ var GASServer = Maple.Class(function(clientClass) {
 
 			case 'BUY_ITEM_REQ':
 				// Fourth alternative, let the api crunch the whole message
-				api.buyItem(data);
+				api.buyItem(JSON.parse(data).username, JSON.parse(data).gladiator, JSON.parse(data).item);
 			break;
 
 			case 'GET_AVAILABLE_GLADIATORS_REQ':

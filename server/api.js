@@ -116,7 +116,8 @@ var api = {
 
 			// Check target defense modifiers
 			if(tgt.armour.shield)
-				def = tgt.armour.shield.toblock
+				def = tgt.armour.shield.toblock;
+
 			def += tgt.nimbleness;
 
 			// If hit, calculate damage and pick a hit location
@@ -176,26 +177,49 @@ var api = {
 		return core.toJSON(myJSON);
 	},
 
-	buyItem: function(BUY_ITEM_REQ_msg) {
-		console.log(BUY_ITEM_REQ_msg);
+	buyItem: function(username, gladiator, item) {
+		console.log("api.buyItem", username, item);
 
-		var isValid = null;
-
-		if(BUY_ITEM_REQ_msg) {
-			isValid = (BUY_ITEM_REQ_msg.item && BUY_ITEM_REQ_msg.user)
-		}
+		var isValid = (item._id && username);
 
 		if(isValid) {
 			// Check if user has enough money for the item
-			var user = core.getUser(BUY_ITEM_REQ_msg.user);
-			var item = core.getItem(BUY_ITEM_REQ_msg.item);
-			if(user) {
-				console.log(item, user);
+			var cachedgladiator = core.getGladiator(gladiator._id);
+			var cacheditem = core.getItem(item._id);
+			var cacheduser = core.getUser(username);
+			isValid = (cachedgladiator && cacheditem && cacheduser);
+
+			if(isValid) {
+				console.log(cacheditem);
+				switch(cacheditem.slot) {
+					case 'body':
+						cachedgladiator.armour.body = item._id;
+						core.gladiatorcache.write(cachedgladiator._id, cachedgladiator);
+						break;
+					default:
+						console.log("api.buyItem, default branch:", username, item);
+				}
+				// Update also the users database
+				for(var index in cacheduser.gladiators) {
+					console.log(cacheduser.gladiators[index]);
+					var gladi = cacheduser.gladiators[index];
+					if(gladi._id == gladiator._id) {
+						console.log("found", gladi._id, index);
+						delete cacheduser.gladiators[index];
+						console.log("after delete", cacheduser.gladiators);
+						cacheduser.gladiators.push(cachedgladiator);
+						console.log("after push", cacheduser.gladiators);
+						core.usercache.write(cacheduser._id, cacheduser);
+						break;
+					}
+				}
 			}
 		}
 		else {
+			console.log("api.buyItem failed", isValid);
 			return null;
 		}
+		return true;
 	}
 }
 
