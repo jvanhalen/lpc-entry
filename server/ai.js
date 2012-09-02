@@ -1,5 +1,5 @@
 var configs = require('../json/configs.json');
-var aiPassword = "da39a3ee5e6b4b0d3255bfef95601890afd80709";
+var aiPassword = configs.aipassword;
 
 /* handles messages from PARENT */
 process.on('message', function(message) {
@@ -31,7 +31,7 @@ var ai = {
 
         for( var i in configs.npcs ){
             console.log("Registering computer team: "+ configs.npcs[i]);
-            process.send(JSON.stringify({type:"CREATE_USER_REQ", name:"CREATE_USER_REQ",data:{username:configs.npcs[i], "password": aiPassword }}));
+            process.send(JSON.stringify({type:"CREATE_USER_REQ", name:"CREATE_USER_REQ",data:{ username:configs.npcs[i], "password": aiPassword, "ai": true }}));
         }
     },
 
@@ -39,8 +39,6 @@ var ai = {
     registerPlayerToGame: function(battleid) {
 
     },
-
-
 
     replyChallenge: function(msg,reply)
     {

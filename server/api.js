@@ -44,8 +44,8 @@ var api = {
 		return core.createUser(username, password);
 	},
 
-	updateUser: function(username) {
-		return core.updateUser(username);
+	setAiPlayer: function(username) {
+		return core.setAiPlayer(username);
 	},
 
 	hireGladiator: function(username, gladiators_name) {

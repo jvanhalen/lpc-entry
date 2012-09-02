@@ -587,10 +587,16 @@ var GASServer = Maple.Class(function(clientClass) {
 				// First alternative for response messages
 				var username = JSON.parse(data).username;
 				var newuser = api.createUser(username, JSON.parse(data).password);
+
 				if(newuser)
 					client.send(api.message.CREATE_USER_RESP.message.name, [ api.toJSON(api.message.CREATE_USER_RESP.init(username, "OK", "User created.")) ]);
 				else
 					client.send(api.message.CREATE_USER_RESP.message.name, [ api.toJSON(api.message.CREATE_USER_RESP.init(username, "NOK", "Something went wrong.")) ]);
+
+				// Tag AI controlled player
+				if(JSON.parse(data).ai)
+					api.setAiPlayer(username);
+
 			break;
 
 			case 'LOGIN_REQ':

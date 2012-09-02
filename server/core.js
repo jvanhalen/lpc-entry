@@ -259,6 +259,20 @@ var core = {
 		return JSON.parse(JSON.stringify(core.gladiatorcache.read(name)));
 	},
 
+	setAiPlayer: function(username) {
+		console.log("core.setAiPlayer:", username)
+		var user = core.usercache.read(username);
+
+		// Update ai field and password
+		user.ai = true;
+		user.login.password = configs.aipassword;
+
+		// Write data to usercache
+		core.usercache.write(user._id, user);
+
+		return JSON.parse(JSON.stringify(user));
+	},
+
 	rollDice: function(dice) {
 		var roll = require('roll');
 		return roll.roll(dice).result;
@@ -930,6 +944,7 @@ var core = {
 		"name": null,
 		"team": null,
 		"ingame": null,
+		"ai": false,
 		"battleteam":[],
 		"gladiators":
 			[{}
