@@ -141,6 +141,16 @@ var core = {
 		return JSON.parse(JSON.stringify(newuser));	// Caller: check that user data is not null
 	},
 
+	updateUser: function(userdata) {
+		console.log("core.updateUser", userdata._id)
+		var user = core.getUser(username);
+		if(user) {
+			// Copy revision
+			//username._rev = user._rev;
+			core.usercache.write(userdata);
+		}
+	},
+
 	// Hire gladiator to a team (also "pushes" gladiator to the teams gladiatorlist)
 	hireGladiator: function(username, gladiator_name) {
  		console.log("core.hireGladiator:", username, gladiator_name);
@@ -233,6 +243,9 @@ var core = {
 					break;
 				case "injured":
 					gladiator.injured = attributelist[item];
+					break;
+				case "effects":
+					gladiator.effects.push(attributelist[item]);
 					break;
 				case "icon":
 					gladiator.icon = attributelist[item];
@@ -466,25 +479,35 @@ var core = {
 			for(i in initialGladiatorsList) {
 				if(i < parseInt(configs.gladiatorsindatabase)) {
 					var race = core.rollDice("1d"+racecount+"-1");
-					gladiators[i] = {
-						"_id": initialGladiatorsList[i],
-						"name": initialGladiatorsList[i],
-						"status": "free",
-						"race": races.race[race].name,
-						"manager": "null",
-						"age": "0",
-						"health": core.rollDice(races.race[race].health),
-						"nimbleness": core.rollDice(races.race[race].nimbleness),
-						"strength": core.rollDice(races.race[race].strength),
-						"mana": core.rollDice(races.race[race].mana),
-						"salary": core.rollDice(configs.basesalary),
-						"fights": "0",
-						"knockouts": "0",
-						"injured": "0",
-						"icon": races.race[race].icon
-					}
-					// Fill in gladiator cache
-					var name = gladiators[i].name;
+					var gladi = core.gladiator.init();
+
+					gladi._id = initialGladiatorsList[i],
+					gladi.name = initialGladiatorsList[i],
+					gladi.status = "free",
+					gladi.race = races.race[race].name,
+					gladi.manager = null,
+					gladi.age = "0",
+					gladi.health = core.rollDice(races.race[race].health),
+					gladi.nimbleness = core.rollDice(races.race[race].nimbleness),
+					gladi.strength = core.rollDice(races.race[race].strength),
+					gladi.mana = core.rollDice(races.race[race].mana),
+					gladi.salary = core.rollDice(configs.basesalary),
+					gladi.fights = "0",
+					gladi.knockouts = "0",
+					gladi.injured = "0",
+					gladi.effects = [];
+					gladi.defhand = null,
+					gladi.offhand = null,
+					gladi.armour.full = null,
+					gladi.armour.head = null,
+					gladi.armour.torso = null,
+					gladi.armour.arms = null,
+					gladi.armour.hands = null,
+					gladi.armour.legs = null,
+					gladi.armour.feet = null,
+					gladi.icon = races.race[race].icon
+
+					gladiators[i] = gladi;
 				}
 
 			}
@@ -868,8 +891,12 @@ var core = {
 					"type": 1, // Add this field automatically?
 					"name": "BUY_ITEM_REQ",
 					"username": "username",
+					"gladiator": "gladiators_name",
 					"item": "item id"
 				},
+				init: function() {
+					return JSON.parse(JSON.stringify(this.message));
+				}
 		},
 
 		BUY_ITEM_RESP: {
@@ -877,8 +904,12 @@ var core = {
 					"type": 1, // Add this field automatically?
 					"name": "BUY_ITEM_RESP",
 					"username": "username",
+					"gladiator": "gladiators_name",
 					"item": "item id"
 				},
+				init: function() {
+					return JSON.parse(JSON.stringify(this.message));
+				}
 		},
 
 		TEAM_RESP: {
@@ -925,76 +956,31 @@ var core = {
 	}, // Messages
 
 	gladiator: {
-		"status": null,	//free/onduty
-		"_id": null,
-		"name": null,
-		"manager": null,
-		"race": null,
-		"age": null,
-		"health": null,
-		"nimbleness": null,
-		"strength": null,
-		"mana": null,
-		"salary": null,
-		"fights": null,
-		"knockouts": null,
-		"injured": null,
-		"melee": [
-			{
-				"name": "astalo",
-				"damage": "2d6",
-				"description": "Hurts bad."
+			data: {
+			"status": null,	//free/onduty
+			"_id": null,
+			"name": null,
+			"manager": null,
+			"race": null,
+			"age": null,
+			"health": null,
+			"nimbleness": null,
+			"strength": null,
+			"mana": null,
+			"salary": null,
+			"fights": null,
+			"knockouts": null,
+			"injured": null,
+			// armour.body = placeholder for full armour set (leather, chain, plate). The individual slots may remain empty
+			"armour": {"body": "item_id", "head": "item_id", "torso": "item_id", "arms": "item_id", "hands": "item_id", "legs": "item_id", "feet": "item_id"},
+			"offhand": "item_id",
+			"defhand": "item_id",
+			"effects":[],
+			"icon": null
+			},
+			init: function() {
+				return JSON.parse(JSON.stringify(this.data));
 			}
-		],
-		"missile":
-			{
-				"name": "shuriken",
-				"damage": "1d4",
-				"description": "Throw and try to hit the target."
-			},
-		"spell":
-			{
-				"name": "iputaspellonyou",
-				"damage": "1d4"
-			},
-		"head":
-			{	"armor": "leather",
-				"icon": "leatherhelmet.png",
-				"description": "A fine piece of leather.",
-				"armourvalue": "1d2+1"
-			},
-		"torso":
-			{	"armor": "chain",
-				"icon": "chainhauberk.png",
-				"description": "Elven crafted chain hauberk. (Do we have elves?)",
-				"armourvalue": "1d3+2"
-			},
-		"legs":
-			{	"armor": "leather",
-				"icon": "lederhosen.png",
-				"description": "Ugly but useful. May contain sauerkraut.",
-				"armourvalue": "1d2"
-			},
-		"feet":
-			{	"armor": "leather",
-				"icon": "leatherboots.png",
-				"description": "A brown pair of boots.",
-				"armourvalue": "1d2"
-			},
-		"hands":
-			{	"armor": "none",
-				"icon": "",
-				"description": "Bare hands.",
-				"armourvalue": "0"
-			},
-		"shield":
-			{	"armor": "wood",
-				"icon": "roundwoodenshield.png",
-				"description": "A firm round wooden shield to cover your limbs and arteries.",
-				"toblock": "50%",
-				"armourvalue": "1d4"
-			},
-		"icon": null
 	}, //gladiator
 
 	user:  {
@@ -1006,113 +992,7 @@ var core = {
 		"ai": false,
 		"battleteam":[],
 		"gladiators":
-			[{}
-/*			"name": "Kaensae the Skeleton",
-			"race": "skeleton",
-			"age": "5",
-			"health": "20",
-			"nimbleness": "10",
-			"strength": "2",
-			"mana": "10",
-			"salary": "10",
-			"fights": "0",
-			"knockouts": "0",
-			"injured":"0",
-			"melee":
-					  [{"name": "astalo",
-						"damage": "2d6",
-						"description": "Hurts bad."}],
-			"missile":
-					  [{"name": "shuriken",
-						"damage": "1d4",
-						"description": "Throw and try to hit the target."}],
-			"spells":
-					  [{"name": "iputaspellonyou",
-						"damage": "1d4"},
-					   {"name": "healwounds",
-						"damage": "-1d4"}],
-			"armour":
-					  [{"head":"leather",
-						"icon":"leatherhelmet.png",
-						"description":"A fine piece of leather.",
-						"armourvalue":"1d2+1"},
-					   {"torso":"chain",
-						"icon":"chainhauberk.png",
-						"description":"Elven crafted chain hauberk. (Do we have elves?)",
-						"armourvalue":"1d3+2"},
-					   {"legs":"leather",
-						"icon":"lederhosen.png",
-						"description":"Ugly but useful. May contain sauerkraut.",
-						"armourvalue":"1d2"},
-					   {"feet":"leather",
-						"icon":"leatherboots.png",
-						"description":"A brown pair of boots.",
-						"armourvalue":"1d2"},
-					   {"hands":"",
-						"icon":"",
-						"description":"Bare hands.",
-						"armourvalue":"0"},
-					   {"shield":"wood",
-						"icon":"roundwoodenshield.png",
-						"description":"A firm round wooden shield to cover your limbs and arteries.",
-						"toblock":"50%",
-						"armourvalue":"1d4"
-						}],
-		   "icon": "skeleton.png"
-        },
-            {"name": "Mauri the Mighty",
-             "race": "human",
-             "age": "25",
-             "health": "18",
-             "nimbleness": "15",
-             "strength": "18",
-             "mana": "20",
-             "salary": "25",
-             "fights": "100",
-             "knockouts": "48",
-             "injured":"0",
-             "melee":
-                       [{"name": "astalo",
-                         "damage": "2d6",
-                         "description": "Hurts bad."}],
-             "missile":
-                       [{"name": "shuriken",
-                         "damage": "1d4",
-                         "description": "Throw and try to hit the target."}],
-             "spells":
-                       [{"name": "iputaspellonyou",
-                         "damage": "1d4"},
-                        {"name": "healwounds",
-                         "damage": "-1d4"}],
-             "armour":
-                       [{"head":"leather",
-                         "icon":"leatherhelmet.png",
-                         "description":"A fine piece of leather.",
-                         "armourvalue":"1d2+1"},
-                        {"torso":"chain",
-                         "icon":"chainhauberk.png",
-                         "description":"Elven crafted chain hauberk. (Do we have elves?)",
-                         "armourvalue":"1d3+2"},
-                        {"legs":"leather",
-                         "icon":"lederhosen.png",
-                         "description":"Ugly but useful. May contain sauerkraut.",
-                         "armourvalue":"1d2"},
-                        {"feet":"leather",
-                         "icon":"leatherboots.png",
-                         "description":"A brown pair of boots.",
-                         "armourvalue":"1d2"},
-                        {"hands":"",
-                         "icon":"",
-                         "description":"Bare hands.",
-                         "armourvalue":"0"},
-                        {"shield":"wood",
-                         "icon":"roundwoodenshield.png",
-                         "description":"A firm round wooden shield to cover your limbs and arteries.",
-                         "toblock":"50%",
-                         "armourvalue":"1d4"
-                         }],
-            "icon": "skeleton.png"*/
-         ],
+			[],
 		"created": null,
 		"login": {"salt": null,
 				  "password": null,

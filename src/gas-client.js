@@ -456,7 +456,7 @@ function showMagicView()
                 .attr({x: 54, y: _y, z: 3 , item: item})
                 .bind('Click', function(){
                     //alert('Selected equipment'+this[0]);
-					gas.send("BUY_ITEM_REQ", [JSON.stringify({type: "BUY_ITEM_REQ", name:"BUY_ITEM_REQ", username: JSON.parse($.cookie("gas-login")).username, item: this.item })]);
+					gas.send("BUY_ITEM_REQ", [JSON.stringify({type: "BUY_ITEM_REQ", name:"BUY_ITEM_REQ", username: JSON.parse($.cookie("gas-login")).username, gladiator: g_gladiatorShowCase, item: this.item })]);
                 }));
     }
 }
@@ -484,7 +484,7 @@ function showMightView()
                 })
                 .bind('Click', function(){
                     //alert('Selected equipment'+this[0]);
-					gas.send("BUY_ITEM_REQ", [JSON.stringify({type: "BUY_ITEM_REQ", name:"BUY_ITEM_REQ", username: JSON.parse($.cookie("gas-login")).username, item: this.item })]);
+					gas.send("BUY_ITEM_REQ", [JSON.stringify({type: "BUY_ITEM_REQ", name:"BUY_ITEM_REQ", username: JSON.parse($.cookie("gas-login")).username, gladiator: g_gladiatorShowCase, item: this.item })]);
 
                 })
         );
@@ -493,7 +493,7 @@ function showMightView()
                 .attr({x: 54, y: _y, z: 3, item: item })
                 .bind('Click', function(){
                     //alert('Selected equipment'+this[0]);
-					gas.send("BUY_ITEM_REQ", [JSON.stringify({type: "BUY_ITEM_REQ", name:"BUY_ITEM_REQ", username: JSON.parse($.cookie("gas-login")).username, item: this.item })]);
+					gas.send("BUY_ITEM_REQ", [JSON.stringify({type: "BUY_ITEM_REQ", name:"BUY_ITEM_REQ", username: JSON.parse($.cookie("gas-login")).username, gladiator: g_gladiatorShowCase, item: this.item })]);
                 }));
     }
 }
@@ -521,7 +521,7 @@ function showArmourView()
                 })
                 .bind('Click', function(){
                     //alert('Selected equipment'+this[0]);
-					gas.send("BUY_ITEM_REQ", [JSON.stringify({type: "BUY_ITEM_REQ", name:"BUY_ITEM_REQ", username: JSON.parse($.cookie("gas-login")).username, item: this.item })]);
+					gas.send("BUY_ITEM_REQ", [JSON.stringify({type: "BUY_ITEM_REQ", name:"BUY_ITEM_REQ", username: JSON.parse($.cookie("gas-login")).username, gladiator: g_gladiatorShowCase, item: this.item })]);
 
                 })
         );
@@ -530,7 +530,7 @@ function showArmourView()
                 .attr({x: 54, y: _y, z: 3, item: item })
                 .bind('Click', function(){
                     //alert('Selected equipment'+this[0]);
-					gas.send("BUY_ITEM_REQ", [JSON.stringify({type: "BUY_ITEM_REQ", name:"BUY_ITEM_REQ", username: JSON.parse($.cookie("gas-login")).username, item: this.item })]);
+					gas.send("BUY_ITEM_REQ", [JSON.stringify({type: "BUY_ITEM_REQ", name:"BUY_ITEM_REQ", username: JSON.parse($.cookie("gas-login")).username, gladiator: g_gladiatorShowCase, item: this.item })]);
                 }));
     }
 }
