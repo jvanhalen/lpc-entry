@@ -52,6 +52,14 @@ var core = {
 				core.dbcore.initUsers(body);
 		});
 
+        // Cache battles
+		this.dbcore.read(configs.battledb + "/_all_docs?include_docs=true", function(err, body) {
+			if(body.total_rows == 0)
+				console.log("core.init: battledb is empty");
+			else
+				core.dbcore.initBattles(body);
+		});
+
 		// Cache items
 		this.dbcore.read(configs.itemdb + "/_all_docs?include_docs=true", function(err, body) {
 			if(body.total_rows == 0) {
@@ -302,7 +310,7 @@ var core = {
 	getUser: function(username) {
 		console.log("core.getUser:", username);
         var user = core.usercache.read(username);
-		console.log(user);
+		//console.log(user);
 		if(user) {
 			return JSON.parse(JSON.stringify(user));
 		}
@@ -317,6 +325,44 @@ var core = {
 
 		return JSON.parse(JSON.stringify(core.itemcache.read(item)));
 
+	},
+
+    getBattle: function(battle) {
+        console.log("core.getBattle:", item);
+        var battle = core.battlecache.read(battle);
+        if ( battle ) return JSON.parse(JSON.stringify(battle));
+        else          return battle;
+    },
+
+    editBattle: function(name, attributelist) {
+ 		//console.log("core.editBattle:", name);
+
+		var battle = core.battlecache.read(name);
+		if(battle == null) {
+			console.log("ERROR: core.editBattle: battle", name, "not found.");
+			return null;
+		}
+
+		// Edit gladiator attributes
+		for(var item in attributelist) {
+			switch(item) {
+				case "challenger":
+					battle.challenger = attributelist[item];
+					break;
+				case "defender":
+					battle.defender = attributelist[item];
+					break;
+				case "history":
+					battle.history = attributelist[item];
+					break;
+				case "initial_state":
+					battle.initial_state = attributelist[item];
+					break;
+				default:
+					console.log("ERROR: core.editBattle: invalid attribute:", item)
+			}
+		}
+		return JSON.parse(JSON.stringify(core.battlecache.read(name)));
 	},
 
 	getTeamSize: function(username) {
@@ -521,6 +567,19 @@ var core = {
 			core.usercache.prefill(users);
 		},
 
+        initBattles: function(http_response) {
+            //console.log(http_response);
+            // Iterate through the data we need
+			core.battlecache.flush();
+			var battles = {};
+			for(var key in http_response.rows) {
+				var name = http_response.rows[key].doc._id
+				battles[name] = http_response.rows[key].doc;
+			}
+            //console.log("battles are:"+JSON.stringify(battles));
+			core.battlecache.prefill(battles);
+        },
+        
 		initItems: function(http_response) {
 			//console.log(http_response);
 			// Iterate through the data we need
@@ -1235,6 +1294,56 @@ var core = {
 						}
 						for(var key in core.usercache.dirtykeys) {
 							delete core.usercache.dirtykeys[key];
+						}
+					}
+				});
+			}
+		}
+	},
+    
+    battlecache: {
+		internalhash: {},	// Cached data
+		dirtykeys: {},		// Key to changed data
+		reads: 0,
+		writes: 0,
+
+		prefill: function(battles) {
+			var i = 0;
+			for(var key in battles) {
+				this.internalhash[key] = battles[key];
+				i++;
+			}
+			console.log("INFO: battlecache prefilled with", i, "battles.");
+		},
+		flush: function() { console.log("battlecache emptied!"); this.internalhash = {}; this.dirtykeys = {}; this.reads = 0; this.writes = 0;},
+		write: function(key, data) { this.writes++; console.log("write battlecache", key); this.internalhash[key] = data; this.dirtykeys[key] = true; },
+		read: function(key) { this.reads++; return this.internalhash[key]; },
+		getCacheLength: function() { return Object.keys(this.internalhash).length },
+		getDirtyLength: function() { return Object.keys(this.dirtykeys).length },
+		save: function() {
+			var retdata = [];
+			var i = 0;
+			for(var key in this.dirtykeys) {
+				retdata[i] = this.internalhash[key];
+				i++;
+			}
+			//console.log("writing:", retdata);
+			// Update only if there are dirty entries
+			if(this.getDirtyLength() > 0) {
+				//console.log("usercache: dirty entries", retdata);
+				core.dbcore.bulkinsert(configs.battledb, retdata, false, function(err, body) {
+					var tmp = core.battlecache.internalhash[body.id];
+					if(err) {
+						console.log("ERROR: core.battlecache.save ", err);
+					}
+					else {
+
+						// Clear the dirty entries
+						for(var i in body) {
+							core.battlecache.internalhash[body[i].id]._rev = body[i].rev;
+						}
+						for(var key in core.battlecache.dirtykeys) {
+							delete core.battlecache.dirtykeys[key];
 						}
 					}
 				});
