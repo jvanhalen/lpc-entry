@@ -1065,7 +1065,7 @@ var GAS = Class(function() {
 
 		case 'PLAYER_CONNECTED_PUSH':
 			console.log(data[0]);
-            //$('#managers_body').append('<div class="manager-entry" id="'+data[0].players[0]+'">'+data[0].players[0]+' [<a href="#" title="Challenge '+data[0].players[0]+' - show player rank and team info?" onclick="gas.challengePlayer(\''+data[0].players[0]+'\');">challenge</a>]</div>');
+            $('#challenges').append('<div class="team_entry" id="'+data[0].players[0]+'">'+data[0].players[0]+' [<a href="#" title="Challenge '+data[0].players[0]+' - show player rank and team info?" onclick="gas.challengePlayer(\''+data[0].players[0]+'\');">challenge</a>]</div>');
 			break;
 
 		case 'PLAYER_DISCONNECTED_PUSH':
