@@ -9,6 +9,11 @@ var g_gladiatorShowCase = null;	// Gladiator at gladiatorView
 var g_gladiators = [];
 var g_timer = { view: null, time: 0};
 var loadAudio = true;
+
+// Audio switches
+var muted = false;
+var nowPlaying = undefined;
+
 Crafty.c('Dummy', {
     dummyIndex: 0,
     setDummyIndex: function(i)
@@ -139,7 +144,6 @@ function PreloadAudio() {
 	"../assets/audio/soliloquy.m4a"]
 	});
 	loadAudio = false;
-
 }
 
 function PreloadAnimation(animFile) {
@@ -656,8 +660,7 @@ function showManagerView()
 	if(loadAudio==true)
 		PreloadAudio();
 
-	Crafty.audio.stop();
-	Crafty.audio.play("soliloquy", -1, 0.1);
+	playAudio("soliloquy", -1, 0.1);
 
     g_currentView = "manager";
     LoadTileMap( 'manager.json');
@@ -728,31 +731,34 @@ function showManagerView()
         });
     // Add some author info
     Crafty.e("2D, DOM, Text").attr({ w: 385, h: 20, x: 400, y: 20 })
-        .text("by Team Oldman & Green (c) 2012")
+        .text("GAS Valhalla <br />by Team Oldman & Green (c) 2012")
         .css({
             "text-align": "right",
             "font-family": "Arial",
             "font-size": "8pt"
         });
     // Testing info
-    Crafty.e("2D, DOM, Text").attr({ w: 140, h: 20, x: 42, y: 220, z:8 })
+    Crafty.e("2D, DOM, Text").attr({ w: 140, h: 20, x: 20, y: 40, z:8 })
         .text("~Legend~")
         .css({
-            "text-align": "center",
+            "text-align": "left",
             "font-family": "Fanwood",
             "font-size": "18pt",
-            "color":"#734212"
+            "color":"#FFFFFF"
         });
-    Crafty.e("2D, DOM, Keyboard, Text").attr({ w: 130, h: 300, x:52 , y: 250, z:8 })
-        .text("P: Gladiator Pit")        .css({
+    Crafty.e("2D, DOM, Keyboard, Text").attr({ w: 130, h: 300, x:25 , y: 70, z:8 })
+        .text("P: Gladiator Pit<br />M: audio on/off")        .css({
             "text-align": "left",
             "font-family": "Fanwood-Text",
             "font-size": "10pt",
-            "color": "#5c3111"
+            "color": "#FFFFFF"
         })
         .bind('KeyDown', function () {
             if (this.isDown('P')){
                 Crafty.scene("gladiatorPitView");
+            }
+            if (this.isDown('M')){
+                Crafty.audio.mute();
             }
         });
 
@@ -767,8 +773,7 @@ function showManagerView()
 function showArenaView()
 {
 
-	Crafty.audio.stop();
-	Crafty.audio.play("granbatalla", -1, 0.3);
+	playAudio("granbatalla", -1, 0.2);
 
     g_currentView = "arena";
     g_currentGrid = LoadTileMap( 'arena.json', true );
@@ -976,7 +981,19 @@ function pitCreateGladiators(data){
     });
 }
 
+function playAudio(audiofile, loop, volume) {
 
+	muted = Crafty.audio.muted;
+
+	if(!muted) {
+		// Do not restart the same audio when switching between views
+		if(audiofile != nowPlaying) {
+			Crafty.audio.stop();
+			Crafty.audio.play(audiofile, loop, volume);
+			nowPlaying = audiofile;
+		}
+	}
+}
 
 /*global Class, Maple */
 var GAS = Class(function() {
@@ -1261,7 +1278,7 @@ var GAS = Class(function() {
                         Crafty.scene("gladiatorView");
                     })
                     .bind("MouseOver", function(){
-                        DisplayFadingText(this.gladiator.name, this.x, this.y, "20pt", "Fanwood");                        
+                        DisplayFadingText(this.gladiator.name, this.x, this.y, "20pt", "Fanwood");
                     });
                 g_gladiators.push(g);
 
