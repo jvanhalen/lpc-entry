@@ -87,6 +87,9 @@
 				if($("#typearea").val() == "clear;") {
 					$('#chatbox').empty();
 				}
+				if($("#typearea").val() == "help;") {
+					$('#chatbox').append("<b>clear;</b> clear the chatbox<br /><b>help;</b> this help<br />");
+				}
 				else {
 					gas.send("CLIENT_CHAT_REQ", ['{"username": "' + user + '", "message": "' + message + '"}']);
 				}
@@ -219,11 +222,11 @@
 	    <div id="managers_body"></div>
 	    <div id="chatbox"></div>
 	    <div>
-		<input type="text" id="typearea" style="width:250px" />
+		<input type="text" id="typearea" style="width:250px" value="help;" />
 	    </div>
       </div>
       <div id="challenges">
-        What now?
+        Online players
       </div>
   </div>
 

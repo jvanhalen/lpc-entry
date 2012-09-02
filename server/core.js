@@ -77,7 +77,7 @@ var core = {
 	},
 
 	createUser: function(username, password) {
-		//console.log("core.createUser: ", username, password);
+		console.log("core.createUser: ", username, password);
 
 		if(null == username || null == password) {
 			console.log("ERROR: core.createUser: ", username, password);
@@ -85,13 +85,11 @@ var core = {
 		}
 
 		var crypto = require('crypto');
-		var newuser = core.user;
+		var newuser = core.user.init();
 		var len = password.length;
-
 		if((null == core.usercache.read(username)) && (len == 40)) {
 			var salt = crypto.createHash('sha1');
 			salt.update(crypto.randomBytes(128));
-			console.log("salt:", salt);
 
 			// Create new user
 			newuser._id = username;
@@ -132,7 +130,7 @@ var core = {
 		}
 
 		//console.log(newuser);
-		return newuser;	// Caller: check that user data is not null
+		return JSON.parse(JSON.stringify(newuser));	// Caller: check that user data is not null
 	},
 
 	// Hire gladiator to a team (also "pushes" gladiator to the teams gladiatorlist)
@@ -169,7 +167,7 @@ var core = {
 		core.usercache.write(user._id, user);
 		core.gladiatorcache.write(gladiator._id, gladiator);
 
-		return gladiator;
+		return JSON.parse(JSON.stringify(gladiator));
 	},
 
 	getGladiator: function(name) {
@@ -180,7 +178,7 @@ var core = {
 			console.log("ERROR: core.getGladiator: gladiator", name, "not found.");
 			return null;
 		}
-		return gladiator;
+		return JSON.parse(JSON.stringify(gladiator));
 	},
 
 	editGladiator: function(name, attributelist) {
@@ -258,7 +256,7 @@ var core = {
 
 		}
 
-		return core.gladiatorcache.read(name);
+		return JSON.parse(JSON.stringify(core.gladiatorcache.read(name)));
 	},
 
 	rollDice: function(dice) {
@@ -290,8 +288,13 @@ var core = {
 	getUser: function(username) {
 		console.log("core.getUser:", username);
         var user = core.usercache.read(username);
-        if ( user === undefined )  return user;
-		else                       return JSON.parse(JSON.stringify(user));
+		console.log(user);
+		if(user) {
+			return JSON.parse(JSON.stringify(user));
+		}
+		else {
+			return null;
+		}
 
 	},
 
@@ -306,7 +309,7 @@ var core = {
 		console.log("core.getTeamSize:", username);
 
 		var user = core.usercache.read(username);
-		console.log(user.gladiators.length);
+		//console.log(user.gladiators.length);
 
 		if(null != user)
 			return user.gladiators.length;
@@ -349,7 +352,7 @@ var core = {
 			gladis.push(reservedGladiators[key]);
 		}
 
-		return gladis;
+		return JSON.parse(JSON.stringify(gladis));
 	},
 
 	// DB CORE
@@ -456,7 +459,7 @@ var core = {
 
 			for(var i in items.items) {
 				itemlist[i] = items.items[i];
-				console.log(item, items.items[i])
+				//console.log(item, items.items[i])
 			}
 
 			this.bulkinsert(configs.itemdb, itemlist, true, function(err, body) {
@@ -583,9 +586,10 @@ var core = {
 		// Write cached data to the database periodically (every 10 seconds?)
 		writeCache: function() {
 			//console.log("Writing cached data to db!")
+			//console.log(JSON.stringify(core.usercache.dirtykeys));
 			core.gladiatorcache.save();
-			core.usercache.save();
 			core.itemcache.save();
+			core.usercache.save();
 
 		},
 
@@ -600,8 +604,7 @@ var core = {
 			}
 
 			console.log("Statistics:");
-			console.log("\tTotal gladiators:", totalgladis);
-			console.log("\tFree gladiators:", freegladis, "(" + parseFloat((100*(freegladis/totalgladis))).toFixed(2) + "%)");
+			console.log("\tTotal gladiators:", totalgladis, "\tFree gladiators:", freegladis, "(" + parseFloat((100*(freegladis/totalgladis))).toFixed(2) + "%)");
 			console.log("\tCaches (r/w): gladiator ("+core.gladiatorcache.reads + "/" + core.gladiatorcache.writes+ "), user (" + core.usercache.reads + "/" + core.usercache.writes+"), item ("+core.itemcache.reads + "/" + core.itemcache.writes+")");
 		}
 	}, // dbcore
@@ -627,10 +630,17 @@ var core = {
 		}, */
 
 		CREATE_USER_REQ: {
+			message: {
 				"type": 1, // Add this field automatically?
 				"name": "CREATE_USER_REQ",
 				"username": "username",
 				"password": "hashedpwd"
+			},
+			init: function(username, password) {
+				this.message.username = username;
+				this.message.password = password;
+				return JSON.parse(JSON.stringify(this.message));
+			}
 		},
 
 
@@ -653,10 +663,17 @@ var core = {
 		},
 
 		LOGIN_REQ: {
+				message: {
 					"type": 1, // Add this field automatically?
 					"name": "LOGIN_REQ",
 					"username": "username",
-					"password": "empty string or salted password"
+					"password": "empty string or salted password",
+				},
+				init: function(username, password) {
+					this.message.username = username;
+					this.message.password = password;
+					return JSON.parse(JSON.stringify(this.message));
+				}
 		},
 
 		LOGIN_RESP: {
@@ -703,9 +720,14 @@ var core = {
 				message: {
 					"type": 1, // Add this field automatically?
 					"name": "HIRE_GLADIATOR_REQ",
-					"user": "username",
+					"username": "username",
 					"gladiator": "gladiator's name"
 				},
+				init: function(username, gladiator) {
+					this.message.username = username;
+					this.message.gladiator = gladiator;
+					return JSON.parse(JSON.stringify(this.message));
+				}
 		},
 
 		HIRE_GLADIATOR_RESP: {
@@ -737,11 +759,18 @@ var core = {
 		},
 
 		FIRE_GLADIATOR_REQ: {
-				"type": 1, // Add this field automatically?
-				"name": "FIRE_GLADIATOR_REQ",
-				"user": "username",
-				"sessionid": "to verify the user action?",
-				"gladiator": "gladiator's name"
+				message: {
+					"type": 1, // Add this field automatically?
+					"name": "FIRE_GLADIATOR_REQ",
+					"username": "username",
+					"sessionid": "to verify the user action?",
+					"gladiator": "gladiator's name"
+				},
+				init: function(username, gladiator) {
+					this.message.username = username;
+					this.message.gladiator = gladiator;
+					return JSON.parse(JSON.stringify(this.message));
+				}
 		},
 
 		FIRE_GLADIATOR_RESP: {
@@ -765,7 +794,7 @@ var core = {
 				message: {
 					"type": 1, // Add this field automatically?
 					"name": "BUY_ITEM_REQ",
-					"user": "username",
+					"username": "username",
 					"item": "item id"
 				},
 		},
@@ -774,7 +803,7 @@ var core = {
 				message: {
 					"type": 1, // Add this field automatically?
 					"name": "BUY_ITEM_RESP",
-					"user": "username",
+					"username": "username",
 					"item": "item id"
 				},
 		},
@@ -896,6 +925,7 @@ var core = {
 	}, //gladiator
 
 	user:  {
+		message:{
 		"_id": null,
 		"name": null,
 		"team": null,
@@ -1014,6 +1044,10 @@ var core = {
 				  "password": null,
 				  "history": [{"ip": null, "timestamp": null, "duration": null, "failed": null}]
 				 }
+		},
+		init: function() {
+			return JSON.parse(JSON.stringify(this.message));
+		}
 	},
 
 
@@ -1059,7 +1093,7 @@ var core = {
 
 			console.log("INFO: gladiatorcache prefilled with", i, "gladiators.");
 		},
-		flush: function() { console.log("gladiatorcache emptied!"); this.internalhash = []; this.dirtykeys = []; this.reads = 0; this.writes = 0;},
+		flush: function() { console.log("gladiatorcache emptied!"); this.internalhash = {}; this.dirtykeys = {}; this.reads = 0; this.writes = 0;},
 		write: function(key, data) { this.writes++; this.internalhash[key] = data;	this.dirtykeys[key] = true; },
 		read: function(key) { this.reads++; return this.internalhash[key]; },
 		getCacheLength: function() { return Object.keys(this.internalhash).length },
@@ -1074,13 +1108,13 @@ var core = {
 
 			// Update only if there are dirty entries
 			if(this.getDirtyLength() > 0) {
-				console.log("gladiatorcache: dirty entries", retdata);
+				//console.log("gladiatorcache: dirty entries", retdata);
 				core.dbcore.bulkinsert(configs.gladiatordb, retdata, false, function(err, body) {
 					if(err) {
 						console.log("ERROR: core.gladiatorcache.save ", err.reason);
 					}
 					else {
-						console.log("gladiatorcache: bulkinserted", err, body);
+						//console.log("gladiatorcache: bulkinserted", err, body);
 						for(var i in body) {
 							core.gladiatorcache.internalhash[body[i].id]._rev = body[i].rev;
 						}
@@ -1108,7 +1142,7 @@ var core = {
 			}
 			console.log("INFO: itemcache prefilled with", i, "items.");
 		},
-		flush: function() { console.log("itemcache emptied!"); this.internalhash = []; this.dirtykeys = []; this.reads = 0; this.writes = 0;},
+		flush: function() { console.log("itemcache emptied!"); this.internalhash = {}; this.dirtykeys = {}; this.reads = 0; this.writes = 0;},
 		write: function(key, data) { this.writes++; this.internalhash[key] = data;	this.dirtykeys[key] = true; },
 		read: function(key) { this.reads++; return this.internalhash[key]; },
 		getCacheLength: function() { return Object.keys(this.internalhash).length },
@@ -1156,8 +1190,8 @@ var core = {
 			}
 			console.log("INFO: usercache prefilled with", i, "users.");
 		},
-		flush: function() { console.log("usercache emptied!"); this.internalhash = []; this.dirtykeys = []; this.reads = 0; this.writes = 0;},
-		write: function(key, data) { this.writes++; console.log("write usercache", key, data); this.internalhash[key] = data; this.dirtykeys[key] = true; },
+		flush: function() { console.log("usercache emptied!"); this.internalhash = {}; this.dirtykeys = {}; this.reads = 0; this.writes = 0;},
+		write: function(key, data) { this.writes++; console.log("write usercache", key); this.internalhash[key] = data; this.dirtykeys[key] = true; },
 		read: function(key) { this.reads++; return this.internalhash[key]; },
 		getCacheLength: function() { return Object.keys(this.internalhash).length },
 		getDirtyLength: function() { return Object.keys(this.dirtykeys).length },
@@ -1168,18 +1202,17 @@ var core = {
 				retdata[i] = this.internalhash[key];
 				i++;
 			}
-
+			//console.log("writing:", retdata);
 			// Update only if there are dirty entries
 			if(this.getDirtyLength() > 0) {
 				//console.log("usercache: dirty entries", retdata);
 				core.dbcore.bulkinsert(configs.userdb, retdata, false, function(err, body) {
 					var tmp = core.usercache.internalhash[body.id];
-					console.log(tmp);
 					if(err) {
 						console.log("ERROR: core.usercache.save ", err);
 					}
 					else {
-						//console.log("usercache: bulkinserted", err, body;
+						//console.log("usercache: bulkinserted", err, body);
 						// Clear the dirty entries
 						//console.log(core.usercache.internalhash);
 						for(var i in body) {

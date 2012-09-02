@@ -1,16 +1,24 @@
 var configs = require('../json/configs.json');
-/* handles messages from PARENT */ 
+var aiPassword = "da39a3ee5e6b4b0d3255bfef95601890afd80709";
+
+/* handles messages from PARENT */
 process.on('message', function(message) {
 
     switch(message.name) {
-       case 'AI_INIT':
-        ai.init();
-        break;
-    case 'CHALLENGE_REQ':
-        ai.replyChallenge(message,true); // always accept challenge
-        break;
-    default:
-        ai.handleMessage(message);
+        case 'AI_INIT':
+            ai.init();
+            break;
+
+        case 'CHALLENGE_REQ':
+            ai.replyChallenge(message,true); // always accept challenge, add random delay before accepting? Should people know they af
+            break;
+
+        case 'CREATE_USER_RESP':
+            process.send(JSON.stringify({type:"LOGIN_REQ", name:"LOGIN_REQ",data:{username: message.username, "password": aiPassword }}));
+            break;
+
+        default:
+            ai.handleMessage(message);
     }
 
 });
@@ -18,39 +26,44 @@ process.on('message', function(message) {
 var ai = {
 
     teams: [], /* player teams */
-    
+
     init: function(){
-        for( i in configs.npcs ){
+
+        for( var i in configs.npcs ){
             console.log("Registering computer team: "+ configs.npcs[i]);
+            process.send(JSON.stringify({type:"CREATE_USER_REQ", name:"CREATE_USER_REQ",data:{username:configs.npcs[i], "password": aiPassword }}));
         }
-        process.send(JSON.stringify({type:"LOGIN_REQ", name:"LOGIN_REQ",data:{username:"Morons"}}));
-    },
-    
-    /* Registers a game for AI to be handled.  */
-    registerPlayerToGame: function(battleid) {
-    
     },
 
-    
+    /* Registers a game for AI to be handled.  */
+    registerPlayerToGame: function(battleid) {
+
+    },
+
+
 
     replyChallenge: function(msg,reply)
     {
-       process.send(JSON.stringify({
-           type:"CHALLENGE_RES", 
-           name:"CHALLENGE_RES", 
-           data:{
-               username:"Morons",
-               challenger:msg.challenger,
-               response:(reply == true ? "OK" : "NOK")
-           }
-       }));
-
+        //console.log(msg, reply);
+        for( i in configs.npcs ) {
+            if(msg.defender == configs.npcs[i]) {
+                process.send(JSON.stringify({
+                    type:"CHALLENGE_RES",
+                    name:"CHALLENGE_RES",
+                    data:{
+                    username:configs.npcs[i],
+                    challenger:msg.challenger,
+                    response:(reply == true ? "OK" : "NOK")
+                    }
+                }));
+            }
+        }
     },
-    
+
     handleMessage: function(message) {
         console.log('ai is handling message ' + JSON.stringify(message.name));
-        
-        
+
+
         // Do some message handling here
         /* ... */
 

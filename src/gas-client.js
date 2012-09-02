@@ -404,7 +404,7 @@ function showMagicView()
                 })
                 .bind('Click', function(){
                     //alert('Selected spell'+this[0]);
-					gas.send("BUY_ITEM_REQ", [JSON.stringify({type: "BUY_ITEM_REQ", name:"BUY_ITEM_REQ", user: JSON.parse($.cookie("gas-login")).username, item: this.item })]);
+					gas.send("BUY_ITEM_REQ", [JSON.stringify({type: "BUY_ITEM_REQ", name:"BUY_ITEM_REQ", username: JSON.parse($.cookie("gas-login")).username, item: this.item })]);
 					})
         );
         shopListObjs.push(
@@ -412,7 +412,7 @@ function showMagicView()
                 .attr({x: 54, y: _y, z: 3 , item: item})
                 .bind('Click', function(){
                     //alert('Selected equipment'+this[0]);
-					gas.send("BUY_ITEM_REQ", [JSON.stringify({type: "BUY_ITEM_REQ", name:"BUY_ITEM_REQ", user: JSON.parse($.cookie("gas-login")).username, item: this.item })]);
+					gas.send("BUY_ITEM_REQ", [JSON.stringify({type: "BUY_ITEM_REQ", name:"BUY_ITEM_REQ", username: JSON.parse($.cookie("gas-login")).username, item: this.item })]);
                 }));
     }
 }
@@ -440,7 +440,7 @@ function showMightView()
                 })
                 .bind('Click', function(){
                     //alert('Selected equipment'+this[0]);
-					gas.send("BUY_ITEM_REQ", [JSON.stringify({type: "BUY_ITEM_REQ", name:"BUY_ITEM_REQ", user: JSON.parse($.cookie("gas-login")).username, item: this.item })]);
+					gas.send("BUY_ITEM_REQ", [JSON.stringify({type: "BUY_ITEM_REQ", name:"BUY_ITEM_REQ", username: JSON.parse($.cookie("gas-login")).username, item: this.item })]);
 
                 })
         );
@@ -449,7 +449,7 @@ function showMightView()
                 .attr({x: 54, y: _y, z: 3, item: item })
                 .bind('Click', function(){
                     //alert('Selected equipment'+this[0]);
-					gas.send("BUY_ITEM_REQ", [JSON.stringify({type: "BUY_ITEM_REQ", name:"BUY_ITEM_REQ", user: JSON.parse($.cookie("gas-login")).username, item: this.item })]);
+					gas.send("BUY_ITEM_REQ", [JSON.stringify({type: "BUY_ITEM_REQ", name:"BUY_ITEM_REQ", username: JSON.parse($.cookie("gas-login")).username, item: this.item })]);
                 }));
     }
 }
@@ -477,7 +477,7 @@ function showArmourView()
                 })
                 .bind('Click', function(){
                     //alert('Selected equipment'+this[0]);
-					gas.send("BUY_ITEM_REQ", [JSON.stringify({type: "BUY_ITEM_REQ", name:"BUY_ITEM_REQ", user: JSON.parse($.cookie("gas-login")).username, item: this.item })]);
+					gas.send("BUY_ITEM_REQ", [JSON.stringify({type: "BUY_ITEM_REQ", name:"BUY_ITEM_REQ", username: JSON.parse($.cookie("gas-login")).username, item: this.item })]);
 
                 })
         );
@@ -486,7 +486,7 @@ function showArmourView()
                 .attr({x: 54, y: _y, z: 3, item: item })
                 .bind('Click', function(){
                     //alert('Selected equipment'+this[0]);
-					gas.send("BUY_ITEM_REQ", [JSON.stringify({type: "BUY_ITEM_REQ", name:"BUY_ITEM_REQ", user: JSON.parse($.cookie("gas-login")).username, item: this.item })]);
+					gas.send("BUY_ITEM_REQ", [JSON.stringify({type: "BUY_ITEM_REQ", name:"BUY_ITEM_REQ", username: JSON.parse($.cookie("gas-login")).username, item: this.item })]);
                 }));
     }
 }
@@ -1065,7 +1065,7 @@ var GAS = Class(function() {
 
 		case 'PLAYER_CONNECTED_PUSH':
 			console.log(data[0]);
-            $('#managers_body').append('<div class="manager-entry" id="'+data[0].players[0]+'">'+data[0].players[0]+' [<a href="#" title="Challenge '+data[0].players[0]+' - show player rank and team info?" onclick="gas.challengePlayer(\''+data[0].players[0]+'\');">challenge</a>]</div>');
+            //$('#managers_body').append('<div class="manager-entry" id="'+data[0].players[0]+'">'+data[0].players[0]+' [<a href="#" title="Challenge '+data[0].players[0]+' - show player rank and team info?" onclick="gas.challengePlayer(\''+data[0].players[0]+'\');">challenge</a>]</div>');
 			break;
 
 		case 'PLAYER_DISCONNECTED_PUSH':
@@ -1111,8 +1111,9 @@ var GAS = Class(function() {
 			break;
 
 		case 'CHAT_SYNC':
-			if(JSON.parse($.cookie("gas-login")).sessionid) {
-				$('#chatbox').append('<div id="message"><a href="#" title="The coolest guy on Earth">'+ JSON.parse(data).username + ':</a>&nbsp;&nbsp;' + JSON.parse(data).message + '<br /></div>');
+			if(JSON.parse($.cookie("gas-login")).username) {
+				console.log("chat_sync");
+				$('#chatbox').append('<div id="message"><a href="#" title="Some information?">'+ JSON.parse(data).username + ':</a>&nbsp;&nbsp;' + JSON.parse(data).message + '<br /></div>');
 					// Chatbox auto-scroll
 				var messages = $('#chatbox');
 				//console.log(messages[0].scrollHeight, "asdf", messages.height);
@@ -1126,7 +1127,6 @@ var GAS = Class(function() {
 	    case 50:
            console.log("Received: " + data[0].name);
 			break;
-
 
 		case 'HIRE_GLADIATOR_RESP':
 			console.log("Received: " + JSON.stringify(data));
@@ -1146,9 +1146,11 @@ var GAS = Class(function() {
         case 'GET_ONLINE_PLAYERS_RESP':
 			$('#managers_title').empty();
 			$('#managers_body').empty();
-			$('#managers_title').append("Players currently online:");
+			$('#challenges').empty();
+			$('#challenges').append("Online players");
+			//$('#managers_title').append("Chat:");
 
-			console.log('received player list'+data[0].players); // Should we use the username of the team name? Also include the match statistics and gladiators in team? If so, use zlib to compress/decompress data
+			console.log('received player list'+data[0].players); // Should we use the username or the team name? Also include the match statistics and gladiators in team? If so, use zlib to compress/decompress data
 			// Order by rank, name or something else?
 			data[0].players.sort(); // This time by name
 			for(var i in data[0].players){
@@ -1156,9 +1158,9 @@ var GAS = Class(function() {
 				// Later on, make server push the online activity status changes to reduce data traffic
 				//console.log('online: ' +data[0].players[i]);
 				if(data[0].players[i] == JSON.parse($.cookie("gas-login")).username)
-					$('#managers_body').append('<div class="manager-entry" id="'+data[0].players[i]+'">'+data[0].players[i]+' [<a href="#" title="It\'s me! Show some stats?">my team</a>]</div>');
+					$('#challenges').append('<div class="team_entry" id="'+data[0].players[i]+'">'+data[0].players[i]+' [<a href="#" title="It\'s me! Show some stats?">my team</a>]</div>');
 				else
-					$('#managers_body').append('<div class="manager-entry" id="'+data[0].players[i]+'">'+data[0].players[i]+' [<a href="#" title="Challenge '+ data[0].players[i] +' - show player rank and team info?" onclick="gas.challengePlayer(\''+data[0].players[i]+'\');">challenge</a>]</div>');
+					$('#challenges').append('<div class="team_entry" id="'+data[0].players[i]+'">'+data[0].players[i]+' [<a href="#" title="Challenge '+ data[0].players[i] +' - show player rank and team info?" onclick="gas.challengePlayer(\''+data[0].players[i]+'\');">challenge</a>]</div>');
 			}
 
 			break;

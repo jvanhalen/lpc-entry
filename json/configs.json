@@ -13,16 +13,19 @@
     "gladiatorsindatabase": 	100,
 	"hirelistlength":			12,
 
+    "AICONFIG":                 true,
+    "aiplayers":                50,
+    "aiteamsize":               4,
+    "npcs":                     ["Morons", "Wyverns", "Dragons", "Destroyers"],
+
 	"SERVER_CACHE_CONTROLS":	true,
-	"cachewriteperiod":			5000,
+	"cachewriteperiod":			1000,
 	"statswriteperiod":			120000,
 
 	"DATABASE":					true,
     "gladiatordb":				"gladiators",
     "userdb":                 	"users",
     "battledb":                 "battles",
-	"itemdb":					"items",
-    
-    "npcs":                     ["Morons"]
-        
+	"itemdb":					"items"
+
 }

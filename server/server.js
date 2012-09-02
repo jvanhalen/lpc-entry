@@ -57,7 +57,7 @@ var GASServer = Maple.Class(function(clientClass) {
             //console.log('AI SEND: ' + name+ ',' + JSON.stringify(mydata));
             var msg = "";
 
-            // workaround for messaging differences 
+            // workaround for messaging differences
             if ( typeof mydata[0] == "string" )
                 msg = JSON.parse(mydata[0]);
             else
@@ -88,7 +88,7 @@ var GASServer = Maple.Class(function(clientClass) {
 		  path = finder.findPath( 8,13,   9,13,   grid.clone() );
 		  console.log('Path:'+JSON.stringify(path));
 		*/
-        
+
     },
 
     update: function(t, tick) {
@@ -220,14 +220,14 @@ var GASServer = Maple.Class(function(clientClass) {
 			// Handle messages coming from the CHILD process
 			this.ai.proc.on('message', function(message) {
 			    //console.log('PARENT received message from ai CHILD process', message);
-                message = JSON.parse(message); 
+                message = JSON.parse(message);
 			    switch(message.name) {
                 default:
                     console.log("Handling message from CHILD process:", message.type);
                     that.handleClientRequest(that.ai, message.type, that.getTime(), JSON.stringify(message.data));
 
 			  }
-                
+
 			});
             // Delay AI init so usercache is ready
             setTimeout(function(){
@@ -391,7 +391,7 @@ var GASServer = Maple.Class(function(clientClass) {
 				}
 			}
 
-            // ok, no live player - check for NPCs 
+            // ok, no live player - check for NPCs
             if ( defenderClient == null ) {
                 for( user in configs.npcs )
                 {
@@ -403,7 +403,7 @@ var GASServer = Maple.Class(function(clientClass) {
                 }
             }
 
-            
+
             if ( defenderClient == null )
             {
                 // user marked as defender is offline, cannot accept.
@@ -539,7 +539,7 @@ var GASServer = Maple.Class(function(clientClass) {
 
 				console.log('Challenger ingame updated');
 			    // send info that game is ready
-           
+
 				for(var c=0;c< this.getClients().length; c++) {
 					if(clientToUsername[this.getClients().getAt(c).id] == data.challenger._id) {
 						this.getClients().getAt(c).send('CHALLENGE_RES',
@@ -548,7 +548,7 @@ var GASServer = Maple.Class(function(clientClass) {
 					}
 				}
                 // NPCs never throw a challenge
-                
+
 			break;
 
 			case 'BATTLE_START_UPDATE_DEFENDER':
@@ -561,7 +561,7 @@ var GASServer = Maple.Class(function(clientClass) {
 						 ['{"response":"READY_FOR_WAR", "battles":"'+data.defender.ingame+'"}']);
 						break;
 					}
-				} 
+				}
                 // NPCs may be on the receiving end
                 if ( livePlayerFound == false) {
 
@@ -630,7 +630,7 @@ var GASServer = Maple.Class(function(clientClass) {
 						}
 					}
 					else {
-                        
+
 						client.send(api.message.LOGIN_RESP.message.name, [ api.toJSON(api.message.LOGIN_RESP.init(username, "NOK", "Login failed.")) ]);
 					}
 				}
@@ -668,7 +668,7 @@ var GASServer = Maple.Class(function(clientClass) {
 			case 'CLIENT_CHAT_REQ':
 				for( var c=0; c < this.getClients().length; c++)
 				{
-					//console.log("Updating:", this.getClients().getAt(c).id);
+					console.log("Updating:", this.getClients().getAt(c).id);
 					this.getClients().getAt(c).send("CHAT_SYNC", [data]);
 				}
 			break;
@@ -712,22 +712,22 @@ var GASServer = Maple.Class(function(clientClass) {
 						console.log('Found challenge!');
 						if ( res == "OK" ) this.challenges[challenge].state = "ACCEPTED";
 						else               this.challenges[challenge].state = "NOT_ACCEPTED";
-                        
+
                         // search client from live players
                         var challengerClient = null;
-                        
+
 						for( var c=0; c < this.getClients().length;c++)
 						{
 							if ( clientToUsername[this.getClients().getAt(c).id] == this.challenges[challenge].challenger ) {
                                 challengerClient = this.getClients().getAt(c);
                                 break;
-                                
+
 							}
 						}
                         console.log('here goes');
                         // not found? then it is got to be computer AI
                         if ( challengerClient == null ){
-                            
+
                             for( i in configs.npcs ){
                                 if ( configs.npcs[i] == this.challenges[challenge].challenger ){
                                     challengerClient = this.ai;
@@ -735,13 +735,13 @@ var GASServer = Maple.Class(function(clientClass) {
                                 }
                             }
                         }
-                        
-                        
+
+
                         // TODO: add safety check for challenger client that does not exist?
                         if ( challengerClient == null ) {
                             console.log("CHALLENGER IS MISSING: SOMETHING IS VERY BADLY WRONG HERE!!!!");
                         }
-                        
+
 						// if challenge was accepted, initiate battles
 						if ( this.challenges[challenge].state == "ACCEPTED")
 						{
@@ -755,9 +755,9 @@ var GASServer = Maple.Class(function(clientClass) {
 						} else {
 							challengerClient.send('CHALLENGE_RES', ['{ "response":"'+res+'", "defender":"'+ch.defender+'", "reason":"defender turned down the challenge"}']);
 						}
-                        
+
 						delete this.challenges[challenge];
-                        
+
 					}
 				}
 

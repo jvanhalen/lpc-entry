@@ -61,8 +61,8 @@ body {
 #chatbox {
 	float: left;
 	position: relative;
-	width:250px;
-	height:100px;
+	width:100%;
+	height:90%;
 	overflow:auto;
 	overflow-y:auto;
 	background-color: #2e1a20;
@@ -234,12 +234,12 @@ input:focus:required:invalid {
 #cr-stage { border:2px solid black; margin:5px auto; color:white; float:left }
 #managers_title, #welcome_title {     font-family: 'Fanwood'; font-size: 18pt;}
 
-.manager-entry {
+.team_entry {
     font-size: 10pt;
     font-family: 'Fanwood-Text';
 }
 #challenges {
-    font-family: 'Fanwood-Text'; 
+    font-family: 'Fanwood-Text';
     font-size: 12pt;
     color: white;
 }
