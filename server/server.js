@@ -666,10 +666,35 @@ var GASServer = Maple.Class(function(clientClass) {
 			break;
 
 			case 'CLIENT_CHAT_REQ':
-				for( var c=0; c < this.getClients().length; c++)
+				// Check if message was ment to some specific player:
+				var msg = JSON.parse(data).message;
+				var username = "";
+				var toUser = "";
+
+				console.log(msg, msg.substring(0,1));
+				if(msg.substring(0,1) == "@" && msg.length > 2) {
+					username = msg.split(":");
+					toUser = username[0];
+					toUser = toUser.substring(1, toUser.length);
+					console.log("username:", toUser);
+				}
+				for( var c=0; c < this.getClients().length; c++ )
 				{
-					console.log("Updating:", this.getClients().getAt(c).id);
-					this.getClients().getAt(c).send("CHAT_SYNC", [data]);
+					//console.log("Updating:", this.getClients().getAt(c).id);
+					if(toUser){
+						// Send to a specific user only
+						console.log(this.getClients().getAt(c).id);
+						if(clientToUsername[this.getClients().getAt(c).id] == toUser) {
+							console.log("Private msg to", toUser, ":", JSON.parse(data).message);
+							this.getClients().getAt(c).send("CHAT_SYNC", [data]);
+							break;
+						}
+
+					}
+					else {
+						// A global message, send to all users
+						this.getClients().getAt(c).send("CHAT_SYNC", [data]);
+					}
 				}
 			break;
 

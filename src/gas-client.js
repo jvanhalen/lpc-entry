@@ -1114,9 +1114,8 @@ var GAS = Class(function() {
 			if(JSON.parse($.cookie("gas-login")).username) {
 				console.log("chat_sync");
 				$('#chatbox').append('<div id="message"><a href="#" title="Some information?">'+ JSON.parse(data).username + ':</a>&nbsp;&nbsp;' + JSON.parse(data).message + '<br /></div>');
-					// Chatbox auto-scroll
+				// Chatbox auto-scroll
 				var messages = $('#chatbox');
-				//console.log(messages[0].scrollHeight, "asdf", messages.height);
 				var scrollTop = messages[0].scrollHeight - messages.height();
 				if(scrollTop > 0) {
 					messages.scrollTop(scrollTop);
