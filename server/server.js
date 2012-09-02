@@ -65,6 +65,7 @@ var GASServer = Maple.Class(function(clientClass) {
 
 
             msg["name"] = name;
+            //console.log('From AI: '+JSON.stringify(msg));
             this.proc.send(msg);
         }
     },					// Game ai
@@ -423,10 +424,10 @@ var GASServer = Maple.Class(function(clientClass) {
                 });
                 // send challenge request for defender
                 defenderClient.send('CHALLENGE_REQ',
-                                    ['{"challenger":"'+ clientToUsername[client.id] + '"}']);
+                                    ['{"challenger":"'+ clientToUsername[client.id] + '", "defender":"'+defender+'"}']);
                 // notify challenger for delivery
                 client.send('CHALLENGE_RES',
-                            ['{"response":"DELIVERED", "defender":"'+defender+'" }']);
+                            ['{"response":"DELIVERED", "challenger":"'+clientToUsername[client.id]+'","defender":"'+defender+'" }']);
             }
 		break;
 
@@ -616,7 +617,7 @@ var GASServer = Maple.Class(function(clientClass) {
 				if(userdata && logged == false) {
 
                     var passwdOk = (userdata.login.password == JSON.parse(data).password); // regular users
-                    var isAI = (userdata.login.computer == true && client == this.ai); // computer AI
+                    var isAI = (userdata.ai == true && client == this.ai); // computer AI
 
 					if( passwdOk || isAI )  {
 						client.send(api.message.LOGIN_RESP.message.name, [ api.toJSON(api.message.LOGIN_RESP.init(username, "OK", "Login succeeded.")) ]);
