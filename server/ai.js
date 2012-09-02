@@ -25,8 +25,8 @@ process.on('message', function(message) {
 
 var ai = {
 
-    teams: [], /* player teams */
-
+    teams: {}, /* player teams */
+    
     init: function(){
 
         for( var i in configs.npcs ){
@@ -36,13 +36,13 @@ var ai = {
     },
 
     /* Registers a game for AI to be handled.  */
-    registerPlayerToGame: function(battleid) {
-
+    registerPlayerToGame: function(aiPlayer, battleid) {
+        teams[aiPlayer] = battleid;
     },
 
     replyChallenge: function(msg,reply)
     {
-        //console.log(msg, reply);
+        //console.log("Ai Replying to challenge: "+msg+","+reply);
         for( i in configs.npcs ) {
             if(msg.defender == configs.npcs[i]) {
                 process.send(JSON.stringify({
@@ -54,6 +54,7 @@ var ai = {
                     response:(reply == true ? "OK" : "NOK")
                     }
                 }));
+
             }
         }
     },
