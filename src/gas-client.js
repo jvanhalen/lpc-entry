@@ -63,6 +63,9 @@ Crafty.c('Grid', {
     movePattern: null, // [[x,y], [,], ...]
     moving: false,
     targetPos:null,
+    orig_x: null, // used for manager view for return to dummy
+    orig_y: null,
+
     init: function()
     {
         this.requires('Tween');
@@ -73,6 +76,8 @@ Crafty.c('Grid', {
         this.tile_x = xc;
         this.tile_y = yc;
         this.attr({x:this.tile_x*32-16, y:this.tile_y*32-32, z:7})
+        this.orig_x = xc;
+        this.orig_y = yc;
         return this;
     },
     SetMovePattern: function(path){
@@ -741,6 +746,7 @@ function showManagerView()
 
     g_currentView = "manager";
     LoadTileMap( 'manager.json');
+    g_currentGrid = LoadTileMap( 'manager.json', true );
 
     // load dummy object sprites
     Crafty.sprite(64, "../pics/combat_dummy/BODY_animation.png", {
@@ -1093,7 +1099,17 @@ var GAS = Class(function() {
         // TODO fix Grid component.
         // manager view with updatemovement call breaks other animations.
         if ( this.paused == false &&
-             g_currentView == 'arena')
+             g_currentView == 'arena' )
+        {
+            for ( var g in g_gladiators )
+            {
+                g_gladiators[g].UpdateMovement();
+            }
+        }
+
+
+        // THIS BREAKS training animation with dummy (but needed for pathfinding)
+        if ( g_currentView == 'manager' )
         {
             for ( var g in g_gladiators )
             {
@@ -1337,10 +1353,11 @@ var GAS = Class(function() {
                     xpos = 640-32;	// Align gladiator to correct "slot"
                     selectorxoff = -128;
                 }
-
-                var g = Crafty.e("2D, DOM, Multiway, Mouse, Ape, Sprite, transparent")
-                    .attr({x:xpos, y:ypos, z:7, gladiator: team.gladiators[i]})
+                //x:xpos, y:ypos, 
+                var g = Crafty.e("2D, DOM, Multiway, Grid, Mouse, Ape, Sprite, transparent")
+                    .attr({z:7, gladiator: team.gladiators[i], myslot:i})
                     .Ape()
+                    .Grid(4,11+(i*3))
                     .collision([16,32],[48,32],[48,64],[16,64])
                     .setupAnimation(anim)
                     .setupAnimation("long_spear")
@@ -1355,19 +1372,19 @@ var GAS = Class(function() {
 
                 // battle team selector
                 Crafty.e("2D, DOM, Mouse, Color")
-                    .attr({x:xpos+selectorxoff, y:ypos, z:7, w:64, h:64, gladiator: team.gladiators[i]})
+                    .attr({x:xpos+selectorxoff, y:ypos, z:7, w:64, h:64, gladiatorname: team.gladiators[i].name, gladiator: g})
                     .color("#ff0000")
                     .bind("Click", function(){
 
-                        if ( g_battleTeam.has(this.gladiator.name))
+                        if ( g_battleTeam.has(this.gladiatorname))
                         {
-                            console.log('De-selecting ' + this.gladiator.name);
+                            console.log('De-selecting ' + this.gladiatorname);
                         }
                         else {
-                            console.log('Selecting ' + this.gladiator.name);
+                            console.log('Selecting ' + this.gladiatorname);
                         }
 
-                        g_battleTeam.toggle(this.gladiator.name);
+                        g_battleTeam.toggle(this.gladiatorname);
                         var user = JSON.parse($.cookie("gas-login")).username;
                         var pass = JSON.parse($.cookie("gas-login")).password;
                         var msg = {
@@ -1376,7 +1393,27 @@ var GAS = Class(function() {
                             gladiators: g_battleTeam.get()
                         }
                         console.log("selected team: "+JSON.stringify(msg));
-                        gas.send('BATTLETEAM_SELECT_REQ', [JSON.stringify(msg)]);
+                        //gas.send('BATTLETEAM_SELECT_REQ', [JSON.stringify(msg)]);
+                        
+                        var backup = g_currentGrid.clone();
+                        var finder = new PF.AStarFinder();
+                        var destx = 0;
+                        var desty = 0;
+                        if ( g_battleTeam.has(this.gladiatorname)) {
+                            destx = 7+((g_battleTeam.get().length-1)*3), 
+                            desty = 8;
+                        } else {
+                            destx = this.gladiator.orig_x;
+                            desty = this.gladiator.orig_y;
+                        }
+                        console.log("start point:"+this.gladiator.tile_x +","+this.gladiator.tile_y);
+
+                        var path = finder.findPath( this.gladiator.tile_x,
+                                                this.gladiator.tile_y,
+                                                destx,desty, backup );                            
+                        console.log("Path found:"+JSON.stringify(path));
+                        this.gladiator.SetMovePattern( path );
+                        
                     });
                 
 
