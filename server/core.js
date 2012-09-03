@@ -468,7 +468,7 @@ var core = {
 			var gladiators = [];
 			var racecount = 0;
 
-			initialGladiatorsList = fs.readFileSync('../rulesets/gladiatornames.txt').toString().split("\n");
+			initialGladiatorsList = fs.readFileSync('./rulesets/gladiatornames.txt').toString().split("\n");
 
 			//console.log("Available races:");
 			for(key in races.race) {
@@ -781,11 +781,10 @@ var core = {
 					"reason": "additional reason, e.g. invalid username/password",
 					"salt": "user specific salt"
 				},
-				init: function(username, response, reason) {
+   			init: function(username, response, reason) {
 					this.message.username = username;
 					this.message.response = response;
 					this.message.reason = reason;
-
 					return JSON.parse(JSON.stringify(this.message));
 				}
 		},

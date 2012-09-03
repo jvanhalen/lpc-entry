@@ -537,9 +537,12 @@ var GASServer = Maple.Class(function(clientClass) {
 			    // send info that game is ready
                 var cli = this.getClientByUsername(data.challenger._id);
 
-                if ( cli )
+               if ( cli ) {
                     cli.send('CHALLENGE_RES',
 						 ['{"response":"READY_FOR_WAR", "battles":"'+data.challenger.ingame+'"}']);
+                   
+                   cli.send('BATTLE_STATUS_RES', [ JSON.stringify({username:data.challenger._id, ingame:data.challenger.ingame}) ]);
+               }
 			    
                 // NPCs never throw a challenge
 
@@ -599,7 +602,7 @@ var GASServer = Maple.Class(function(clientClass) {
 
                     var passwdOk = (userdata.login.password == JSON.parse(data).password); // regular users
                     var isAI = (userdata.ai == true && client == this.ai); // computer AI
-
+                    
 					if( passwdOk || isAI )  {
 						client.send(api.message.LOGIN_RESP.message.name, [ api.toJSON(api.message.LOGIN_RESP.init(username, "OK", "Login succeeded.")) ]);
 						clientToUsername[client.id] = JSON.parse(data).username;
@@ -790,6 +793,11 @@ var GASServer = Maple.Class(function(clientClass) {
                         
                }
 
+            break;
+        case 'BATTLE_STATUS_REQ':
+            var user = api.getUser(JSON.parse(data).username);
+            console.log('user '+user.name +' is in : ' + user.ingame );
+            client.send('BATTLE_STATUS_RES', [ JSON.stringify({username:user.name, ingame:user.ingame}) ]);
             break;
    		case 'DONT_CARE':
 			break;
