@@ -143,7 +143,7 @@ var core = {
 
 	updateUser: function(userdata) {
 		console.log("core.updateUser", userdata._id)
-		var user = core.getUser(username);
+		var user = core.getUser(userdata._id);
 		if(user) {
 			// Copy revision
 			//username._rev = user._rev;
