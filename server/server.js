@@ -799,6 +799,17 @@ var GASServer = Maple.Class(function(clientClass) {
             console.log('user '+user.name +' is in : ' + user.ingame );
             client.send('BATTLE_STATUS_RES', [ JSON.stringify({username:user.name, ingame:user.ingame}) ]);
             break;
+        case 'BATTLETEAM_SELECT_REQ':
+            var user = api.getUser(JSON.parse(data).username);
+            user.battleteam = JSON.parse(data).gladiators;
+            api.updateUser(user);
+            client.send('BATTLETEAM_SELECT_RES', [ JSON.stringify({
+                username: user.username,
+                response: "OK",
+                gladiators: user.battleteam
+            })]);
+
+            break;
    		case 'DONT_CARE':
 			break;
 
