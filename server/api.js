@@ -79,7 +79,11 @@ var api = {
 		else
 			return JSON.parse(JSON.stringify(user));
 	},
-
+    
+    updateUser: function(userdata) {
+        core.updateUser(userdata);
+    },
+    
     getBattle: function(battleid) {
         var battle = core.getBattle(battleid);
         if ( battle == undefined ) return battle;
