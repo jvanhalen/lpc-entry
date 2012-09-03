@@ -11,6 +11,38 @@ var g_timer = { view: null, time: 0};
 var loadAudio = true;
 var g_ingame = null;
 
+var g_battleTeam = {
+
+    _team: [],
+    _TEAM_MAX_SIZE: 4,
+
+    toggle: function(name) {
+
+        var index = this._team.indexOf(name);
+        if ( index != -1 )
+        {
+            this._team.splice(index,1); 
+        } 
+        else if ( this._team.length < this._TEAM_MAX_SIZE )
+        {
+            this._team.push(name);
+        } 
+        else 
+        {
+            console.log('Battle team full');
+        }
+    },
+
+    get: function(){
+        return JSON.parse(JSON.stringify(this._team));
+    },
+    
+    has: function(name){
+        return (this._team.indexOf(name)!=-1);
+    }
+    
+};
+
 // Audio switches
 var muted = false;
 var nowPlaying = undefined;
@@ -1177,7 +1209,7 @@ var GAS = Class(function() {
 			break;
 
         case 'TEAM_RESP':
-           console.log("Received team:"+ JSON.stringify(data));
+           //console.log("Received team:"+ JSON.stringify(data));
            this.handleTeamResponse((data[0]));
 			break;
         case 'BATTLE_CONTROL_SYNC':
@@ -1241,15 +1273,22 @@ var GAS = Class(function() {
         case 'BATTLE_STATUS_RES':
             g_ingame = JSON.parse(data[0]).ingame;
             console.log('BATTLE_STATUS_RES:'+ g_ingame);
-        if ( g_ingame != null && g_ingame != undefined ) {
-            console.log('Setting arena enabeld');
-            SetArenaEnabled(true);
-        }
-        else            {
-            console.log('Setting arena disabled');
-            SetArenaEnabled(false);
-        }
+            if ( g_ingame != null && g_ingame != undefined ) {
+                console.log('Setting arena enabeld');
+                SetArenaEnabled(true);
+            }
+            else {
+                console.log('Setting arena disabled');
+                SetArenaEnabled(false);
+            }
         break;
+        case 'BATTLETEAM_SELECT_RES':
+            var resp = JSON.parse(data[0]);
+            if ( resp.response ==  "OK") {
+                console.log("Battle team confirmed, " + resp.gladiators);
+            }
+        break;
+    
 	    default:
 	      console.log("Default branch reached in 'message handling'");
 	    break;
@@ -1319,7 +1358,25 @@ var GAS = Class(function() {
                     .attr({x:xpos+selectorxoff, y:ypos, z:7, w:64, h:64, gladiator: team.gladiators[i]})
                     .color("#ff0000")
                     .bind("Click", function(){
-                        console.log("Selecting gladiator: " + this.gladiator.name);
+
+                        if ( g_battleTeam.has(this.gladiator.name))
+                        {
+                            console.log('De-selecting ' + this.gladiator.name);
+                        }
+                        else {
+                            console.log('Selecting ' + this.gladiator.name);
+                        }
+
+                        g_battleTeam.toggle(this.gladiator.name);
+                        var user = JSON.parse($.cookie("gas-login")).username;
+                        var pass = JSON.parse($.cookie("gas-login")).password;
+                        var msg = {
+                            username: user,
+                            password: pass,
+                            gladiators: g_battleTeam.get()
+                        }
+                        console.log("selected team: "+JSON.stringify(msg));
+                        gas.send('BATTLETEAM_SELECT_REQ', [JSON.stringify(msg)]);
                     });
                 
 
