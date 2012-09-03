@@ -9,6 +9,7 @@ var g_enterArenaButton = null;
 var g_gladiators = [];
 var g_timer = { view: null, time: 0};
 var loadAudio = true;
+var g_ingame = null;
 
 // Audio switches
 var muted = false;
@@ -809,6 +810,8 @@ function showManagerView()
     var data = $.cookie("gas-login");
     gas.send('TEAM_REQ', [ '{"username":"'+ JSON.parse(data).username + '"}' ]);
     gas.send('GET_ONLINE_PLAYERS_REQ', [ '{"username":"'+ JSON.parse(data).username + '"}' ]);
+    gas.send('BATTLE_STATUS_REQ',[ '{"username":"'+ JSON.parse(data).username + '"}' ]);
+
 
     //console.log("skel id:"+skel[0]);
 
@@ -1130,19 +1133,14 @@ var GAS = Class(function() {
 			if("OK" == JSON.parse(data).response) {
 
 				$.cookie("gas-login", data);
+                g_ingame = JSON.parse(data).ingame;
 				displayLogin();
-
-				/*$('#login').fadeOut(500, function(){
-					$('#login').empty();
-					$('#login').text('<h1>Welcome back, '+data.username+'!</h1>');
-					$('#login').fadeIn('slow', function(){
-						Crafty.scene("managerView");
-					});
-				});*/
+				
 			}
 			else {
 				//$.cookie("gas-login", null);
 				console.log("Login failed");
+                g_ingame = null;
 			}
 			break;
 
@@ -1181,7 +1179,6 @@ var GAS = Class(function() {
            console.log("Received team:"+ JSON.stringify(data));
            this.handleTeamResponse((data[0]));
 			break;
-
         case 'BATTLE_CONTROL_SYNC':
             var bc = data[0];
             this.paused = bc.paused;
@@ -1233,7 +1230,6 @@ var GAS = Class(function() {
             }
 			else if (JSON.parse(data[0]).response === "READY_FOR_WAR") {
 				console.log('Time to make last minute adjustments...');
-                SetArenaEnabled(true);
 			}
             else
             {
@@ -1241,6 +1237,18 @@ var GAS = Class(function() {
             }
 
 		    break;
+        case 'BATTLE_STATUS_RES':
+            g_ingame = JSON.parse(data[0]).ingame;
+            console.log('BATTLE_STATUS_RES:'+ g_ingame);
+        if ( g_ingame != null && g_ingame != undefined ) {
+            console.log('Setting arena enabeld');
+            SetArenaEnabled(true);
+        }
+        else            {
+            console.log('Setting arena disabled');
+            SetArenaEnabled(false);
+        }
+        break;
 	    default:
 	      console.log("Default branch reached in 'message handling'");
 	    break;
@@ -1255,8 +1263,7 @@ var GAS = Class(function() {
         // create visualization for each gladiator in team.
         if ( g_currentView == "manager")
         {
-            // if battle is active
-            SetArenaEnabled((data.ingame != null));
+
             
             g_gladiators = [];
 			console.log("team.gladiators", team.gladiators);
