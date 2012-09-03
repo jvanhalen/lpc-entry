@@ -764,6 +764,7 @@ function showManagerView()
                     this.stop().sprite(0,0);
                 }
             });
+
     }
 
     // Add a title
@@ -1290,10 +1291,12 @@ var GAS = Class(function() {
                 // compute offsets
                 var ypos = 320+i*96;
                 var xpos = 48+80;
+                var selectorxoff = 128;
                 // right side
                 if ( i >= 4 ) {
                     ypos = 320+((i-4)*96);
                     xpos = 640-32;	// Align gladiator to correct "slot"
+                    selectorxoff = -128;
                 }
 
                 var g = Crafty.e("2D, DOM, Multiway, Mouse, Ape, Sprite, transparent")
@@ -1311,6 +1314,14 @@ var GAS = Class(function() {
                     });
                 g_gladiators.push(g);
 
+                // battle team selector
+                Crafty.e("2D, DOM, Mouse, Color")
+                    .attr({x:xpos+selectorxoff, y:ypos, z:7, w:64, h:64, gladiator: team.gladiators[i]})
+                    .color("#ff0000")
+                    .bind("Click", function(){
+                        console.log("Selecting gladiator: " + this.gladiator.name);
+                    });
+                
 
             }
         }
