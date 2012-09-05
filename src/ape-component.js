@@ -13,7 +13,7 @@ Crafty.c('Ape', {
     bow: null,
     hurt: null,
     spellcast: null,
-
+    
     init: function()
     {
 	    console.log('initializing members');
@@ -428,6 +428,7 @@ Crafty.c('Ape', {
         return this;
     },
     startWalking: function (direction, speed) {
+
         this.hideAll();
         this.enableAnimation(this.walk);
         if (direction.x < 0) {
@@ -467,59 +468,28 @@ Crafty.c('Ape', {
             {
                 if ( this.walk[i]) this.walk[i].stop();
             }
+
         }
     },
 
+    stopWalking: function() {
+        // halt animations
+        for(var i in this.walk)
+        {
+            if ( this.walk[i]) this.walk[i].stop().animate("stand_down", 1, 0);
+
+        }
+
+    },
+    
     Ape: function(n) {
         this.name = n;
         //setup animations
         this.requires("Collision, Grid")
         //change direction when a direction change event is received
-           /* .bind("NewDirection",
-                  function (direction) {
-                      this.hideAll();
-                      this.enableAnimation(this.walk);
-                      if (direction.x < 0) {
-                          if (!this.walk.body.isPlaying("walk_left")){
-                              for(var i in this.walk)
-                              {
-                                  if ( this.walk[i] ) this.walk[i].stop().animate("walk_left", 10, -1);
-                              }
-                          }
-                      }
-                      if (direction.x > 0) {
-                          if (!this.walk.body.isPlaying("walk_right")){
-                              for(var i in this.walk)
-                              {
-                                  if ( this.walk[i]) this.walk[i].stop().animate("walk_right", 10, -1);
-                              }
-                          }
-                      }
-                      if (direction.y < 0) {
-                          if (!this.walk.body.isPlaying("walk_up")){
-                              for(var i in this.walk)
-                              {
-                                  if ( this.walk[i]) this.walk[i].stop().animate("walk_up", 10, -1);
-                              }
-                          }
-                      }
-                      if (direction.y > 0) {
-                          if (!this.walk.body.isPlaying("walk_down")){
-                              for(var i in this.walk)
-                              {
-                                  if ( this.walk[i]) this.walk[i].stop().animate("walk_down", 10, -1);
-                              }
-                          }
-                      }
-                      if(!direction.x && !direction.y) {
-                          for(var i in this.walk)
-                          {
-                              if ( this.walk[i]) this.walk[i].stop();
-                          }
-                      }
-                  })*/
+          
             .bind('Moved', function(from) {
-
+                
                 if(this.hit('solid')){
                     this.attr({x: from.x, y:from.y});
                 } 

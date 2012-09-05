@@ -121,13 +121,14 @@ Crafty.c('Grid', {
                 this.tile_y = this.targetPos[1];
 
                 this.targetPos = null;
+                // when final pattern is consumed, stop and face the player.
+                if ( this.movePattern.isEmpty())
+                    this.stopWalking();
 
             }
-        }
-        else
-        {
-            this.startWalking({x:0,y:0},0);
-        }
+            
+        } 
+
         return this;
     },
     Step: function(x,y) {
@@ -1096,8 +1097,8 @@ var GAS = Class(function() {
     },
 
     update: function(t, tick) {
-        // TODO fix Grid component.
-        // manager view with updatemovement call breaks other animations.
+
+
         if ( this.paused == false &&
              g_currentView == 'arena' )
         {
@@ -1107,8 +1108,6 @@ var GAS = Class(function() {
             }
         }
 
-
-        // THIS BREAKS training animation with dummy (but needed for pathfinding)
         if ( g_currentView == 'manager' )
         {
             for ( var g in g_gladiators )
