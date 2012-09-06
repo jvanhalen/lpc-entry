@@ -1392,7 +1392,7 @@ var GAS = Class(function() {
                             gladiators: g_battleTeam.get()
                         }
                         console.log("selected team: "+JSON.stringify(msg));
-                        //gas.send('BATTLETEAM_SELECT_REQ', [JSON.stringify(msg)]);
+                        gas.send('BATTLETEAM_SELECT_REQ', [JSON.stringify(msg)]);
                         
                         var backup = g_currentGrid.clone();
                         var finder = new PF.AStarFinder();
