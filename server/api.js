@@ -79,17 +79,17 @@ var api = {
 		else
 			return JSON.parse(JSON.stringify(user));
 	},
-    
+
     updateUser: function(userdata) {
         core.updateUser(userdata);
     },
-    
+
     getBattle: function(battleid) {
         var battle = core.getBattle(battleid);
         if ( battle == undefined ) return battle;
         else                  return JSON.parse(JSON.stringify(battle));
     },
-    
+
     editBattle: function(battleid, attributelist){
         return core.editBattle(name,attributelist);
     },
@@ -194,7 +194,7 @@ var api = {
 			isValid = (cachedgladiator && cacheditem && cacheduser);
 
 			if(isValid) {
-				console.log(cacheditem);
+				//console.log(cacheditem);
 				switch(cacheditem.slot) {
 					case 'body':
 						cachedgladiator.armour.body = item._id;
@@ -204,19 +204,20 @@ var api = {
 						console.log("api.buyItem, default branch:", username, item);
 				}
 				// Update also the users database
+				console.log("USER:", cacheduser);
 				for(var index in cacheduser.gladiators) {
-					console.log(cacheduser.gladiators[index]);
+					//console.log(cacheduser.gladiators[index]);
 					var gladi = cacheduser.gladiators[index];
 					if(gladi._id == gladiator._id) {
 						console.log("found", gladi._id, index);
-						delete cacheduser.gladiators[index];
-						console.log("after delete", cacheduser.gladiators);
-						cacheduser.gladiators.push(cachedgladiator);
-						console.log("after push", cacheduser.gladiators);
+						cacheduser.gladiators[index] = cachedgladiator;
+						//console.log("after delete", cacheduser.gladiators);
+						//cacheduser.gladiators.push(cachedgladiator);
 						core.usercache.write(cacheduser._id, cacheduser);
 						break;
 					}
 				}
+				console.log("after update", cacheduser);
 			}
 		}
 		else {
