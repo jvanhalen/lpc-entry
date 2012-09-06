@@ -147,7 +147,7 @@ var core = {
 		if(user) {
 			// Copy revision
 			//username._rev = user._rev;
-			core.usercache.write(userdata);
+			core.usercache.write(userdata._id, userdata);
 		}
 	},
 
