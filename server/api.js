@@ -127,9 +127,13 @@ var api = {
 			// If hit, calculate damage and pick a hit location
 			var dmg = core.rollDice(weapon.damage);
 			var armourvalue = 0;
+
+			/* Per slot armor is not yet available, use slot "body"
 			for(var item in target.armour) {
 				armourvalue += core.rollDice(target.armour[item].armourvalue);
-			}
+			}*/
+			armourvalue = core.rollDice(target.armour["body"].armourvalue);
+
 			dmg -= armourvalue;
 
 			if(dmg < 0)
@@ -138,6 +142,7 @@ var api = {
 			// Modify changed attributes @ attacker / target
 
 			// "Illustrate/stringify" the action ,e.g. "Ouch! Mauri hit Hermanni with astalo to location for xx points of damage"
+			console.log(attacker.name, "hit", target.name, "for", dmg, "points of damage. That must have hurt!");
 			return true;
 		}
 		else {
