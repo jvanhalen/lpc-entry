@@ -60,10 +60,7 @@ var api = {
 	},
 
 	getGladiator: function(name) {
-		// The objects are passed as reference, so editing the returned object would cause the original object to change too - that is not what we want,
-		// so make and return a copy of the original object
-		var retval = eval(core.getGladiator(name).toSource());
-		return retval;
+		return core.getGladiator(name);
 	},
 
 	editGladiator: function(name, attributelist) {
@@ -71,13 +68,7 @@ var api = {
 	},
 
 	getUser: function(username) {
-		// The objects are passed as reference, so editing the returned object would cause the original object to change too - that is not what we want,
-		// so make and return a copy of the original object
-        var user = core.getUser(username);
-        if ( user == undefined )
-			return user;
-		else
-			return JSON.parse(JSON.stringify(user));
+        return core.getUser(username);
 	},
 
     updateUser: function(userdata) {
@@ -96,43 +87,80 @@ var api = {
 
 	attack: function (attacker, target) {
 
+		// Attacker and defender data
+		var att = null;
+		var tgt = null;
+
 		// Check weapon data
-		var def = 0;
+		var shield = 0;
 		var weapon = 0;
+		var def = 0;
 
 		// Check user validity
 		var validparams = attacker.name && target.name;
 		if(validparams) {
 			// Check gladiator existence
-			var att = core.gladiatorcache.read(attacker.name);
-			var tgt = core.gladiatorcache.read(target.name);
+			att = core.gladiatorcache.read(attacker.name);
+			tgt = core.gladiatorcache.read(target.name);
 		}
 		else {
 			console.log("ERROR: api.attack failed, params:", attacker, target);
 			return null;
 		}
 
-		var valid = (att && target);
+		console.log("asdf", att, tgt);
+		var valid = (att && tgt);
+
 
 		if(valid) {
 			// Check hit / miss
-			weapon = att.melee;
+			weapon = core.itemcache.read(att.offhand);
+			shield = core.itemcache.read(tgt.defhand);
+
+			console.log(weapon, "against", shield);
 
 			// Check target defense modifiers
-			if(tgt.armour.shield)
-				def = tgt.armour.shield.toblock;
+			if(shield)
+				def = shield.toblock;
 
 			def += tgt.nimbleness;
+			var dice = core.rollDice("d100");
+			console.log(attacker, "rolled", dice, "while def was", def);
+			if(dice < def) {
+
+				if(shield) {
+					console.log(target, "blocked the attack!");
+				}
+				else {
+					console.log(target, "dodged the attack!");
+				}
+				return null;
+			}
 
 			// If hit, calculate damage and pick a hit location
-			var dmg = core.rollDice(weapon.damage);
+			var dmg = 0;
+			if(weapon) {
+				dmg = core.rollDice(weapon.damage);
+			}
+			else {
+				console.log(attacker, "uses bare hands to attack", target)
+				dmg = att.strength - 10;	// TODO: Bare hands, calculate some dmg ???
+			}
+
+			if(dmg < 1)
+				dmg = 1;
+
 			var armourvalue = 0;
 
 			/* Per slot armor is not yet available, use slot "body"
 			for(var item in target.armour) {
 				armourvalue += core.rollDice(target.armour[item].armourvalue);
 			}*/
-			armourvalue = core.rollDice(target.armour["body"].armourvalue);
+			var armourvalue = target.armour["body"].armourvalue;
+			if(armourvalue)
+				armourvalue = core.rollDice(armourvalue);
+			else
+				armourvalue = 0;
 
 			dmg -= armourvalue;
 
@@ -150,7 +178,6 @@ var api = {
 			return null;
 		}
 	},
-
 
 	cast: function(caster, target) {
 
