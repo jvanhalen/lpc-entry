@@ -1155,6 +1155,50 @@ var GAS = Class(function() {
 
     },
 
+    placeGladiators: function( mode, battleteam, gladiators) {
+
+        for (var i in gladiators )
+        {
+            var anim = "";
+            var offset = 0;
+            
+            if ( jQuery.inArray(gladiators[i].name, battleteam) != -1 )
+            {
+                switch ( gladiators[i].race)
+                {
+				case "skeleton":
+					anim = "skeleton_body";
+					break;
+				case "human":
+					anim = "human_body";
+					break;
+                }
+                var xoffset = 0;
+                if ( mode === "defender") {
+                    xoffset = 15;
+                } 
+                else if ( mode == "challenger") {
+                    xoffset = 2;
+                }
+
+                var o = Crafty.e("2D, DOM, Multiway, Keyboard, Grid, Mouse, Ape, Sprite, transparent")
+                    .Ape()
+                    .collision([16,32],[48,32],[48,64],[16,64])
+                    .Grid(xoffset,7+(i*2))  // Fix me, y-coordinate
+                    .setupAnimation(anim)
+                    .bind("MouseOver", function(){
+                        console.log('mouseover');
+                    })
+                    .bind("Click", function(){
+                        // set for pathfinding
+                        g_currentGladiator = this;
+                    });
+                
+                g_gladiators.push(o);
+            }
+        }
+    },
+
     message: function(type, tick, data) {
         //console.log('message:', type, tick, data);
 
@@ -1306,7 +1350,14 @@ var GAS = Class(function() {
             }
         break;
         case 'BATTLE_START':
-        console.log('Received BATTLE_START:' + data[0]);
+           console.log('Received BATTLE_START:' /*+ data[0]*/);
+           var battle = JSON.parse(data[0]);
+           var username = JSON.parse($.cookie("gas-login")).username;
+           g_gladiators = [];
+           // a very crude placement, but just to demonstrate
+           this.placeGladiators( "challenger", battle.challenger.battleteam, battle.challenger.gladiators);
+           this.placeGladiators( "defender",   battle.defender.battleteam,   battle.defender.gladiators);
+           
         break;
 	    default:
 	      console.log("Default branch reached in 'message handling'"+type);
