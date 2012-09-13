@@ -1115,6 +1115,7 @@ var GAS = Class(function() {
                 g_gladiators[g].UpdateMovement();
             }
         }
+
         /*if ( g_timer.view ) {
             g_timer.time = g_timer.time-(tick - this.pointOfReference);
             g_timer.view.text( g_timer.time / 333.33);
@@ -1296,6 +1297,7 @@ var GAS = Class(function() {
                 console.log('Setting arena disabled');
                 SetArenaEnabled(false);
             }
+        
         break;
         case 'BATTLETEAM_SELECT_RES':
             var resp = JSON.parse(data[0]);
@@ -1303,9 +1305,11 @@ var GAS = Class(function() {
                 console.log("Battle team confirmed, " + resp.gladiators);
             }
         break;
-    
+        case 'BATTLE_START':
+        console.log('Received BATTLE_START:' + data[0]);
+        break;
 	    default:
-	      console.log("Default branch reached in 'message handling'");
+	      console.log("Default branch reached in 'message handling'"+type);
 	    break;
 	}
 
