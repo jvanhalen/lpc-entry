@@ -20,6 +20,7 @@
   * THE SOFTWARE.
   */
 
+var crypto = require('crypto');
 var configs = require('../json/configs'); 			// Game configuration file
 var counter = 0;
 var allownewedits = true;			// True by default, allow new revisions of documents -> this will increase the DB size every time a doc is updated
@@ -83,7 +84,7 @@ var core = {
 	dbresponse: function(response) {
 			console.log(response);
 	},
-
+    
 	createUser: function(username, password) {
 		console.log("core.createUser: ", username, password);
 
@@ -92,7 +93,7 @@ var core = {
 			return null;
 		}
 
-		var crypto = require('crypto');
+
 		var newuser = core.user.init();
 		var len = password.length;
 		if((null == core.usercache.read(username)) && (len == 40)) {
@@ -121,7 +122,7 @@ var core = {
 					core.usercache.write(body.id, userdata);
 					}
 			});
-
+            
 			// Write current user data to the usercache for gladiator hiring.
 			core.usercache.write(username, newuser);
 			// Pick the gladiators for the new user
@@ -321,7 +322,7 @@ var core = {
 	},
 
 	getUser: function(username) {
-		console.log("core.getUser:", username);
+		console.log("core.getUser: " + username );
         var user = core.usercache.read(username);
 		//console.log(user);
 		if(user) {
@@ -340,13 +341,53 @@ var core = {
 
 	},
 
-    getBattle: function(battle) {
-        console.log("core.getBattle:", item);
-        var battle = core.battlecache.read(battle);
+    createBattle: function(battleid, battledata) {
+        var battle = core.battlecache.read(battleid);
+        if (  battle == null ) {
+            battle = core.battle.init();
+            battle._id = battleid;
+            // check fields according to given data - O(n^2). 
+            // n is sufficiently small, so it should not matter.
+            for( var item in battledata) {
+                for( var val in core.battle.message ) {
+                    if ( item == val ) {
+                        battle[item] = battledata[item];
+                    } else {
+                        console.log("ERROR: core.createBattle: invalid attribute:", item);
+                    }
+                }
+            }
+            // add to cache immediately
+            core.battlecache.write(battle._id, battle);
+            
+            this.dbcore.insert(configs.battledb, battle._id, battle, function(err,body){
+                if ( err ) {
+                    console.log("ERROR: dbcore.createBattle: ", err.reason.body);
+                }
+                else 
+                {
+                    console.log("INFO: dbcore.insert: added battle", body);
+                    // update cache
+                    var bd = core.getBattle(body.id);
+                    bd._rev = body.rev;
+                    core.battlecache.write(body.id, bd);
+                }
+            });
+        } else {
+            console.log("ERROR: Battle id already exists!");
+            return null;
+        }
+        return JSON.parse(JSON.stringify(battle));
+    },
+
+    getBattle: function(battleid) {
+        console.log("core.getBattle:", battleid);
+
+        var battle = core.battlecache.read(battleid);
         if ( battle ) return JSON.parse(JSON.stringify(battle));
         else          return battle;
     },
-
+    
     editBattle: function(name, attributelist) {
  		//console.log("core.editBattle:", name);
 
@@ -371,10 +412,17 @@ var core = {
 				case "initial_state":
 					battle.initial_state = attributelist[item];
 					break;
+				case "_id":
+					battle._id = attributelist[item];
+					break;
+				case "_rev":
+					battle._rev = attributelist[item];
+				    break;
 				default:
 					console.log("ERROR: core.editBattle: invalid attribute:", item)
 			}
 		}
+        core.battlecache.write(battle._id, battle);
 		return JSON.parse(JSON.stringify(core.battlecache.read(name)));
 	},
 
@@ -431,7 +479,15 @@ var core = {
 	// DB CORE
 	dbcore: {
 		nano: null,
+        idcounter: 0,
+        // own UUID counter for 
+        getUUID: function() {
 
+            var uuid = crypto.createHash('sha1').update(crypto.randomBytes(128)+(new Date().toISOString())).digest('hex');
+            uuid = uuid + ''+ this.idcounter++;
+            return uuid;
+        },
+        
 		init: function () {
 			console.log("dbcore: init()")
 			this.nano = require('nano')('http://localhost:5984');
@@ -686,6 +742,7 @@ var core = {
 			core.gladiatorcache.save();
 			core.itemcache.save();
 			core.usercache.save();
+            core.battlecache.save();
 
 		},
 
@@ -1028,6 +1085,23 @@ var core = {
 		"icon": null,
 		"description": null
 	},
+    
+    battle: {
+        message: {
+            "_id": null,
+            "history":[],
+		    "initial_state":{
+			    "basetick":0, 
+			    "challenger": null, 
+			    "defender": null
+		    }, 
+		    "challenger":null, 
+		    "defender":null
+        },
+        init: function(){
+            return JSON.parse(JSON.stringify(this.message));
+        }
+    }, // battle
 
 	// CACHES
 	gladiatorcache: {
