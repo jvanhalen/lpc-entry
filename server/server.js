@@ -446,118 +446,57 @@ var GASServer = Maple.Class(function(clientClass) {
         switch(type)
         {
             case 'BATTLE_START_REQ':
-                // get unique id for battle document
-                this.querydb( '/_uuids', null, 'BATTLE_START_CREATE_BATTLE_REQ', data);
-            break;
-			case 'BATTLE_START_CREATE_BATTLE_REQ':
-				data["path"]=configs.battledb + '/' + JSON.parse(response).uuids[0];
 
-				// create battles doc
-				this.updatedb(configs.battledb + '/' + JSON.parse(response).uuids[0], null,
-							  'BATTLE_START_LOAD_CHALLENGER_REQ', data, '{ \
-									"history":[], \
-									"initial_state":{\
-										  "basetick":0, \
-										  "challenger": null, \
-										  "defender": null\
-									}, \
-									"challenger":null, \
-									"defender":null\
-							}');
-			break;
+                var battles    = api.createBattle();
+                var challenger = api.getUser(data.challenger)
+                var defender   = api.getUser(data.defender);
+                console.log('Battles: ' + battles );
+                console.log('challenger: ' + challenger.name );
+                console.log('defender: ' + defender.name );
 
-			case 'BATTLE_START_LOAD_CHALLENGER_REQ':
-
-				this.querydb('/users/'+data.challenger, null,
-							 'BATTLE_START_LOAD_DEFENDER_REQ', data);
-			break;
-
-			case 'BATTLE_START_LOAD_DEFENDER_REQ':
-
-				var challenger = JSON.parse(response);
-				data.challenger = challenger;
-				console.log(data);
-				this.querydb('/users/'+data.defender, null,
-							 'BATTLE_START_LOAD_BATTLE_REQ', data);
-			break;
-
-			case 'BATTLE_START_LOAD_BATTLE_REQ':
-				var defender = JSON.parse(response);
-				data.defender = defender;
-				console.log(data);
-				this.querydb(data.path, null,
-							 'BATTLE_START_STORE_PLAYERS_REQ', data);
-			break;
-
-			case 'BATTLE_START_STORE_PLAYERS_REQ':
-				var battles = JSON.parse(response);
 				// create crude "copies"
-				battles.defender = JSON.parse(JSON.stringify(data.defender));
-				battles.challenger = JSON.parse(JSON.stringify(data.challenger));
+                battles.defender = JSON.parse(JSON.stringify(defender));
+        		battles.challenger = JSON.parse(JSON.stringify(challenger));
 
 				battles.initial_state.challenger = battles.challenger;
 				battles.initial_state.defender = battles.defender;
 
 				// cleanup unnecessary details
-				delete battles.challenger._rev;
+			    delete battles.challenger._rev;
 				battles.challenger["name"] = battles.challenger._id;
 				delete battles.challenger._id;
 				delete battles.defender._rev;
 				battles.defender["name"] = battles.defender._id;
 				delete battles.defender._id;
 
-				var battlesStr = JSON.stringify(battles);
-				console.log(battlesStr);
+			    //var battlesStr = JSON.stringify(battles);
+			    //console.log(battlesStr);
+
 				// set both players into game
-				data.defender.ingame = battles._id;
-				data.challenger.ingame = battles._id;
+				defender.ingame = battles._id;
+				challenger.ingame = battles._id;
 
-				// create battles doc
-				this.updatedb(data.path, null, 'BATTLE_START_STORE_PLAYERS_RES', data, battlesStr );
+                api.editBattle(battles._id, battles);
+                console.log('Updating users NOW' + challenger._id + ","+defender._id);
 
 
-				// Update player ingame property
-				this.updatedb('/users/'+data.challenger._id, null,
-							  'BATTLE_START_UPDATE_CHALLENGER', data,
-							  JSON.stringify(data.challenger));
-
-				this.updatedb('/users/'+data.defender._id, null,
-							  'BATTLE_START_UPDATE_DEFENDER', data,
-							  JSON.stringify(data.defender));
-
-			break;
-
-			case 'BATTLE_START_STORE_PLAYERS_RES':
-				console.log('Players stored into battles doc, yay!');
-			break;
-
-			case 'BATTLE_START_UPDATE_CHALLENGER':
-
-				console.log('Challenger ingame updated');
-			    // send info that game is ready
-                var cli = this.getClientByUsername(data.challenger._id);
-
-               if ( cli ) {
-                    cli.send('CHALLENGE_RES',
-						 ['{"response":"READY_FOR_WAR", "battles":"'+data.challenger.ingame+'"}']);
-                   
-                   cli.send('BATTLE_STATUS_RES', [ JSON.stringify({username:data.challenger._id, ingame:data.challenger.ingame}) ]);
-               }
-			    
-                // NPCs never throw a challenge
-
-			break;
-
-			case 'BATTLE_START_UPDATE_DEFENDER':
-				console.log('Defender ingame updated');
-
-                // Defender, check also NPCs since they may be on the receiving end
-                var cli = this.getClientByUsername(data.defender._id, true);
+   			    api.updateUser(challenger);
+                api.updateUser(defender);
+            
+                var cli = this.getClientByUsername(challenger._id);
                 if ( cli ) {
                     cli.send('CHALLENGE_RES',
-						     ['{"response":"READY_FOR_WAR", "battles":"'+data.defender.ingame+'"}']);
+						 ['{"response":"READY_FOR_WAR", "battles":"'+challenger.ingame+'"}']);
+                   
+                    cli.send('BATTLE_STATUS_RES', [ JSON.stringify({username:challenger._id, ingame:challenger.ingame}) ]);
+                }
+                cli = this.getClientByUsername(defender._id, true);
+                if ( cli ) {
+                    cli.send('CHALLENGE_RES',
+						     ['{"response":"READY_FOR_WAR", "battles":"'+defender.ingame+'"}']);
 
 				}
+            
 			break;
 		}
     },
@@ -767,28 +706,55 @@ var GASServer = Maple.Class(function(clientClass) {
                        this.battleSessions[user.ingame] = {}
                    }
 
-                   if ( battle.defender == user ) { 
+                   if ( battle.defender.name == user.name ) { 
                        this.battleSessions[user.ingame]["defender"] = user;
-                       client.send('ENTER_ARENA_RES', ['{"response":"OK", "defender":"'+user+'","battleid":"'+user.ingame+'"}']);
+                       // update battle team in ... battle
+                       battle.defender.battleteam = user.battleteam;
+                       console.log('Defender battle team is ' +JSON.stringify(battle.defender.battleteam));
+                       api.editBattle(battle._id, battle);
+                       client.send('ENTER_ARENA_RES', ['{"response":"OK", "defender":"'+user.name+'","battleid":"'+user.ingame+'"}']);
                    }
                    
-                   if ( battle.challenger == user ) {
+                   if ( battle.challenger.name == user.name ) {
+                       console.log('Challenger entering');
                        this.battleSessions[user.ingame]["challenger"] = user;
-                       client.send('ENTER_ARENA_RES', ['{"response":"OK", "challenger":"'+user+'","battleid":"'+user.ingame+'"}']);
+                       // update battle team in ... battle
+                       battle.challenger.battleteam = user.battleteam;
+                       api.editBattle(battle._id, battle);
+                       client.send('ENTER_ARENA_RES', ['{"response":"OK", "challenger":"'+user.name+'","battleid":"'+user.ingame+'"}']);
+                       console.log('Challenger battle team is ' +JSON.stringify(battle.challenger.battleteam));
+                       // awaken ai, if needed.
+                       var def = api.getUser(battle.defender.name);
+                       if ( def && def.ai === true ) {
+                           console.log('Here, awaking ai');
+                           var aiClient = this.getClientByUsername(battle.defender.name,true);
+                           aiClient.send('WAKE_UP', ['{"username":"'+battle.defender.name+'", "ingame":"'+battle._id+'"}']);
+                       }
+                       
                    }
                    
                    // if both parties have joined the arena
                    if ( this.battleSessions[user.ingame].defender  &&
                         this.battleSessions[user.ingame].challenger ){
-
+                       console.log('Battle start will be sent');
                        // enable challenger
-                       var chal = this.getClientByUsername(battle.challenger);
-                       if ( chal ) chal.send('BATTLE_START', [JSON.stringify(battle)]);
+                       var chal = this.getClientByUsername(battle.challenger.name);
+                       if ( chal ) { 
+                           chal.send('BATTLE_START', [JSON.stringify(battle)]);
+                           console.log('Challenger activated');
+                       }
 
                        // enable defender
-                       var def = this.getClientByUsername(battle.defender,true);
-                       if ( def ) def.send('BATTLE_START', [JSON.stringify(battle)]);
+                       var def = this.getClientByUsername(battle.defender.name,true);
+                       if ( def ) { 
+                           def.send('BATTLE_START', [JSON.stringify(battle)]);
+                           console.log('Defender activated');
+                       }
 
+                   } else {
+                       console.log('Still waiting for parties to join battle...');
+                       console.log('Def is:'+this.battleSessions[user.ingame].defender);
+                       console.log('Chal is:'+this.battleSessions[user.ingame].challenger);                       
                    }
                         
                }
