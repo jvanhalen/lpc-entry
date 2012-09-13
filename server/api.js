@@ -75,6 +75,10 @@ var api = {
         core.updateUser(userdata);
     },
 
+    createBattle: function(battledata){
+        return core.createBattle( core.dbcore.getUUID(), battledata);
+    },
+
     getBattle: function(battleid) {
         var battle = core.getBattle(battleid);
         if ( battle == undefined ) return battle;
@@ -82,7 +86,7 @@ var api = {
     },
 
     editBattle: function(battleid, attributelist){
-        return core.editBattle(name,attributelist);
+        return core.editBattle(battleid,attributelist);
     },
 
 	attack: function (attacker, target) {
