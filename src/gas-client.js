@@ -75,7 +75,7 @@ Crafty.c('Grid', {
     Grid: function(xc,yc){
         this.tile_x = xc;
         this.tile_y = yc;
-        this.attr({x:this.tile_x*32-16, y:this.tile_y*32-32, z:7})
+        this.attr({x:this.tile_x*32-16, y:this.tile_y*32-32})
         this.orig_x = xc;
         this.orig_y = yc;
         return this;
@@ -857,6 +857,13 @@ function showManagerView()
 
 }
 
+function hideArenaView()
+{
+    var login = $.cookie('gas-login');
+    gas.send('EXIT_ARENA_REQ', [ '{"username":"'+ JSON.parse(login).username + '"}']);
+    
+}
+
 function showArenaView()
 {
     // notify that player has entered battle
@@ -875,27 +882,27 @@ function showArenaView()
 
 
     Crafty.e("2D, DOM, Mouse, Text")
-        .attr({w:200, h:32, x:20, y:10, z:9})
+        .attr({w:20, h:12, x:20, y:10, z:9})
         .text('Back')
         .bind('Click', function(){
             Crafty.scene("managerView");
         });
     // resume buttons
     Crafty.e("2D, DOM, Mouse, Text")
-        .attr({w:200, h:32, x:220, y:160, z:9})
+        .attr({w:20, h:12, x:220, y:160, z:9})
         .text('A team done!')
         .bind('Click', function(){
 
             console.log('Resuming A');
         });
     Crafty.e("2D, DOM, Mouse, Text")
-        .attr({w:200, h:32, x:480, y:160, z:9})
+        .attr({w:20, h:12, x:480, y:160, z:9})
         .text('B team done!')
         .bind('Click', function(){
             console.log('Resuming B');
         });
     g_timer.view = Crafty.e("2D, DOM, Mouse, Text")
-        .attr({w:100, h:32, x:730, y:40, z:9})
+        .attr({w:10, h:12, x:730, y:40, z:9})
         .text('23')
         .css({"font-family":"Impact",
               "font-size":"24pt"});
@@ -1182,6 +1189,7 @@ var GAS = Class(function() {
                 }
 
                 var o = Crafty.e("2D, DOM, Multiway, Keyboard, Grid, Mouse, Ape, Sprite, transparent")
+                    .attr({z:7})
                     .Ape()
                     .collision([16,32],[48,32],[48,64],[16,64])
                     .Grid(xoffset,7+(i*2))  // Fix me, y-coordinate
