@@ -448,6 +448,9 @@ var GASServer = Maple.Class(function(clientClass) {
             case 'BATTLE_START_REQ':
 
                 var battles    = api.createBattle();
+               // create also pathfinding map for the arena
+                battles.map    = api.createGridFromMap('arena.json');
+
                 var challenger = api.getUser(data.challenger)
                 var defender   = api.getUser(data.defender);
                 console.log('Battles: ' + battles );
@@ -692,11 +695,38 @@ var GASServer = Maple.Class(function(clientClass) {
 						}
 
 						delete this.challenges[challenge];
-
+                        
 					}
 				}
 
 			break;
+            
+            case 'EXIT_ARENA_REQ':
+               var user = api.getUser(JSON.parse(data).username);
+               var battlesession = this.battleSessions[user.ingame];
+               if ( battlesession ) {
+
+                   if ( user.name == battlesession.defender.name ) {
+                       battlesession.defender = null;
+                       console.log('Removing battlesession defneder', user.name);
+                   }
+                   else if ( user.name == battlesession.challenger.name ) {
+                       console.log('Removing battlesession challenger', user.name);
+                       battlesession.challenger = null;
+                       if ( battlesession.defender.ai === true) {
+                           
+                           var aiClient = this.getClientByUsername(battlesession.defender.name,true);
+                           aiClient.send('STAND_DOWN', ['{"username":"'+battlesession.defender.name+'", "ingame":"'+user.ingame+'"}']);
+                           battlesession.defender = null;
+                       }
+                   }
+                   
+               } else {
+                   console.log('EXIT_ARENA_REQ', 'Could not find battlesession', user.ingame);
+               }
+            
+            break;
+
             case 'ENTER_ARENA_REQ':
                var user = api.getUser(JSON.parse(data).username);
                var battle = api.getBattle( user.ingame );
@@ -737,6 +767,8 @@ var GASServer = Maple.Class(function(clientClass) {
                    if ( this.battleSessions[user.ingame].defender  &&
                         this.battleSessions[user.ingame].challenger ){
                        console.log('Battle start will be sent');
+                       console.log('defender is :' + JSON.stringify(this.battleSessions[user.ingame].defender));
+                       console.log('challenger is :' + JSON.stringify(this.battleSessions[user.ingame].challenger));
                        // enable challenger
                        var chal = this.getClientByUsername(battle.challenger.name);
                        if ( chal ) { 
@@ -782,48 +814,7 @@ var GASServer = Maple.Class(function(clientClass) {
 			default:
 				console.log("message : default branch reached, type: ", type);
 		}
-	},
-
-    // creates a pathfinding grid from given tilemap.json file.
-    createGridFromFile: function(file) {
-
-        var asset = './../assets/maps/'+file;
-
-        // try to read json tile map
-        var map = require(asset);
-        if ( !map ) return null;
-
-        var grid = new PF.Grid(map.width, map.height);
-
-        for( var layer=0; layer<map.layers.length;layer++)
-        {
-            // process only collision layer
-            if ( map.layers[layer].name == "Collision" ) {
-
-                var currRow = 0;
-                var currColumn = 0;
-                // Process layer data
-                for(var i in map.layers[layer].data)
-                {
-                    // non-zero means a set tile and on collision
-                    // layer it means 'blocked'
-                    if ( map.layers[layer].data[i] > 0 )
-                    {
-                        grid.setWalkableAt(currColumn, currRow, false);
-                    }
-                    // next tile, take care of indices.
-                    currColumn++;
-                    if ( currColumn >= map.width ) {
-                        currColumn = 0;
-                        currRow++;
-                    }
-
-                }
-            }
-        }
-
-        return grid;
-    }
+	}
 
 })
 

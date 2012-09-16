@@ -23,6 +23,7 @@
 var configs = require('../json/configs'); 		// Game configuration file
 
 var core = require('./core');					// Require game core functions
+var PF = require('pathfinding');                // pathfinding for grid creation.
 
 /* GAS server api */
 var api = {
@@ -88,7 +89,52 @@ var api = {
     editBattle: function(battleid, attributelist){
         return core.editBattle(battleid,attributelist);
     },
+    
+    move: function(battleid, playername, gladiatorname, from, to ) {
 
+        var battle = core.getBattle(battleid);
+        var player = null;
+        // find out which player is it for
+        if ( battle.defender.name == playername ) 
+            player = battle.defender;
+        else if ( battle.challenger.name == playername ) 
+            player = battle.challenger;
+        else {
+            console.log('Whatta heck? player name does not match');
+            return [];
+        }
+ 
+        var finder = new PF.AStarFinder();
+        var gladiator = null;
+
+        // verify that gladiator is in battle team
+        for( var gid in player.battleteam){
+            if (player.battleteam[gid] == gladiatorname) {
+                for( var gid2 in player.gladiators ){
+                    if ( player.gladiators[gid2].name == gladiatorname) {
+                        gladiator = player.gladiators[gid2];
+                        break;
+                    }
+                }
+                break;
+            }
+        }
+
+        if ( gladiator ) {
+            // find path 
+            gladiator.battledata.path = finder.findPath(from.x, from.y, 
+                                                        to.x, to.y, 
+                                                        battle.map.clone());
+            // save changes and return path
+            core.editBattle( battleid, battle );
+            return gladiator.battledata.path;
+        }
+        else {
+            // no gladiator, no path either.
+            return [];
+        }
+    },
+    
 	attack: function (attacker, target) {
 
 		// Attacker and defender data
@@ -261,7 +307,49 @@ var api = {
 			return null;
 		}
 		return true;
-	}
+	},
+
+    // creates a pathfinding grid from given tilemap.json file.
+    createGridFromFile: function(file) {
+
+        var asset = './../assets/maps/'+file;
+
+        // try to read json tile map
+        var map = require(asset);
+        if ( !map ) return null;
+
+        var grid = new PF.Grid(map.width, map.height);
+
+        for( var layer=0; layer<map.layers.length;layer++)
+        {
+            // process only collision layer
+            if ( map.layers[layer].name == "Collision" ) {
+
+                var currRow = 0;
+                var currColumn = 0;
+                // Process layer data
+                for(var i in map.layers[layer].data)
+                {
+                    // non-zero means a set tile and on collision
+                    // layer it means 'blocked'
+                    if ( map.layers[layer].data[i] > 0 )
+                    {
+                        grid.setWalkableAt(currColumn, currRow, false);
+                    }
+                    // next tile, take care of indices.
+                    currColumn++;
+                    if ( currColumn >= map.width ) {
+                        currColumn = 0;
+                        currRow++;
+                    }
+
+                }
+            }
+        }
+
+        return grid;
+    }
+
 }
 
 module.exports = api;
