@@ -166,7 +166,7 @@
     //gas.connect('localhost', 8080);
     Crafty.scene("managerView", showManagerView);
     Crafty.scene("gladiatorView", showGladiatorView);
-    Crafty.scene("arenaView", showArenaView);
+    Crafty.scene("arenaView", showArenaView, hideArenaView);
     Crafty.scene("gladiatorPitView", showGladiatorPitView);
     Crafty.scene("loginView", showLoginView);
 
@@ -190,11 +190,11 @@
        }
        Crafty.load(assetArray, function(e){
                        console.log('Done loading, starting manager!');
-                       Crafty.scene("managerView"); });
-
+                       Crafty.scene("managerView"); }); 
+                       
        Crafty.e("2D, DOM, Text").attr({ w: 100, h: 20, x: 150, y: 120 })
       .text("Loading")
-      .css({ "text-align": "center" });
+      .css({ "text-align": "center" });                       
     });
     Crafty.scene("loginView");
 
