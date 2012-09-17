@@ -38,17 +38,18 @@ var THIRTY_SECONDS = 30000 / TICK_RATE;
 var ROUND_LENGTH = TWO_SECONDS; 					// Round length, round means the "free action" period after the management period
 var INITIAL_MANAGEMENT_PERIOD = THIRTY_SECONDS; 	// Initial management period after the gladiator placement
 var MANAGEMENT_PERIOD = FIVE_SECONDS; 				// Management period after the initial round
-
+var AI_UPDATE_PERIOD = FIVE_SECONDS;
 // Test -----------------------------------------------------------------------
 var GASServer = Maple.Class(function(clientClass) {
     Maple.Server(this, clientClass);
 
 }, Maple.Server, {
-
+    
 	pointOfReference: 0, 	// ticks
 	paused: false,   		// state
 	duration: 0, 			// for how long
 	ai: {
+        updateTickRef: 0, 
         proc: null, // AI process, must be set before calling send()
         id: "computer",
         /* Fancy wrapper for compatibility with Maple client message sending */
@@ -120,6 +121,11 @@ var GASServer = Maple.Class(function(clientClass) {
 
     update: function(t, tick) {
         //console.log(this.getClients().length, 'client(s) connected', t, tick, this.getRandom());
+
+
+	    //this.ai.send('AI_MESSAGE_EXAMPLE', [{action: "cast a nice spell", params: {name: "Magic missile", type: "attack", damage: "2d4" } }]);
+
+        
 
         if ( this.paused == true )
         {
@@ -449,8 +455,8 @@ var GASServer = Maple.Class(function(clientClass) {
 
                 var battles    = api.createBattle();
                // create also pathfinding map for the arena
-                battles.map    = api.createGridFromMap('arena.json');
-
+                battles.map    = api.createGridMatrixFromMap('arena.json');
+            
                 var challenger = api.getUser(data.challenger)
                 var defender   = api.getUser(data.defender);
                 console.log('Battles: ' + battles );
@@ -807,6 +813,22 @@ var GASServer = Maple.Class(function(clientClass) {
                 gladiators: user.battleteam
             })]);
 
+            break;
+        case 'MOVE_REQ':
+            var d = JSON.parse(data);
+            var _path = api.move( d.battleid, d.username, d.gladiator, d.from, d.to);
+            var resp = ( _path.length == 0 ) ? "NOK" : "OK";
+            client.send('MOVE_RES', [ JSON.stringify({battleid: d.battleid, username: d.username, gladiator: d.gladiator, response: resp, path: _path})]);
+
+            break;
+        case 'DEBUG_REMOVE_FROM_BATTLE':
+            var d = JSON.parse(data);
+            var user = api.getUser(d.player);
+            user.ingame = null;
+            api.updateUser(user);
+            // notify so GUI reflects change
+            var client = this.getClientByUsername( d.player, true);
+            client.send('BATTLE_STATUS_RES', [ JSON.stringify({username:d.player, ingame:null}) ]);
             break;
    		case 'DONT_CARE':
 			break;
