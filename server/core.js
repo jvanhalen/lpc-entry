@@ -418,6 +418,9 @@ var core = {
 				case "_rev":
 					battle._rev = attributelist[item];
 				    break;
+                case "map":
+                    battle.map = attributelist[item];
+                    break;
 				default:
 					console.log("ERROR: core.editBattle: invalid attribute:", item)
 			}
