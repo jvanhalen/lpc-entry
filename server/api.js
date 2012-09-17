@@ -121,15 +121,21 @@ var api = {
         }
 
         if ( gladiator ) {
+            console.log('Finding path...');
             // find path 
-            gladiator.battledata.path = finder.findPath(from.x, from.y, 
-                                                        to.x, to.y, 
-                                                        battle.map.clone());
+            gladiator["battledata"] = {}
+            
+            gladiator.battledata["path"] = finder.findPath(from.x, from.y, 
+                                                           to.x, to.y, 
+                                                           new PF.Grid(battle.map[0].length, 
+                                                                       battle.map.length,
+                                                                       battle.map));
             // save changes and return path
             core.editBattle( battleid, battle );
             return gladiator.battledata.path;
         }
         else {
+            console.log('No gladiator found with that name', gladiatorname);
             // no gladiator, no path either.
             return [];
         }
@@ -310,7 +316,7 @@ var api = {
 	},
 
     // creates a pathfinding grid from given tilemap.json file.
-    createGridFromFile: function(file) {
+    createGridMatrixFromMap: function(file) {
 
         var asset = './../assets/maps/'+file;
 
@@ -318,8 +324,8 @@ var api = {
         var map = require(asset);
         if ( !map ) return null;
 
-        var grid = new PF.Grid(map.width, map.height);
-
+        var matrix = [];
+        
         for( var layer=0; layer<map.layers.length;layer++)
         {
             // process only collision layer
@@ -327,19 +333,29 @@ var api = {
 
                 var currRow = 0;
                 var currColumn = 0;
+                // add first row (empty)
+                matrix.push([]);
                 // Process layer data
                 for(var i in map.layers[layer].data)
                 {
+                    
+                    matrix[currRow].push(0);// walkable
                     // non-zero means a set tile and on collision
                     // layer it means 'blocked'
                     if ( map.layers[layer].data[i] > 0 )
                     {
-                        grid.setWalkableAt(currColumn, currRow, false);
+                        matrix[currRow][currColumn] = 1; // non-walkable
                     }
+                    
                     // next tile, take care of indices.
                     currColumn++;
                     if ( currColumn >= map.width ) {
                         currColumn = 0;
+                        // push new row if needed.
+                        if ( i < map.layers[layer].data.length-1)
+                            matrix.push([]);                             
+
+
                         currRow++;
                     }
 
@@ -347,7 +363,7 @@ var api = {
             }
         }
 
-        return grid;
+        return matrix;
     }
 
 }
