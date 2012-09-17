@@ -8,7 +8,7 @@ var g_gladiatorShowCase = null;	// Gladiator at gladiatorView
 var g_enterArenaButton = null;
 var g_gladiators = [];
 var g_timer = { view: null, time: 0};
-var loadAudio = true;
+var loadAudio = false;
 var g_ingame = null;
 
 var g_battleTeam = {
@@ -192,9 +192,9 @@ function SetArenaEnabled(value){
     
 }
 
-function HandleMouseClick(x,y,passable)
+function HandleMouseClick(xpos,ypos)
 {
-    console.log("Mouse click at " + x + "," + y + ":" + passable);
+    console.log("Mouse click at " + xpos + "," + ypos );
     if ( !g_currentGladiator) {
         console.log("there is no gladiator!");
         return;
@@ -204,17 +204,10 @@ function HandleMouseClick(x,y,passable)
         console.log("There is no grid!");
         return;
     }
-
-
-    var backup = g_currentGrid.clone();
-    var finder = new PF.AStarFinder();
-    var path = finder.findPath( g_currentGladiator.tile_x,
-                                g_currentGladiator.tile_y,
-                                x,y, backup );
-    console.log("start point:"+g_currentGladiator.tile_x +","+g_currentGladiator.tile_y);
-    console.log("Path found:"+JSON.stringify(path));
-    g_currentGladiator.SetMovePattern( path );
-
+    var player = JSON.parse($.cookie("gas-login")).username;
+    
+    gas.send('MOVE_REQ', [ JSON.stringify( {username: player, battleid: g_ingame, gladiator: g_currentGladiator.gladiator.name, from: {x: g_currentGladiator.tile_x, y:g_currentGladiator.tile_y}, to: {x: xpos, y: ypos} })]);
+    
 }
 
 function PreloadAudio() {
@@ -329,7 +322,7 @@ function LoadTileMap(file, createGrid)
                             .attr({x:currColumn*map.tilewidth, y:currRow*map.tileheight, z:6})
                             .Grid(currColumn, currRow)
                             .bind("Click", function(){
-                                HandleMouseClick(this.tile_x, this.tile_y, true);
+                                HandleMouseClick(this.tile_x, this.tile_y);
                             });
                     }
                     else if ( map.layers[layer].data[i] > 0 )
@@ -370,7 +363,7 @@ function LoadTileMap(file, createGrid)
                                 .attr({x:currColumn*map.tilewidth, y:currRow*map.tileheight, z:6})
                                 .Grid(currColumn, currRow)
                                 .bind("Click", function(){
-                                    HandleMouseClick(this.tile_x, this.tile_y, true);
+                                    HandleMouseClick(this.tile_x, this.tile_y);
                                 });
 
                         } else {
@@ -1144,6 +1137,10 @@ var GAS = Class(function() {
         console.log('connected');
     },
 
+    removeFromBattle: function(playername) {
+        this.send('DEBUG_REMOVE_FROM_BATTLE', [ '{ "player": "'+playername+'"}']);
+    },
+    
     challengePlayer: function(defender)
     {
         this.send('CHALLENGE_REQ', [ '{ "username":"'+ JSON.parse($.cookie("gas-login")).username + '",'+
@@ -1189,13 +1186,13 @@ var GAS = Class(function() {
                 }
 
                 var o = Crafty.e("2D, DOM, Multiway, Keyboard, Grid, Mouse, Ape, Sprite, transparent")
-                    .attr({z:7})
+                    .attr({z:7, gladiator: gladiators[i]})
                     .Ape()
                     .collision([16,32],[48,32],[48,64],[16,64])
                     .Grid(xoffset,7+(i*2))  // Fix me, y-coordinate
                     .setupAnimation(anim)
                     .bind("MouseOver", function(){
-                        console.log('mouseover');
+                        console.log('mouseover on ', this.gladiator.name);
                     })
                     .bind("Click", function(){
                         // set for pathfinding
@@ -1301,9 +1298,9 @@ var GAS = Class(function() {
 				// Later on, make server push the online activity status changes to reduce data traffic
 				//console.log('online: ' +data[0].players[i]);
 				if(data[0].players[i] == JSON.parse($.cookie("gas-login")).username)
-					$('#challenges').append('<div class="team_entry" id="'+data[0].players[i]+'">'+data[0].players[i]+' [<a href="#" title="It\'s me! Show some stats?">my team</a>]</div>');
+					$('#challenges').append('<div class="team_entry" id="'+data[0].players[i]+'">'+data[0].players[i]+' [<a href="#" title="It\'s me! Show some stats?">my team</a>] [<a href="#" onclick="gas.removeFromBattle(\''+data[0].players[i]+'\');">Remove battle</a>]</div>');
 				else
-					$('#challenges').append('<div class="team_entry" id="'+data[0].players[i]+'">'+data[0].players[i]+' [<a href="#" title="Challenge '+ data[0].players[i] +' - show player rank and team info?" onclick="gas.challengePlayer(\''+data[0].players[i]+'\');">challenge</a>]</div>');
+					$('#challenges').append('<div class="team_entry" id="'+data[0].players[i]+'">'+data[0].players[i]+' [<a href="#" title="Challenge '+ data[0].players[i] +' - show player rank and team info?" onclick="gas.challengePlayer(\''+data[0].players[i]+'\');">challenge</a>] [<a href="#" onclick="gas.removeFromBattle(\''+data[0].players[i]+'\');">Remove battle</a>] </div>');
 			}
 
 			break;
@@ -1366,6 +1363,20 @@ var GAS = Class(function() {
            this.placeGladiators( "challenger", battle.challenger.battleteam, battle.challenger.gladiators);
            this.placeGladiators( "defender",   battle.defender.battleteam,   battle.defender.gladiators);
            
+        break;
+        case 'MOVE_RES':
+
+           var d = JSON.parse(data[0]);
+           console.log('Received MOVE_RES',JSON.stringify(d));
+
+           // append path to movement pattern for respective gladiator
+           for( var gid in g_gladiators ){
+               if ( g_gladiators[gid].gladiator.name == d.gladiator ) {
+                   g_gladiators[gid].SetMovePattern( d.path);
+                   break;
+               }
+           }
+
         break;
 	    default:
 	      console.log("Default branch reached in 'message handling'"+type);
