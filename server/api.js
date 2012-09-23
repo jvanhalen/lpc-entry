@@ -89,9 +89,65 @@ var api = {
     editBattle: function(battleid, attributelist){
         return core.editBattle(battleid,attributelist);
     },
-    
-    move: function(battleid, playername, gladiatorname, from, to ) {
 
+    setBattlePosition: function(battleid, playername, gladiatorname, pos ) {
+        
+        var battle = core.getBattle(battleid);
+        var player = null;
+        // find out which player is it for
+        if ( battle.defender.name == playername ) 
+            player = battle.defender;
+        else if ( battle.challenger.name == playername ) 
+            player = battle.challenger;
+        else {
+            console.log('Whatta heck? player name does not match');
+            return null;
+        }
+ 
+
+        var gladiator = null;
+
+        // verify that gladiator is in battle team
+        for( var gid in player.battleteam){
+            if (player.battleteam[gid] == gladiatorname) {
+                for( var gid2 in player.gladiators ){
+                    if ( player.gladiators[gid2].name == gladiatorname) {
+                        gladiator = player.gladiators[gid2];
+                        break;
+                    }
+                }
+                break;
+            }
+        }
+        if ( gladiator ){
+            var posFoundFromPath = false;
+            // TODO verify that position is in current path.
+            for( var p in gladiator.battledata.path ) {
+
+                if ( gladiator.battledata.path[p][0] == pos[0] &&
+                     gladiator.battledata.path[p][1] == pos[1]){
+                    posFoundFromPath = true;
+                    break;
+                }
+            }
+            if ( posFoundFromPath ){
+                gladiator.battledata.pos = pos;
+                core.editBattle( battleid, battle );
+                
+            } else {
+                console.log('Invalid gladiator move from client', pos);
+                return null;
+            }
+        }
+        else {
+            console.log('No gladiator found with that name', gladiatorname);
+            return null;
+        }
+        return pos;
+    },
+
+    move: function(battleid, playername, gladiatorname, from, to ) {
+        
         var battle = core.getBattle(battleid);
         var player = null;
         // find out which player is it for
@@ -123,8 +179,10 @@ var api = {
         if ( gladiator ) {
             console.log('Finding path...');
             // find path 
-            gladiator["battledata"] = {}
+            if ( gladiator.battledata === undefined) 
+                gladiator["battledata"] = {}
             
+            gladiator.battledata["pos"] = [from.x, from.y]
             gladiator.battledata["path"] = finder.findPath(from.x, from.y, 
                                                            to.x, to.y, 
                                                            new PF.Grid(battle.map[0].length, 
@@ -316,7 +374,7 @@ var api = {
 	},
 
     // creates a pathfinding grid from given tilemap.json file.
-    createGridMatrixFromMap: function(file) {
+    createGridMatrixFromMap: function(file, battle, storeMatrix, storePositions) {
 
         var asset = './../assets/maps/'+file;
 
@@ -360,10 +418,32 @@ var api = {
                     }
 
                 }
+                if ( storeMatrix ) battle["map"] = matrix;
+                else console.log('setting arena matrix skipped');
+            }
+            
+            if ( map.layers[layer].name == "Spawnpoints" )
+            { 
+                var currRow = 0;
+                var currColumn = 0;
+                var positions = [];
+                for(var i in map.layers[layer].data) {
+                    // if tile is set, it means a spawn point
+                    if ( map.layers[layer].data[i] > 0 ) {
+                        positions.push([currRow,currColumn]);
+                    }
+
+                    currColumn++;
+                    if ( currColumn >= map.width ) {
+                        currColumn = 0;
+                        currRow++;
+                    }
+                }
+
+                if ( storePositions ) battle["startpositions"] = positions;
+                else console.log('start positions skipped');                
             }
         }
-
-        return matrix;
     }
 
 }
