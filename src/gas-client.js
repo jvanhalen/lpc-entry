@@ -114,6 +114,12 @@ Crafty.c('Grid', {
             }
             else if ( this.coordinatesMatch(this.targetPos[0], this.targetPos[1]) )
             {
+                
+                //console.log(this.gladiator.name, "reached", JSON.stringify(this.targetPos));
+
+                var player = JSON.parse($.cookie("gas-login")).username;
+                gas.send('MOVE_UPDATE', [JSON.stringify({ username: player, battleid: g_ingame, gladiator: this.gladiator.name, pos: this.targetPos})]);
+                
                 // remove coordinate since we have reached it.
                 this.movePattern.dequeue();
                 //update tile position.
@@ -131,6 +137,7 @@ Crafty.c('Grid', {
 
         return this;
     },
+    
     Step: function(x,y) {
 
         var dirx = x-this.tile_x;
@@ -1177,19 +1184,21 @@ var GAS = Class(function() {
 					anim = "human_body";
 					break;
                 }
-                var xoffset = 0;
+                /*var xoffset = 0;
                 if ( mode === "defender") {
                     xoffset = 15;
                 } 
                 else if ( mode == "challenger") {
                     xoffset = 2;
-                }
-
+                }*/
+                console.log("Battledata is", JSON.stringify(gladiators[i].battledata));
+                var mypos = gladiators[i].battledata.pos;
+                
                 var o = Crafty.e("2D, DOM, Multiway, Keyboard, Grid, Mouse, Ape, Sprite, transparent")
                     .attr({z:7, gladiator: gladiators[i]})
                     .Ape()
                     .collision([16,32],[48,32],[48,64],[16,64])
-                    .Grid(xoffset,7+(i*2))  // Fix me, y-coordinate
+                    .Grid( mypos[0], mypos[1])  
                     .setupAnimation(anim)
                     .bind("MouseOver", function(){
                         console.log('mouseover on ', this.gladiator.name);
@@ -1376,7 +1385,10 @@ var GAS = Class(function() {
                    break;
                }
            }
-
+        break;
+        case 'ATTACK_RESP':
+           console.log('Received attack result data');
+           
         break;
 	    default:
 	      console.log("Default branch reached in 'message handling'"+type);
