@@ -440,8 +440,8 @@ var api = {
                     }
                 }
 
-                if ( storePositions ) battle["startpositions"] = positions;
-                else console.log('start positions skipped');                
+                if ( storePositions ) battle["spawnpoints"] = positions;
+                else console.log('spawn points skipped');                
             }
         }
     }
