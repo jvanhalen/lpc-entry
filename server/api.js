@@ -430,7 +430,7 @@ var api = {
                 for(var i in map.layers[layer].data) {
                     // if tile is set, it means a spawn point
                     if ( map.layers[layer].data[i] > 0 ) {
-                        positions.push([currRow,currColumn]);
+                        positions.push([currColumn,currRow]);
                     }
 
                     currColumn++;
