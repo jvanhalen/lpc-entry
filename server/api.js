@@ -199,7 +199,7 @@ var api = {
         }
     },
     
-	attack: function (attacker, target) {
+	attack: function (attackername, targetname) {
 
 		// Attacker and defender data
 		var att = null;
@@ -211,11 +211,11 @@ var api = {
 		var def = 0;
 
 		// Check user validity
-		var validparams = attacker.name && target.name;
+		var validparams = (attackername !== undefined )&& (targetname !== undefined);
 		if(validparams) {
 			// Check gladiator existence
-			att = core.gladiatorcache.read(attacker.name);
-			tgt = core.gladiatorcache.read(target.name);
+			att = core.gladiatorcache.read(attackername);
+			tgt = core.gladiatorcache.read(targetname);
 		}
 		else {
 			console.log("ERROR: api.attack failed, params:", attacker, target);
@@ -239,16 +239,17 @@ var api = {
 
 			def += tgt.nimbleness;
 			var dice = core.rollDice("d100");
-			console.log(attacker, "rolled", dice, "while def was", def);
+			console.log(attackername, "rolled", dice, "while def was", def);
 			if(dice < def) {
 
 				if(shield) {
-					console.log(target, "blocked the attack!");
+					console.log(targetname, "blocked the attack!");
 				}
 				else {
-					console.log(target, "dodged the attack!");
+					console.log(targetname, "dodged the attack!");
 				}
-				return null;
+
+				return this.message.ATTACK_RESP.init(attackername, targetname, 0, false);
 			}
 
 			// If hit, calculate damage and pick a hit location
@@ -257,7 +258,7 @@ var api = {
 				dmg = core.rollDice(weapon.damage);
 			}
 			else {
-				console.log(attacker, "uses bare hands to attack", target)
+				console.log(attackername, "uses bare hands to attack", targetname)
 				dmg = att.strength - 10;	// TODO: Bare hands, calculate some dmg ???
 			}
 
@@ -270,7 +271,7 @@ var api = {
 			for(var item in target.armour) {
 				armourvalue += core.rollDice(target.armour[item].armourvalue);
 			}*/
-			var armourvalue = target.armour["body"].armourvalue;
+			var armourvalue = tgt.armour["body"].armourvalue;
 			if(armourvalue)
 				armourvalue = core.rollDice(armourvalue);
 			else
@@ -284,8 +285,9 @@ var api = {
 			// Modify changed attributes @ attacker / target
 
 			// "Illustrate/stringify" the action ,e.g. "Ouch! Mauri hit Hermanni with astalo to location for xx points of damage"
-			console.log(attacker.name, "hit", target.name, "for", dmg, "points of damage. That must have hurt!");
-			return true;
+			console.log(attackername, "hit", targetname, "for", dmg, "points of damage. That must have hurt!");
+            
+			return this.message.ATTACK_RESP.init(attackername, targetname, dmg, true);
 		}
 		else {
 			console.log("ERROR: api.attack failed, params:", attacker, target, att, tgt);
