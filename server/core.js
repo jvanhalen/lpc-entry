@@ -421,6 +421,9 @@ var core = {
                 case "map":
                     battle.map = attributelist[item];
                     break;
+                case "spawnpoints":
+                    battle.spawnpoints = attributelist[item];
+                    break;
 				default:
 					console.log("ERROR: core.editBattle: invalid attribute:", item)
 			}
