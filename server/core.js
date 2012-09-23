@@ -1014,7 +1014,35 @@ var core = {
 				}
 				return JSON.parse(JSON.stringify(this.message));
 			}
-		}
+		},
+        
+        ATTACK_RESP: {
+            message: {
+                "type": 1,
+                "name": "ATTACK_RESP",
+                "response": "OK/NOK",
+                "attackerid": "Mauri",
+                "targetid": "Kaensae",
+                "damage": "damagetaken"/*,
+                "attackerpos":
+                [{"x": "1",
+                  "y": "1"}],
+                "targetpos":
+                [{"x": "2",
+                  "y": "1"}],
+                "newtargetpos":
+                [{"x": "1",
+                  "y": "1"}]*/
+            },
+            init: function(attacker, target, damage, success ) {
+                this.message.response   = (success ? "OK" : "NOK");
+                this.message.attackerid = attacker;
+                this.message.targetid   = target,
+                this.message.damage     = damage;
+
+                return JSON.parse(JSON.stringify(this.message));
+            }
+        }
 	}, // Messages
 
 	gladiator: {
