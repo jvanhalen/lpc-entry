@@ -24,23 +24,6 @@
    eJztlcsKwjAQRScfoX9Qt9oPsPha+sCmSx9/4P8vvYEUB+mYSelUF144i8LNHGgGQjR+5o5oIVA6fUdKCVborAU2Tt/hmYAd2MZv6Wx7nhQOivPC3CnwoGFOzXlNh+Jcz2hzRqcW8E7fITa7AqfP19Q7e7AER3A3clzAITqs8w1H+H+VseMKbsaOAsyMHRZJOYa4n5RD2u8cd8oh7UDObqQc0g7k7MYv3Pnf8Up4Qx4jOt7f+q7kdjx1v7dDhM99AjEfKTA=
   </data>
  </layer>
- <objectgroup name="SpawnPoints" width="25" height="25" visible="0">
-  <object name="sp1" type="SpawnPoint" x="287" y="305"/>
-  <object name="sp1" type="SpawnPoint" x="123" y="300"/>
-  <object name="sp1" type="SpawnPoint" x="126" y="496"/>
-  <object name="sp1" type="SpawnPoint" x="125" y="591"/>
-  <object name="sp1" type="SpawnPoint" x="127" y="688"/>
-  <object name="sp1" type="SpawnPoint" x="286" y="686"/>
-  <object name="sp1" type="SpawnPoint" x="384" y="588"/>
-  <object name="sp1" type="SpawnPoint" x="542" y="655"/>
-  <object name="sp1" type="SpawnPoint" x="543" y="400"/>
-  <object name="sp1" type="SpawnPoint" x="382" y="398"/>
-  <object name="sp1" type="SpawnPoint" x="672" y="686"/>
-  <object name="sp1" type="SpawnPoint" x="670" y="590"/>
-  <object name="sp1" type="SpawnPoint" x="670" y="493"/>
-  <object name="sp1" type="SpawnPoint" x="671" y="400"/>
-  <object name="sp1" type="SpawnPoint" x="671" y="301"/>
- </objectgroup>
  <layer name="Collision" width="25" height="25" opacity="0.54">
   <data encoding="base64" compression="zlib">
    eJwTYmBgEBrFo3gIY1qA4W4HNe0c7nZQExBrByVuoNQOYuweaXZQAkbtGLWDlhgAUY0UQQ==
@@ -49,6 +32,11 @@
  <layer name="Front" width="25" height="25">
   <data encoding="base64" compression="zlib">
    eJztwQENAAAAwqD3T20ON6AAAHgzCcQAAQ==
+  </data>
+ </layer>
+ <layer name="Spawnpoints" width="25" height="25">
+  <data encoding="base64" compression="zlib">
+   eJxjYBgFo2AUDBYgRKI4pWqHMiDGn9jUoIuNhPCilh9HQliBACF/Uio/mAE1yhpS/T+Uw2ugAQAqGAEh
   </data>
  </layer>
 </map>
