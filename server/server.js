@@ -49,7 +49,7 @@ var GASServer = Maple.Class(function(clientClass) {
 	paused: false,   		// state
 	duration: 0, 			// for how long
 	ai: {
-        updateTickRef: 0, 
+        pointOfReference: 0, 
         proc: null, // AI process, must be set before calling send()
         id: "computer",
         /* Fancy wrapper for compatibility with Maple client message sending */
@@ -171,7 +171,13 @@ var GASServer = Maple.Class(function(clientClass) {
                 }
             }
 
+            if( tick - this.ai.pointOfReference  >= AI_UPDATE_PERIOD )
+            {
+                this.ai.send('UPDATE', ['{"tick":' + tick + '}']);
+                this.ai.pointOfReference = tick;
+            }
         }
+        
 
         // make object move on client side.
         /*if ( this.getClients().length > 0 )
@@ -454,9 +460,12 @@ var GASServer = Maple.Class(function(clientClass) {
             case 'BATTLE_START_REQ':
 
                 var battles    = api.createBattle();
-               // create also pathfinding map for the arena
-                battles.map    = api.createGridMatrixFromMap('arena.json');
-            
+
+               // create also pathfinding map for the arena 
+                api.createGridMatrixFromMap('arena.json', battles, true, true);
+                //console.log('* battles map is', battles.map );
+                //console.log('* battles.spawnpoints is', battles.spawnpoints);
+    
                 var challenger = api.getUser(data.challenger)
                 var defender   = api.getUser(data.defender);
                 console.log('Battles: ' + battles );
@@ -775,6 +784,40 @@ var GASServer = Maple.Class(function(clientClass) {
                        console.log('Battle start will be sent');
                        console.log('defender is :' + JSON.stringify(this.battleSessions[user.ingame].defender));
                        console.log('challenger is :' + JSON.stringify(this.battleSessions[user.ingame].challenger));
+
+
+                       // setup spawn points for defender battle team
+                       for ( var g in battle.defender.gladiators ) {
+                           for( var bg in battle.defender.battleteam ){
+                               if ( battle.defender.gladiators[g].name == battle.defender.battleteam[bg] ){
+                                   console.log('Processing', battle.defender.battleteam[bg]);
+                                   if ( battle.defender.gladiators[g].battledata === undefined ) 
+                                       battle.defender.gladiators[g]["battledata"] = {}
+
+                                   if ( battle.defender.gladiators[g].battledata.pos === undefined ) {
+                                       battle.defender.gladiators[g].battledata["pos"] = battle.spawnpoints[0];
+                                       battle.spawnpoints.splice(0,1);
+                                   }
+                               }
+                           }
+                       }
+                       // setup spawn points for challenger battle team
+                       for ( var g in battle.challenger.gladiators ) {
+                           for( var bg in battle.challenger.battleteam ){
+                               if ( battle.challenger.gladiators[g].name == battle.challenger.battleteam[bg] ){
+                                   console.log('Processing', battle.challenger.battleteam[bg]);
+                                   if ( battle.challenger.gladiators[g].battledata === undefined )
+                                       battle.challenger.gladiators[g]["battledata"] = {}
+
+                                   if ( battle.challenger.gladiators[g].battledata.pos === undefined ) {
+                                       battle.challenger.gladiators[g].battledata["pos"] = battle.spawnpoints[0];
+                                       battle.spawnpoints.splice(0,1);
+                                   }
+                               }
+                           }
+                       }
+                       var battle = api.editBattle(battle._id, battle);
+                       
                        // enable challenger
                        var chal = this.getClientByUsername(battle.challenger.name);
                        if ( chal ) { 
@@ -818,8 +861,48 @@ var GASServer = Maple.Class(function(clientClass) {
             var d = JSON.parse(data);
             var _path = api.move( d.battleid, d.username, d.gladiator, d.from, d.to);
             var resp = ( _path.length == 0 ) ? "NOK" : "OK";
-            client.send('MOVE_RES', [ JSON.stringify({battleid: d.battleid, username: d.username, gladiator: d.gladiator, response: resp, path: _path})]);
 
+            var message = {
+                type: "MOVE_RES", 
+                name: "MOVE_RES", 
+                battleid: d.battleid, 
+                username: d.username, 
+                gladiator: d.gladiator, 
+                response: 
+                resp, path: _path
+            }
+            
+            // session clients will be notified of this change
+            this.notifyBattleSession( d.battleid, message );
+
+            break;
+        case 'MOVE_UPDATE':
+            var d = JSON.parse(data);
+            var battle = api.getBattle(d.battleid);
+            if ( battle ){
+                var newpos = api.setBattlePosition(d.battleid, d.username, d.gladiator, d.pos);
+                if ( newpos ) {
+
+                    var message = {
+                        type: 'MOVE_UPDATE', 
+                        name: 'MOVE_UPDATE', 
+                        battleid: d.battleid, 
+                        username: d.username, 
+                        gladiator: d.gladiator, 
+                        pos: newpos
+                    }
+                    
+                    this.notifyBattleSession(d.battleid, message );
+                }
+            }
+            break;
+        case 'ATTACK_REQ':
+            var d = JSON.parse(data);
+            var msg = api.attack( d.attackerid, d.targetid);
+            if ( msg != null)
+            {
+                this.notifyBattleSession(d.battleid, msg );
+            }
             break;
         case 'DEBUG_REMOVE_FROM_BATTLE':
             var d = JSON.parse(data);
@@ -836,8 +919,21 @@ var GASServer = Maple.Class(function(clientClass) {
 			default:
 				console.log("message : default branch reached, type: ", type);
 		}
-	}
-
+	},
+    
+    notifyBattleSession: function( battleid, message ){
+        var battlesession = this.battleSessions[battleid];
+        
+        var challenger = this.getClientByUsername(battlesession.challenger.name);
+        if ( challenger ) challenger.send(message.type, [JSON.stringify(message)]);
+        
+        var defender = this.getClientByUsername(battlesession.defender.name, true);
+        if ( defender ) defender.send(message.type, [JSON.stringify(message)]);
+        
+        if ( challenger ) console.log('Challenger sent:', JSON.stringify(message));
+        if ( defender ) console.log('Defender sent:', JSON.stringify(message));
+    }
+        
 })
 
 	// Create server
