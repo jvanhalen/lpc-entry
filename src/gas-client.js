@@ -21,13 +21,13 @@ var g_battleTeam = {
         var index = this._team.indexOf(name);
         if ( index != -1 )
         {
-            this._team.splice(index,1); 
-        } 
+            this._team.splice(index,1);
+        }
         else if ( this._team.length < this._TEAM_MAX_SIZE )
         {
             this._team.push(name);
-        } 
-        else 
+        }
+        else
         {
             console.log('Battle team full');
         }
@@ -36,11 +36,11 @@ var g_battleTeam = {
     get: function(){
         return JSON.parse(JSON.stringify(this._team));
     },
-    
+
     has: function(name){
         return (this._team.indexOf(name)!=-1);
     }
-    
+
 };
 
 // Audio switches
@@ -114,12 +114,12 @@ Crafty.c('Grid', {
             }
             else if ( this.coordinatesMatch(this.targetPos[0], this.targetPos[1]) )
             {
-                
+
                 //console.log(this.gladiator.name, "reached", JSON.stringify(this.targetPos));
 
                 var player = JSON.parse($.cookie("gas-login")).username;
                 gas.send('MOVE_UPDATE', [JSON.stringify({ username: player, battleid: g_ingame, gladiator: this.gladiator.name, pos: this.targetPos})]);
-                
+
                 // remove coordinate since we have reached it.
                 this.movePattern.dequeue();
                 //update tile position.
@@ -132,12 +132,12 @@ Crafty.c('Grid', {
                     this.stopWalking();
 
             }
-            
-        } 
+
+        }
 
         return this;
     },
-    
+
     Step: function(x,y) {
 
         var dirx = x-this.tile_x;
@@ -158,7 +158,7 @@ Crafty.c('Grid', {
 function SetArenaEnabled(value){
     // destroy old one
     if ( g_enterArenaButton ) g_enterArenaButton.destroy();
-    
+
     if ( value == true) {
         g_enterArenaButton = Crafty.e("2D, DOM, Mouse, Text")
             .attr( {w:130, h:20, x:340, y:100, z:9})
@@ -171,7 +171,7 @@ function SetArenaEnabled(value){
             .bind('Click', function(){
                 Crafty.scene("arenaView");
             });
-        
+
     } else {
         g_enterArenaButton = Crafty.e("2D, DOM, Mouse, Text")
             .attr( {w:130, h:20, x:340, y:100, z:9})
@@ -182,7 +182,7 @@ function SetArenaEnabled(value){
                 "font-size": "13pt",
             })
             .bind('Click', function(){
-                
+
                 if ( g_pitMessage ) g_pitMessage.destroy();
                 g_pitMessage = Crafty.e("2D, DOM, Text")
                     .attr({w:200, h:232, x:100, y:300, z:8})
@@ -194,9 +194,9 @@ function SetArenaEnabled(value){
                     })
                     .text("Please challenge someone first!");
             });
-        
+
     }
-    
+
 }
 
 function HandleMouseClick(xpos,ypos)
@@ -212,9 +212,9 @@ function HandleMouseClick(xpos,ypos)
         return;
     }
     var player = JSON.parse($.cookie("gas-login")).username;
-    
+
     gas.send('MOVE_REQ', [ JSON.stringify( {username: player, battleid: g_ingame, gladiator: g_currentGladiator.gladiator.name, from: {x: g_currentGladiator.tile_x, y:g_currentGladiator.tile_y}, to: {x: xpos, y: ypos} })]);
-    
+
 }
 
 function PreloadAudio() {
@@ -487,7 +487,7 @@ function showMagicView()
                 })
                 .bind('Click', function(){
                     //alert('Selected spell'+this[0]);
-					gas.send("BUY_ITEM_REQ", [JSON.stringify({type: "BUY_ITEM_REQ", name:"BUY_ITEM_REQ", username: JSON.parse($.cookie("gas-login")).username, item: this.item })]);
+					gas.send("BUY_ITEM_REQ", [JSON.stringify({type: "BUY_ITEM_REQ", name:"BUY_ITEM_REQ", username: JSON.parse($.cookie("gas-login")).username, gladiator: g_gladiatorShowCase, item: this.item })]);
 					})
         );
         shopListObjs.push(
@@ -861,7 +861,7 @@ function hideArenaView()
 {
     var login = $.cookie('gas-login');
     gas.send('EXIT_ARENA_REQ', [ '{"username":"'+ JSON.parse(login).username + '"}']);
-    
+
 }
 
 function showArenaView()
@@ -908,7 +908,7 @@ function showArenaView()
               "font-size":"24pt"});
 
 
-    
+
 
 
 
@@ -1147,7 +1147,7 @@ var GAS = Class(function() {
     removeFromBattle: function(playername) {
         this.send('DEBUG_REMOVE_FROM_BATTLE', [ '{ "player": "'+playername+'"}']);
     },
-    
+
     challengePlayer: function(defender)
     {
         this.send('CHALLENGE_REQ', [ '{ "username":"'+ JSON.parse($.cookie("gas-login")).username + '",'+
@@ -1172,7 +1172,7 @@ var GAS = Class(function() {
         {
             var anim = "";
             var offset = 0;
-            
+
             if ( jQuery.inArray(gladiators[i].name, battleteam) != -1 )
             {
                 switch ( gladiators[i].race)
@@ -1187,18 +1187,18 @@ var GAS = Class(function() {
                 /*var xoffset = 0;
                 if ( mode === "defender") {
                     xoffset = 15;
-                } 
+                }
                 else if ( mode == "challenger") {
                     xoffset = 2;
                 }*/
                 console.log("Battledata is", JSON.stringify(gladiators[i].battledata));
                 var mypos = gladiators[i].battledata.pos;
-                
+
                 var o = Crafty.e("2D, DOM, Multiway, Keyboard, Grid, Mouse, Ape, Sprite, transparent")
                     .attr({z:7, gladiator: gladiators[i]})
                     .Ape()
                     .collision([16,32],[48,32],[48,64],[16,64])
-                    .Grid( mypos[0], mypos[1])  
+                    .Grid( mypos[0], mypos[1])
                     .setupAnimation(anim)
                     .bind("MouseOver", function(){
                         console.log('mouseover on ', this.gladiator.name);
@@ -1207,7 +1207,7 @@ var GAS = Class(function() {
                         // set for pathfinding
                         g_currentGladiator = this;
                     });
-                
+
                 g_gladiators.push(o);
             }
         }
@@ -1242,7 +1242,7 @@ var GAS = Class(function() {
 				$.cookie("gas-login", data);
                 g_ingame = JSON.parse(data).ingame;
 				displayLogin();
-				
+
 			}
 			else {
 				//$.cookie("gas-login", null);
@@ -1355,7 +1355,7 @@ var GAS = Class(function() {
                 console.log('Setting arena disabled');
                 SetArenaEnabled(false);
             }
-        
+
         break;
         case 'BATTLETEAM_SELECT_RES':
             var resp = JSON.parse(data[0]);
@@ -1371,7 +1371,7 @@ var GAS = Class(function() {
            // a very crude placement, but just to demonstrate
            this.placeGladiators( "challenger", battle.challenger.battleteam, battle.challenger.gladiators);
            this.placeGladiators( "defender",   battle.defender.battleteam,   battle.defender.gladiators);
-           
+
         break;
         case 'MOVE_RES':
 
@@ -1388,7 +1388,7 @@ var GAS = Class(function() {
         break;
         case 'ATTACK_RESP':
            console.log('Received attack result data');
-           
+
         break;
 	    default:
 	      console.log("Default branch reached in 'message handling'"+type);
@@ -1405,7 +1405,7 @@ var GAS = Class(function() {
         if ( g_currentView == "manager")
         {
 
-            
+
             g_gladiators = [];
 			console.log("team.gladiators", team.gladiators);
             for (var i in team.gladiators )
@@ -1438,7 +1438,7 @@ var GAS = Class(function() {
                     xpos = 640-32;	// Align gladiator to correct "slot"
                     selectorxoff = -128;
                 }
-                //x:xpos, y:ypos, 
+                //x:xpos, y:ypos,
                 var g = Crafty.e("2D, DOM, Multiway, Grid, Mouse, Ape, Sprite, transparent")
                     .attr({z:7, gladiator: team.gladiators[i], myslot:i})
                     .Ape()
@@ -1479,13 +1479,13 @@ var GAS = Class(function() {
                         }
                         console.log("selected team: "+JSON.stringify(msg));
                         gas.send('BATTLETEAM_SELECT_REQ', [JSON.stringify(msg)]);
-                        
+
                         var backup = g_currentGrid.clone();
                         var finder = new PF.AStarFinder();
                         var destx = 0;
                         var desty = 0;
                         if ( g_battleTeam.has(this.gladiatorname)) {
-                            destx = 7+((g_battleTeam.get().length-1)*3), 
+                            destx = 7+((g_battleTeam.get().length-1)*3),
                             desty = 8;
                         } else {
                             destx = this.gladiator.orig_x;
@@ -1495,12 +1495,12 @@ var GAS = Class(function() {
 
                         var path = finder.findPath( this.gladiator.tile_x,
                                                 this.gladiator.tile_y,
-                                                destx,desty, backup );                            
+                                                destx,desty, backup );
                         console.log("Path found:"+JSON.stringify(path));
                         this.gladiator.SetMovePattern( path );
-                        
+
                     });
-                
+
 
             }
         }

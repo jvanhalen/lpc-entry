@@ -91,19 +91,19 @@ var api = {
     },
 
     setBattlePosition: function(battleid, playername, gladiatorname, pos ) {
-        
+
         var battle = core.getBattle(battleid);
         var player = null;
         // find out which player is it for
-        if ( battle.defender.name == playername ) 
+        if ( battle.defender.name == playername )
             player = battle.defender;
-        else if ( battle.challenger.name == playername ) 
+        else if ( battle.challenger.name == playername )
             player = battle.challenger;
         else {
             console.log('Whatta heck? player name does not match');
             return null;
         }
- 
+
 
         var gladiator = null;
 
@@ -133,7 +133,7 @@ var api = {
             if ( posFoundFromPath ){
                 gladiator.battledata.pos = pos;
                 core.editBattle( battleid, battle );
-                
+
             } else {
                 console.log('Invalid gladiator move from client', pos);
                 return null;
@@ -147,19 +147,19 @@ var api = {
     },
 
     move: function(battleid, playername, gladiatorname, from, to ) {
-        
+
         var battle = core.getBattle(battleid);
         var player = null;
         // find out which player is it for
-        if ( battle.defender.name == playername ) 
+        if ( battle.defender.name == playername )
             player = battle.defender;
-        else if ( battle.challenger.name == playername ) 
+        else if ( battle.challenger.name == playername )
             player = battle.challenger;
         else {
             console.log('Whatta heck? player name does not match');
             return [];
         }
- 
+
         var finder = new PF.AStarFinder();
         var gladiator = null;
 
@@ -178,14 +178,14 @@ var api = {
 
         if ( gladiator ) {
             console.log('Finding path...');
-            // find path 
-            if ( gladiator.battledata === undefined) 
+            // find path
+            if ( gladiator.battledata === undefined)
                 gladiator["battledata"] = {}
-            
+
             gladiator.battledata["pos"] = [from.x, from.y]
-            gladiator.battledata["path"] = finder.findPath(from.x, from.y, 
-                                                           to.x, to.y, 
-                                                           new PF.Grid(battle.map[0].length, 
+            gladiator.battledata["path"] = finder.findPath(from.x, from.y,
+                                                           to.x, to.y,
+                                                           new PF.Grid(battle.map[0].length,
                                                                        battle.map.length,
                                                                        battle.map));
             // save changes and return path
@@ -198,7 +198,7 @@ var api = {
             return [];
         }
     },
-    
+
 	attack: function (attackername, targetname) {
 
 		// Attacker and defender data
@@ -286,7 +286,7 @@ var api = {
 
 			// "Illustrate/stringify" the action ,e.g. "Ouch! Mauri hit Hermanni with astalo to location for xx points of damage"
 			console.log(attackername, "hit", targetname, "for", dmg, "points of damage. That must have hurt!");
-            
+
 			return this.message.ATTACK_RESP.init(attackername, targetname, dmg, true);
 		}
 		else {
@@ -348,6 +348,14 @@ var api = {
 						cachedgladiator.armour.body = item._id;
 						core.gladiatorcache.write(cachedgladiator._id, cachedgladiator);
 						break;
+					case 'offhand':
+						cachedgladiator.offhand = item._id;
+						core.gladiatorcache.write(cachedgladiator._id, cachedgladiator);
+						break;
+					case 'defhand':
+						cachedgladiator.defhand = item._id;
+						core.gladiatorcache.write(cachedgladiator._id, cachedgladiator);
+						break;
 					default:
 						console.log("api.buyItem, default branch:", username, item);
 				}
@@ -385,7 +393,7 @@ var api = {
         if ( !map ) return null;
 
         var matrix = [];
-        
+
         for( var layer=0; layer<map.layers.length;layer++)
         {
             // process only collision layer
@@ -398,7 +406,7 @@ var api = {
                 // Process layer data
                 for(var i in map.layers[layer].data)
                 {
-                    
+
                     matrix[currRow].push(0);// walkable
                     // non-zero means a set tile and on collision
                     // layer it means 'blocked'
@@ -406,14 +414,14 @@ var api = {
                     {
                         matrix[currRow][currColumn] = 1; // non-walkable
                     }
-                    
+
                     // next tile, take care of indices.
                     currColumn++;
                     if ( currColumn >= map.width ) {
                         currColumn = 0;
                         // push new row if needed.
                         if ( i < map.layers[layer].data.length-1)
-                            matrix.push([]);                             
+                            matrix.push([]);
 
 
                         currRow++;
@@ -423,9 +431,9 @@ var api = {
                 if ( storeMatrix ) battle["map"] = matrix;
                 else console.log('setting arena matrix skipped');
             }
-            
+
             if ( map.layers[layer].name == "Spawnpoints" )
-            { 
+            {
                 var currRow = 0;
                 var currColumn = 0;
                 var positions = [];
@@ -443,7 +451,7 @@ var api = {
                 }
 
                 if ( storePositions ) battle["spawnpoints"] = positions;
-                else console.log('spawn points skipped');                
+                else console.log('spawn points skipped');
             }
         }
     }
