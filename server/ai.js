@@ -30,6 +30,12 @@ process.on('message', function(message) {
         case 'BATTLE_START':
            ai.handleBattleStart(message);
         break;
+        case 'STAND_DOWN':
+           ai.handleBattleExit(message);
+        break;
+       case 'ATTACK_RESP':
+           ai.handleAttackResp(message);
+        break;
     default:
           ai.handleMessage(message);
     }
@@ -124,7 +130,26 @@ var ai = {
         // store battle into ai team property
         this.teams[battle.defender.name]["battle"] = battle;
     },
+    
+    handleBattleExit: function( msg ){
+        delete this.teams[msg.username]["battle"];
+        console.log('AI battle exit: ', msg.username, "now idle.");
+    },
+    
+    handleAttackResp: function(msg) {
 
+        console.log('AI ATTACK_RESP custom handler');
+        
+        for( var ai in this.teams ){
+            if ( this.teams[ai].ingame == msg.ingame )
+            {
+                var g = this.getGladiatorByName(this.teams[ai], msg.targetid);
+                g.health -= msg.damage;
+            }
+        }
+        
+    },
+    
     // AI enemy will always be a challenger.
     isEnemy: function( battleid, gladiatorname )
     {
@@ -162,13 +187,17 @@ var ai = {
     update: function(tick){
 
         for( var ai in this.teams ){
-            console.log('Seeking enemies2...');
+
             if ( this.teams[ai].battle === undefined ) continue;
 
+            console.log(ai, 'seeking enemies...');
             var team = this.teams[ai].battle.defender.battleteam;
             for( var bt in team)
             {
                 var g = this.getGladiatorByName( this.teams[ai], team[bt] );
+                // skip gladiators that aren't alive anymore.
+                if ( g.health <= 0 ) continue;
+
                 var target = this.teams[ai].battle.map[g.battledata.pos[1]][g.battledata.pos[0]-1];
                 
                 if ( target != 0 && target != 1 ){
