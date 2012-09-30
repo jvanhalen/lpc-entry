@@ -8,9 +8,9 @@ var g_gladiatorShowCase = null;	// Gladiator at gladiatorView
 var g_enterArenaButton = null;
 var g_gladiators = [];
 var g_timer = { view: null, time: 0};
-var loadAudio = false;
+var loadAudio = true;
 var g_ingame = null;
-
+var g_playerName = null;
 var g_battleTeam = {
 
     _team: [],
@@ -63,9 +63,11 @@ Crafty.c('Grid', {
     movePattern: null, // [[x,y], [,], ...]
     moving: false,
     targetPos:null,
+    attackTimer: 0,
+    attackTarget: null,
     orig_x: null, // used for manager view for return to dummy
     orig_y: null,
-
+    
     init: function()
     {
         this.requires('Tween');
@@ -80,8 +82,31 @@ Crafty.c('Grid', {
         this.orig_y = yc;
         return this;
     },
+    
+    SetTarget: function( gladiator ){
+        this.attackTarget = gladiator;
+    },
+    
+    HasTarget: function(){
+        return (this.attackTarget !== undefined && this.attackTarget !== null );
+    },
+    
+    HasTargetInRange: function(){
+
+        if ( this.HasTarget() == false) return false;
+            
+        var xRange = Math.abs(this.attackTarget.gladiator.battledata.pos[0] - this.gladiator.battledata.pos[0]);
+        var yRange = Math.abs(this.attackTarget.gladiator.battledata.pos[1] - this.gladiator.battledata.pos[1]);
+        console.log('Checking', xRange, "and", yRange);
+        if ( xRange == 1.0 && yRange == 0.0 ) return true;
+        if ( yRange == 1.0 && xRange == 0.0 ) return true;
+        
+        return false;
+    },
+    
     SetMovePattern: function(path){
         //console.log('setting new pattern, length:' + path.length);
+        
         for(var i in path ){
             this.movePattern.enqueue(path[i]);
         }
@@ -119,12 +144,15 @@ Crafty.c('Grid', {
 
                 var player = JSON.parse($.cookie("gas-login")).username;
                 gas.send('MOVE_UPDATE', [JSON.stringify({ username: player, battleid: g_ingame, gladiator: this.gladiator.name, pos: this.targetPos})]);
-
+                
                 // remove coordinate since we have reached it.
                 this.movePattern.dequeue();
                 //update tile position.
                 this.tile_x = this.targetPos[0];
                 this.tile_y = this.targetPos[1];
+                // update battle position
+                this.gladiator.battledata.pos[0] = this.tile_x;
+                this.gladiator.battledata.pos[1] = this.tile_y;
 
                 this.targetPos = null;
                 // when final pattern is consumed, stop and face the player.
@@ -1112,7 +1140,49 @@ var GAS = Class(function() {
             for ( var g in g_gladiators )
             {
                 g_gladiators[g].UpdateMovement();
+
+                if ( g_gladiators[g].HasTargetInRange() &&
+                     (g_gladiators[g].attackTimer < tick) ) {
+
+                    // stop attacking if target is dead.
+                    if ( g_gladiators[g].attackTarget.gladiator.health <= 0 )
+                    {
+                        g_gladiators[g].SetTarget(null);
+                        continue;
+                    }
+                        // construct attack msg
+                        var attackMsg = {
+                            type: "ATTACK_REQ",
+                            name: "ATTACK_REQ",
+                            username: JSON.parse($.cookie('gas-login')).username,
+                            attackerid: g_gladiators[g].gladiator.name,
+                            targetid: g_gladiators[g].attackTarget.gladiator.name,
+                            battleid: g_ingame
+                        }
+                    
+                        // attack away.
+                        gas.send( attackMsg.type, [JSON.stringify(attackMsg)] );
+
+                        // TODO figure out a more reasonable "timer". 
+                        // AND make a check on server-side to verify that client does not cheat.
+
+                        // set next point of attack according to nimbleness level,
+                        // 20 seconds if nimble = 0, nimbleness reduces seconds.
+                        var nimbleFactor = g_gladiators[g].gladiator.nimbleness;
+                        g_gladiators[g].attackTimer = tick + (20000/3)/nimbleFactor;
+                        console.log(g_gladiators[g].gladiator.name, 'attack timer set to', g_gladiators[g].attackTimer);
+                    
+                } else {
+                    //console.log(g_gladiators[g].gladiator.name, 'has no target');
+                }
             }
+            
+            for ( var g in g_gladiators )
+            {
+                g_gladiators[g].UpdateMovement();
+            }
+            
+            
         }
 
         if ( g_currentView == 'manager' )
@@ -1184,13 +1254,7 @@ var GAS = Class(function() {
 					anim = "human_body";
 					break;
                 }
-                /*var xoffset = 0;
-                if ( mode === "defender") {
-                    xoffset = 15;
-                }
-                else if ( mode == "challenger") {
-                    xoffset = 2;
-                }*/
+
                 console.log("Battledata is", JSON.stringify(gladiators[i].battledata));
                 var mypos = gladiators[i].battledata.pos;
 
@@ -1205,7 +1269,16 @@ var GAS = Class(function() {
                     })
                     .bind("Click", function(){
                         // set for pathfinding
-                        g_currentGladiator = this;
+                        if ( this.gladiator.manager == JSON.parse($.cookie('gas-login')).username ){
+                            g_currentGladiator = this;
+                        } else {
+                            // if we have previously selected gladiator, then 
+                            // we attack on enemy.
+                            if ( g_currentGladiator ) {
+                                g_currentGladiator.SetTarget( this );
+                                console.log(g_currentGladiator.gladiator.name, "setting target to", this.gladiator.name);
+                            }
+                        }
                     });
 
                 g_gladiators.push(o);
@@ -1367,6 +1440,7 @@ var GAS = Class(function() {
            console.log('Received BATTLE_START:' /*+ data[0]*/);
            var battle = JSON.parse(data[0]);
            var username = JSON.parse($.cookie("gas-login")).username;
+           
            g_gladiators = [];
            // a very crude placement, but just to demonstrate
            this.placeGladiators( "challenger", battle.challenger.battleteam, battle.challenger.gladiators);
@@ -1388,6 +1462,40 @@ var GAS = Class(function() {
         break;
         case 'ATTACK_RESP':
            console.log('Received attack result data');
+           var d = JSON.parse(data[0]);
+           for( var gid in g_gladiators ) {
+
+               // attacker will bash the towards target
+               if ( g_gladiators[gid].gladiator.name == d.attackerid ) {
+
+                   var xdiff = d.targetpos.x - d.attackerpos.x;
+                   var ydiff = d.targetpos.y - d.attackerpos.y;
+                   
+                   if      ( xdiff < 0 ) g_gladiators[gid].thrustAttack('left');
+                   else if ( xdiff > 0 ) g_gladiators[gid].thrustAttack('right');
+                   else if ( ydiff < 0 ) g_gladiators[gid].thrustAttack('up');
+                   else if ( ydiff > 0 ) g_gladiators[gid].thrustAttack('down');
+                   else {
+                       console.log('Coordinates do not differ, guessing something?');
+                       g_gladiators[gid].thrustAttack('left');
+                   }
+               }
+               
+               if ( g_gladiators[gid].gladiator.name == d.targetid ) { 
+                   g_gladiators[gid].gladiator.health -= d.damage;
+
+                   if ( g_gladiators[gid].gladiator.health <= 0 ){
+                       g_gladiators[gid].gladiator.health = 0;
+                       // display hurt animation
+                       g_gladiators[gid].fallDown(20);
+                   }
+                   
+               }
+               
+           }
+           // display damage animation where target should be 
+           DisplayFadingText('-'+d.damage, d.targetpos.x*32, d.targetpos.y*32, 24, 'Impact');
+           
 
         break;
 	    default:
