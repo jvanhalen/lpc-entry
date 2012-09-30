@@ -199,34 +199,72 @@ var api = {
         }
     },
 
-	attack: function (attackername, targetname) {
+	attack: function (attackername, targetname, battleid) {
 
 		// Attacker and defender data
 		var att = null;
 		var tgt = null;
-
+        var battle = null;
 		// Check weapon data
 		var shield = 0;
 		var weapon = 0;
 		var def = 0;
 
 		// Check user validity
-		var validparams = (attackername !== undefined )&& (targetname !== undefined);
+		var validparams = (attackername !== undefined )&& (targetname !== undefined) && (battleid !== undefined);
 		if(validparams) {
 			// Check gladiator existence
-			att = core.gladiatorcache.read(attackername);
-			tgt = core.gladiatorcache.read(targetname);
+			//att = core.gladiatorcache.read(attackername);
+			//tgt = core.gladiatorcache.read(targetname);
+            
+            battle = core.battlecache.read(battleid);
+            
+            if ( battle != null ) {
+
+                // seek target gladiator
+                for( var gid in battle.defender.gladiators ) {
+                    if ( battle.defender.gladiators[gid].name == targetname ){
+                        tgt = battle.defender.gladiators[gid];
+                        break;
+                    }
+                }
+                
+                if ( tgt == null ) {
+                    for( var gid in battle.challenger.gladiators ) {
+                        if ( battle.challenger.gladiators[gid].name == targetname ){
+                            tgt = battle.challenger.gladiators[gid];
+                            break;
+                        }
+                    }
+                }
+                // seek attacker gladiator
+                for( var gid in battle.defender.gladiators ) {
+                    if ( battle.defender.gladiators[gid].name == attackername ){
+                        att = battle.defender.gladiators[gid];
+                        break;
+                    }
+                }
+                if ( att == null ){
+                    for( var gid in battle.challenger.gladiators ) {
+                        if ( battle.challenger.gladiators[gid].name == attackername ){
+                            att = battle.challenger.gladiators[gid];
+                            break;
+                        }
+                    }
+                }
+            }
 		}
 		else {
-			console.log("ERROR: api.attack failed, params:", attacker, target);
+			console.log("ERROR: api.attack failed, params:", attackername, targetname, battleid);
 			return null;
 		}
 
-		console.log("asdf", att, tgt);
-		var valid = (att && tgt);
+		//console.log("asdf", att, tgt);
+		var valid = (att && tgt && battle);
 
 
 		if(valid) {
+
 			// Check hit / miss
 			weapon = core.itemcache.read(att.offhand);
 			shield = core.itemcache.read(tgt.defhand);
@@ -248,8 +286,19 @@ var api = {
 				else {
 					console.log(targetname, "dodged the attack!");
 				}
+                
+				var msg = this.message.ATTACK_RESP.init(attackername, targetname, 0, false);
+                // append positions
+                msg.targetpos.x = tgt.battledata.pos[0];
+                msg.targetpos.y = tgt.battledata.pos[1];
 
-				return this.message.ATTACK_RESP.init(attackername, targetname, 0, false);
+                msg.newtargetpos.x = tgt.battledata.pos[0];
+                msg.newtargetpos.y = tgt.battledata.pos[1];
+
+                msg.attackerpos.x = att.battledata.pos[0];
+                msg.attackerpos.y = att.battledata.pos[1];
+                msg.ingame = battleid;
+                return msg;
 			}
 
 			// If hit, calculate damage and pick a hit location
@@ -259,7 +308,8 @@ var api = {
 			}
 			else {
 				console.log(attackername, "uses bare hands to attack", targetname)
-				dmg = att.strength - 10;	// TODO: Bare hands, calculate some dmg ???
+                var luckMod = Math.floor((Math.random()*6))-3;
+                dmg = att.strength - 10 + luckMod;	// TODO: Bare hands, calculate some dmg ???
 			}
 
 			if(dmg < 1)
@@ -286,8 +336,23 @@ var api = {
 
 			// "Illustrate/stringify" the action ,e.g. "Ouch! Mauri hit Hermanni with astalo to location for xx points of damage"
 			console.log(attackername, "hit", targetname, "for", dmg, "points of damage. That must have hurt!");
+            
+			var msg = this.message.ATTACK_RESP.init(attackername, targetname, dmg, true);
 
-			return this.message.ATTACK_RESP.init(attackername, targetname, dmg, true);
+            // append positions
+            msg.targetpos.x = tgt.battledata.pos[0];
+            msg.targetpos.y = tgt.battledata.pos[1];
+            
+            msg.newtargetpos.x = tgt.battledata.pos[0];
+            msg.newtargetpos.y = tgt.battledata.pos[1];
+            
+            msg.attackerpos.x = att.battledata.pos[0];
+            msg.attackerpos.y = att.battledata.pos[1];
+            msg.ingame = battleid;
+            tgt.health -= dmg;
+            // save changes
+            api.editBattle(battleid, battle);
+            return msg;
 		}
 		else {
 			console.log("ERROR: api.attack failed, params:", attacker, target, att, tgt);
