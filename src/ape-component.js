@@ -255,7 +255,7 @@ Crafty.c('Ape', {
 			    // by default, invisible
 			    entity.hurt[key].visible = false;
 			    entity.hurt[key]
-                    .animate("hurt",1,0,6)
+                    .animate("hurt",1,0,5)
                     .attr({x:entity.x, y:entity.y, z:val.z});
 			    entity.attach(entity.hurt[key]);
             } else {
@@ -471,7 +471,18 @@ Crafty.c('Ape', {
 
         }
     },
-
+    
+    fallDown: function(speed){
+        this.hideAll();
+        this.enableAnimation(this.hurt);
+        if (!this.walk.body.isPlaying("hurt")){
+            for(var i in this.hurt)
+            {
+                if ( this.hurt[i]) this.hurt[i].stop().animate("hurt", speed, 0);
+            }
+        }
+    },
+    
     stopWalking: function() {
         // halt animations
         for(var i in this.walk)
