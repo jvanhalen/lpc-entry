@@ -32,13 +32,14 @@ var TICK_RATE = 3; // Tick rate in milliseconds
 var ONE_SECOND = 1000 / TICK_RATE;
 var TWO_SECONDS = 2000 / TICK_RATE;
 var FIVE_SECONDS = 1000 / TICK_RATE;
+var SEVEN_SECONDS = 7000 / TICK_RATE;
 var TEN_SECONDS = 10000 / TICK_RATE;
 var THIRTY_SECONDS = 30000 / TICK_RATE;
 
 var ROUND_LENGTH = TWO_SECONDS; 					// Round length, round means the "free action" period after the management period
 var INITIAL_MANAGEMENT_PERIOD = THIRTY_SECONDS; 	// Initial management period after the gladiator placement
 var MANAGEMENT_PERIOD = FIVE_SECONDS; 				// Management period after the initial round
-var AI_UPDATE_PERIOD = FIVE_SECONDS;
+var AI_UPDATE_PERIOD = SEVEN_SECONDS;
 // Test -----------------------------------------------------------------------
 var GASServer = Maple.Class(function(clientClass) {
     Maple.Server(this, clientClass);
@@ -228,6 +229,31 @@ var GASServer = Maple.Class(function(clientClass) {
 		var playerNames = { players:[] }
 		playerNames.players.push( clientToUsername[client.id]);
 
+        // take care of AI upon some weird player disconnect
+        var user = api.getUser(clientToUsername[client.id]);
+        if ( user.ingame != null ) {
+            
+            var battlesession = this.battleSessions[user.ingame];
+            if ( battlesession ) {
+                
+                if ( user.name == battlesession.defender.name ) {
+                    battlesession.defender = null;
+                    console.log('Removing battlesession defender', user.name);
+                }
+                else if ( user.name == battlesession.challenger.name ) {
+                    console.log('Removing battlesession challenger', user.name);
+                    battlesession.challenger = null;
+                    if ( battlesession.defender.ai === true) {
+                        
+                        var aiClient = this.getClientByUsername(battlesession.defender.name,true);
+                        aiClient.send('STAND_DOWN', ['{"username":"'+battlesession.defender.name+'", "ingame":"'+user.ingame+'"}']);
+                        battlesession.defender = null;
+                    }
+                }
+                
+            } 
+        }
+        
 		for( var c=0; c < this.getClients().length; c++)
 		{
 		console.log("Updating:", this.getClients().getAt(c).id);
@@ -898,11 +924,16 @@ var GASServer = Maple.Class(function(clientClass) {
             break;
         case 'ATTACK_REQ':
             var d = JSON.parse(data);
-            var msg = api.attack( d.attackerid, d.targetid);
+
+            // TODO check that attacks occur within proper time limits.
+            // ie. no 2000 attacks per second.
+
+            var msg = api.attack( d.attackerid, d.targetid, d.battleid);
             if ( msg != null)
             {
                 this.notifyBattleSession(d.battleid, msg );
             }
+            
             break;
         case 'DEBUG_REMOVE_FROM_BATTLE':
             var d = JSON.parse(data);
@@ -923,15 +954,18 @@ var GASServer = Maple.Class(function(clientClass) {
     
     notifyBattleSession: function( battleid, message ){
         var battlesession = this.battleSessions[battleid];
-        
-        var challenger = this.getClientByUsername(battlesession.challenger.name);
-        if ( challenger ) challenger.send(message.type, [JSON.stringify(message)]);
-        
-        var defender = this.getClientByUsername(battlesession.defender.name, true);
-        if ( defender ) defender.send(message.type, [JSON.stringify(message)]);
-        
-        if ( challenger ) console.log('Challenger sent:', JSON.stringify(message));
-        if ( defender ) console.log('Defender sent:', JSON.stringify(message));
+        if ( battlesession.challenger ) {
+            var challenger = this.getClientByUsername(battlesession.challenger.name);
+            if ( challenger ) challenger.send(message.type, [JSON.stringify(message)]);
+            // debug stuff
+            if ( challenger ) console.log('Challenger sent:', JSON.stringify(message));
+        }
+        if ( battlesession.defender ) {
+            var defender = this.getClientByUsername(battlesession.defender.name, true);
+            if ( defender ) defender.send(message.type, [JSON.stringify(message)]);
+            // debug stuff
+            if ( defender ) console.log('Defender sent:', JSON.stringify(message));
+        }
     }
         
 })
