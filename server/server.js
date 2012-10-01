@@ -119,7 +119,6 @@ var GASServer = Maple.Class(function(clientClass) {
         return null;
     },
 
-
     update: function(t, tick) {
         //console.log(this.getClients().length, 'client(s) connected', t, tick, this.getRandom());
 
@@ -135,7 +134,6 @@ var GASServer = Maple.Class(function(clientClass) {
 
                 this.paused = false;
                 this.pointOfReference = tick;
-
                 var msg = {
                     "name":"BATTLE_CONTROL_SYNC",
                     "paused":this.paused,
@@ -150,7 +148,10 @@ var GASServer = Maple.Class(function(clientClass) {
                 {
                     this.getClients().getAt(c).send(data[0].name, data);
                 }
-            }
+              
+                // TODO check battle session activity; has battle ended (other side died?)
+                
+            } 
         }
         else
         {
@@ -236,11 +237,11 @@ var GASServer = Maple.Class(function(clientClass) {
             var battlesession = this.battleSessions[user.ingame];
             if ( battlesession ) {
                 
-                if ( user.name == battlesession.defender.name ) {
+                if ( battlesession.defender !== undefined && user.name == battlesession.defender.name ) {
                     battlesession.defender = null;
                     console.log('Removing battlesession defender', user.name);
                 }
-                else if ( user.name == battlesession.challenger.name ) {
+                else if ( battlesession.challenger !== undefined && user.name == battlesession.challenger.name ) {
                     console.log('Removing battlesession challenger', user.name);
                     battlesession.challenger = null;
                     if ( battlesession.defender.ai === true) {
@@ -485,42 +486,40 @@ var GASServer = Maple.Class(function(clientClass) {
         {
             case 'BATTLE_START_REQ':
 
-                var battles    = api.createBattle();
+                var newBattle    = api.createBattle();
 
                // create also pathfinding map for the arena 
-                api.createGridMatrixFromMap('arena.json', battles, true, true);
-                //console.log('* battles map is', battles.map );
-                //console.log('* battles.spawnpoints is', battles.spawnpoints);
+                api.createGridMatrixFromMap('arena.json', newBattle, true, true);
+                //console.log('* newBattle map is', newBattle.map );
+                //console.log('* newBattle.spawnpoints is', newBattle.spawnpoints);
     
                 var challenger = api.getUser(data.challenger)
                 var defender   = api.getUser(data.defender);
-                console.log('Battles: ' + battles );
-                console.log('challenger: ' + challenger.name );
-                console.log('defender: ' + defender.name );
+                
 
 				// create crude "copies"
-                battles.defender = JSON.parse(JSON.stringify(defender));
-        		battles.challenger = JSON.parse(JSON.stringify(challenger));
+                newBattle.defender = JSON.parse(JSON.stringify(defender));
+        		newBattle.challenger = JSON.parse(JSON.stringify(challenger));
 
-				battles.initial_state.challenger = battles.challenger;
-				battles.initial_state.defender = battles.defender;
+				newBattle.initial_state.challenger = newBattle.challenger;
+				newBattle.initial_state.defender = newBattle.defender;
 
 				// cleanup unnecessary details
-			    delete battles.challenger._rev;
-				battles.challenger["name"] = battles.challenger._id;
-				delete battles.challenger._id;
-				delete battles.defender._rev;
-				battles.defender["name"] = battles.defender._id;
-				delete battles.defender._id;
+			    delete newBattle.challenger._rev;
+				newBattle.challenger["name"] = newBattle.challenger._id;
+				delete newBattle.challenger._id;
+				delete newBattle.defender._rev;
+				newBattle.defender["name"] = newBattle.defender._id;
+				delete newBattle.defender._id;
 
-			    //var battlesStr = JSON.stringify(battles);
-			    //console.log(battlesStr);
+			    //var newBattleStr = JSON.stringify(newBattle);
+			    //console.log(newBattleStr);
 
 				// set both players into game
-				defender.ingame = battles._id;
-				challenger.ingame = battles._id;
+				defender.ingame = newBattle._id;
+				challenger.ingame = newBattle._id;
 
-                api.editBattle(battles._id, battles);
+                api.editBattle(newBattle._id, newBattle);
                 console.log('Updating users NOW' + challenger._id + ","+defender._id);
 
 
@@ -528,18 +527,16 @@ var GASServer = Maple.Class(function(clientClass) {
                 api.updateUser(defender);
             
                 var cli = this.getClientByUsername(challenger._id);
+                var msg = JSON.stringify({ response: "READY_FOR_WAR",  battle: newBattle });
                 if ( cli ) {
-                    cli.send('CHALLENGE_RES',
-						 ['{"response":"READY_FOR_WAR", "battles":"'+challenger.ingame+'"}']);
-                   
+                
+                    cli.send('CHALLENGE_RES', [msg]);
                     cli.send('BATTLE_STATUS_RES', [ JSON.stringify({username:challenger._id, ingame:challenger.ingame}) ]);
                 }
-                cli = this.getClientByUsername(defender._id, true);
-                if ( cli ) {
-                    cli.send('CHALLENGE_RES',
-						     ['{"response":"READY_FOR_WAR", "battles":"'+defender.ingame+'"}']);
 
-				}
+                cli = this.getClientByUsername(defender._id, true);
+                if ( cli ) cli.send('CHALLENGE_RES', [msg]);
+
             
 			break;
 		}

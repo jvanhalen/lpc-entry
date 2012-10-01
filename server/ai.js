@@ -13,13 +13,15 @@ process.on('message', function(message) {
             ai.replyChallenge(message,true); // always accept challenge, add random delay before accepting? Should people know they af
             
             break;
-
+        case 'CHALLENGE_RES':
+            ai.handleChallengeResponse( message );
+        break;
         case 'CREATE_USER_RESP':
             process.send(JSON.stringify({type:"LOGIN_REQ", name:"LOGIN_REQ",data:{username: message.username, "password": aiPassword }}));
             break;
 
         case 'WAKE_UP':
-           ai.enterArena('Morons', message.ingame);
+           ai.enterArena(message.username, message.ingame);
         break;
         case 'MOVE_UPDATE':
            ai.handleMoveUpdate(message);
@@ -57,6 +59,14 @@ var ai = {
         }
     },
     
+    handleChallengeResponse: function(msg){
+        // select battle team - this needs to be handled before live player 
+        // enters arena, otherwise (s)he won't see AI enemy players.
+        if ( msg.response == "READY_FOR_WAR" ){
+	        this.selectBattleTeam(msg.battle.defender.name, [ msg.battle.defender.gladiators[0].name] );
+        }
+    },
+
     handleMoveUpdate: function(msg)
     {
         console.log('AI is handling move update...');
@@ -101,8 +111,7 @@ var ai = {
     {
         console.log('AI received BATTLE_START:' /*+ data[0]*/);
 
-        // select battle team - now it is possible.
-	this.selectBattleTeam(battle.defender.name, [ battle.defender.gladiators[0].name] );
+
 
         // convert battle map into spatial positioning map
         for(var g in battle.challenger.gladiators)
