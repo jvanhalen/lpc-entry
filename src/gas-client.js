@@ -152,10 +152,11 @@ Crafty.c('Grid', {
                 //update tile position.
                 this.tile_x = this.targetPos[0];
                 this.tile_y = this.targetPos[1];
-                // update battle position
-                this.gladiator.battledata.pos[0] = this.tile_x;
-                this.gladiator.battledata.pos[1] = this.tile_y;
-
+		if ( g_currentView == 'arena' )  {
+		    // update battle position
+                    this.gladiator.battledata.pos[0] = this.tile_x;
+                    this.gladiator.battledata.pos[1] = this.tile_y;
+		}
                 this.targetPos = null;
                 // when final pattern is consumed, stop and face the player.
                 if ( this.movePattern.isEmpty())

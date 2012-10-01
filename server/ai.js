@@ -11,7 +11,7 @@ process.on('message', function(message) {
 
         case 'CHALLENGE_REQ':
             ai.replyChallenge(message,true); // always accept challenge, add random delay before accepting? Should people know they af
-            ai.selectBattleTeam('Morons', ["Sesir"]);
+            
             break;
 
         case 'CREATE_USER_RESP':
@@ -100,7 +100,10 @@ var ai = {
     handleBattleStart: function(battle)
     {
         console.log('AI received BATTLE_START:' /*+ data[0]*/);
-        
+
+        // select battle team - now it is possible.
+	this.selectBattleTeam(battle.defender.name, [ battle.defender.gladiators[0].name] );
+
         // convert battle map into spatial positioning map
         for(var g in battle.challenger.gladiators)
         {
@@ -144,7 +147,9 @@ var ai = {
             if ( this.teams[ai].ingame == msg.ingame )
             {
                 var g = this.getGladiatorByName(this.teams[ai], msg.targetid);
-                g.health -= msg.damage;
+		if ( g ) {
+                    g.health -= msg.damage;
+		}
             }
         }
         
@@ -196,6 +201,7 @@ var ai = {
             {
                 var g = this.getGladiatorByName( this.teams[ai], team[bt] );
                 // skip gladiators that aren't alive anymore.
+		if ( g == null ) continue;
                 if ( g.health <= 0 ) continue;
 
                 var target = this.teams[ai].battle.map[g.battledata.pos[1]][g.battledata.pos[0]-1];
@@ -242,7 +248,7 @@ var ai = {
             if ( names[i] !== undefined )
                 msg.gladiators.push(names[i]);
         }
-        
+        console.log('AI selecting battle team:', JSON.stringify(names));
         process.send( JSON.stringify({type:"BATTLETEAM_SELECT_REQ", name:"BATTLETEAM_SELECT_REQ",data: msg}));
     },
     
