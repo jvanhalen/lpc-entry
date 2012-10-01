@@ -143,8 +143,10 @@ Crafty.c('Grid', {
                 //console.log(this.gladiator.name, "reached", JSON.stringify(this.targetPos));
 
                 var player = JSON.parse($.cookie("gas-login")).username;
-                gas.send('MOVE_UPDATE', [JSON.stringify({ username: player, battleid: g_ingame, gladiator: this.gladiator.name, pos: this.targetPos})]);
-                
+		// Quick fix for crash.
+		if ( g_currentView == 'arena') {
+                    gas.send('MOVE_UPDATE', [JSON.stringify({ username: player, battleid: g_ingame, gladiator: this.gladiator.name, pos: this.targetPos})]);
+                }
                 // remove coordinate since we have reached it.
                 this.movePattern.dequeue();
                 //update tile position.
