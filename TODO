@@ -1,8 +1,34 @@
-- melee fighting
+TODO
+
+- AI moving logic for "Morons"
+- AI must check enemies from ALL four directions
+- AI must check enemies from ranged weapon distance. any tile within weapon range.
+- Melee fighting with weapons
+- Response for bought item must be sent to client
+- Implement ranged fighting
+- Implement spell casting during fight
 - Fix the login protocol when entering with existing cookie.
-- Finish battle creation on server-side and client-side
+- Tweak pause functionality timing (how long we watch, how long we modify)
+- Make gladiators controllable only during pause 
+- Response for finished fight
+- Pathfinding must avoid other gladiators. tricky when others are moving, needs random pause for both if same team, propbably attack when enemies.
 
-* pause functionality (partially done)
+- Fix client page layout graphics and colors
+- Gladiator statuses visible during fight
+- Client map load times (sync parsing into async mode)
+- Client proper preloading 
+- Client proper loading screens (fade-ins and fade-outs)
+- Client must handle finished fight response and display you won/lost scene
+- Client visualization for bought items
+- Client visualization for ranged fighting
+- Client visualization for spell casting
 
-Add skill bards
-http://opengameart.org/content/health-and-mana-bars
+- Add skill bars to client(http://opengameart.org/content/health-and-mana-bars)
+- Client pause indicator (timer etc.)
+
+DONE
+
+* Melee fighting with hands
+* Finish battle creation on server-side and client-side (DONE)
+* pause functionality (partially done, needs timing tweaks)
+
