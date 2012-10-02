@@ -45,12 +45,12 @@ var GASServer = Maple.Class(function(clientClass) {
     Maple.Server(this, clientClass);
 
 }, Maple.Server, {
-    
+
 	pointOfReference: 0, 	// ticks
 	paused: false,   		// state
 	duration: 0, 			// for how long
 	ai: {
-        pointOfReference: 0, 
+        pointOfReference: 0,
         proc: null, // AI process, must be set before calling send()
         id: "computer",
         /* Fancy wrapper for compatibility with Maple client message sending */
@@ -94,8 +94,8 @@ var GASServer = Maple.Class(function(clientClass) {
 
     },
 
-    /* returns Maple client by username.              
-     * when parameter for withAIplayers is passed, checks also 
+    /* returns Maple client by username.
+     * when parameter for withAIplayers is passed, checks also
      * AI players.
      */
     getClientByUsername: function(username, withAIplayers) {
@@ -115,7 +115,7 @@ var GASServer = Maple.Class(function(clientClass) {
                 }
             }
         }
-        
+
         return null;
     },
 
@@ -125,7 +125,7 @@ var GASServer = Maple.Class(function(clientClass) {
 
 	    //this.ai.send('AI_MESSAGE_EXAMPLE', [{action: "cast a nice spell", params: {name: "Magic missile", type: "attack", damage: "2d4" } }]);
 
-        
+
 
         if ( this.paused == true )
         {
@@ -148,10 +148,10 @@ var GASServer = Maple.Class(function(clientClass) {
                 {
                     this.getClients().getAt(c).send(data[0].name, data);
                 }
-              
+
                 // TODO check battle session activity; has battle ended (other side died?)
-                
-            } 
+
+            }
         }
         else
         {
@@ -179,7 +179,7 @@ var GASServer = Maple.Class(function(clientClass) {
                 this.ai.pointOfReference = tick;
             }
         }
-        
+
 
         // make object move on client side.
         /*if ( this.getClients().length > 0 )
@@ -233,10 +233,10 @@ var GASServer = Maple.Class(function(clientClass) {
         // take care of AI upon some weird player disconnect
         var user = api.getUser(clientToUsername[client.id]);
         if ( user.ingame != null ) {
-            
+
             var battlesession = this.battleSessions[user.ingame];
             if ( battlesession ) {
-                
+
                 if ( battlesession.defender !== undefined && user.name == battlesession.defender.name ) {
                     battlesession.defender = null;
                     console.log('Removing battlesession defender', user.name);
@@ -245,16 +245,16 @@ var GASServer = Maple.Class(function(clientClass) {
                     console.log('Removing battlesession challenger', user.name);
                     battlesession.challenger = null;
                     if ( battlesession.defender.ai === true) {
-                        
+
                         var aiClient = this.getClientByUsername(battlesession.defender.name,true);
                         aiClient.send('STAND_DOWN', ['{"username":"'+battlesession.defender.name+'", "ingame":"'+user.ingame+'"}']);
                         battlesession.defender = null;
                     }
                 }
-                
-            } 
+
+            }
         }
-        
+
 		for( var c=0; c < this.getClients().length; c++)
 		{
 		console.log("Updating:", this.getClients().getAt(c).id);
@@ -384,10 +384,10 @@ var GASServer = Maple.Class(function(clientClass) {
 				}
 			})
     },
-    
+
     handleDbResponse: function(querypath, client, type, data, response) {
 		console.log("handleDbResponse: ", type, "querypath", querypath + " : " + data+ " : " + response);
-        
+
 		switch(type)
 		{
 			case 'BATTLE_START_CREATE_BATTLE_REQ':
@@ -424,7 +424,7 @@ var GASServer = Maple.Class(function(clientClass) {
 			break;
 
         case 'CHALLENGE_REQ_ONLINE_CHECK':
-            
+
             if ( JSON.parse(response) == null || JSON.parse(response).ingame != null )
             {
                 var cli = this.getClientByUsername( JSON.parse(data).username)
@@ -488,14 +488,14 @@ var GASServer = Maple.Class(function(clientClass) {
 
                 var newBattle    = api.createBattle();
 
-               // create also pathfinding map for the arena 
+               // create also pathfinding map for the arena
                 api.createGridMatrixFromMap('arena.json', newBattle, true, true);
                 //console.log('* newBattle map is', newBattle.map );
                 //console.log('* newBattle.spawnpoints is', newBattle.spawnpoints);
-    
+
                 var challenger = api.getUser(data.challenger)
                 var defender   = api.getUser(data.defender);
-                
+
 
 				// create crude "copies"
                 newBattle.defender = JSON.parse(JSON.stringify(defender));
@@ -525,11 +525,11 @@ var GASServer = Maple.Class(function(clientClass) {
 
    			    api.updateUser(challenger);
                 api.updateUser(defender);
-            
+
                 var cli = this.getClientByUsername(challenger._id);
                 var msg = JSON.stringify({ response: "READY_FOR_WAR",  battle: newBattle });
                 if ( cli ) {
-                
+
                     cli.send('CHALLENGE_RES', [msg]);
                     cli.send('BATTLE_STATUS_RES', [ JSON.stringify({username:challenger._id, ingame:challenger.ingame}) ]);
                 }
@@ -537,7 +537,7 @@ var GASServer = Maple.Class(function(clientClass) {
                 cli = this.getClientByUsername(defender._id, true);
                 if ( cli ) cli.send('CHALLENGE_RES', [msg]);
 
-            
+
 			break;
 		}
     },
@@ -569,7 +569,7 @@ var GASServer = Maple.Class(function(clientClass) {
 				var username = JSON.parse(data).username;
    			    var userdata = api.getUser(username);
 				var logged = false;
-            
+
 				for(user in clientToUsername) {
 					if(clientToUsername[user] == JSON.parse(data).username) {
 						logged = true;
@@ -582,7 +582,7 @@ var GASServer = Maple.Class(function(clientClass) {
 
                     var passwdOk = (userdata.login.password == JSON.parse(data).password); // regular users
                     var isAI = (userdata.ai == true && client == this.ai); // computer AI
-                    
+
 					if( passwdOk || isAI )  {
 						client.send(api.message.LOGIN_RESP.message.name, [ api.toJSON(api.message.LOGIN_RESP.init(username, "OK", "Login succeeded.")) ]);
 						clientToUsername[client.id] = JSON.parse(data).username;
@@ -627,8 +627,21 @@ var GASServer = Maple.Class(function(clientClass) {
 			break;
 
 			case 'BUY_ITEM_REQ':
-				// Fourth alternative, let the api crunch the whole message
-				api.buyItem(JSON.parse(data).username, JSON.parse(data).gladiator, JSON.parse(data).item);
+				var resp = api.message.BUY_ITEM_RESP.init();
+				resp.username = JSON.parse(data).username;
+				resp.gladiator = JSON.parse(data).gladiator;
+				resp.item = JSON.parse(data).item;
+				var success = api.buyItem(JSON.parse(data).username, JSON.parse(data).gladiator, JSON.parse(data).item);
+
+				if(success) {
+					resp.response = "OK";
+				}
+				else {
+					resp.response = "NOK";
+					resp.reason = "Something went wrong.";
+					resp.item = JSON.parse(data).item;
+				}
+				client.send(resp.name, [resp]);
 			break;
 
 			case 'GET_AVAILABLE_GLADIATORS_REQ':
@@ -649,7 +662,7 @@ var GASServer = Maple.Class(function(clientClass) {
 					toUser = toUser.substring(1, toUser.length);
 					console.log("username:", toUser);
 				}
-                
+
 				for( var c=0; c < this.getClients().length; c++ )
 				{
 					//console.log("Updating:", this.getClients().getAt(c).id);
@@ -712,7 +725,7 @@ var GASServer = Maple.Class(function(clientClass) {
 
                         // search client from live players (AI does not throw a challenge)
                         var challengerClient = this.getClientByUsername(this.challenges[challenge].challenger);
-                        
+
                         // TODO: add safety check for challenger client that does not exist?
                         if ( challengerClient == null ) {
                             console.log("CHALLENGER IS MISSING: SOMETHING IS VERY BADLY WRONG HERE!!!!");
@@ -733,12 +746,12 @@ var GASServer = Maple.Class(function(clientClass) {
 						}
 
 						delete this.challenges[challenge];
-                        
+
 					}
 				}
 
 			break;
-            
+
             case 'EXIT_ARENA_REQ':
                var user = api.getUser(JSON.parse(data).username);
                var battlesession = this.battleSessions[user.ingame];
@@ -752,29 +765,29 @@ var GASServer = Maple.Class(function(clientClass) {
                        console.log('Removing battlesession challenger', user.name);
                        battlesession.challenger = null;
                        if ( battlesession.defender.ai === true) {
-                           
+
                            var aiClient = this.getClientByUsername(battlesession.defender.name,true);
                            aiClient.send('STAND_DOWN', ['{"username":"'+battlesession.defender.name+'", "ingame":"'+user.ingame+'"}']);
                            battlesession.defender = null;
                        }
                    }
-                   
+
                } else {
                    console.log('EXIT_ARENA_REQ', 'Could not find battlesession', user.ingame);
                }
-            
+
             break;
 
             case 'ENTER_ARENA_REQ':
                var user = api.getUser(JSON.parse(data).username);
                var battle = api.getBattle( user.ingame );
-               
+
                if ( battle != null ) {
                    if ( !this.battleSessions[user.ingame] ) {
                        this.battleSessions[user.ingame] = {}
                    }
 
-                   if ( battle.defender.name == user.name ) { 
+                   if ( battle.defender.name == user.name ) {
                        this.battleSessions[user.ingame]["defender"] = user;
                        // update battle team in ... battle
                        battle.defender.battleteam = user.battleteam;
@@ -782,7 +795,7 @@ var GASServer = Maple.Class(function(clientClass) {
                        api.editBattle(battle._id, battle);
                        client.send('ENTER_ARENA_RES', ['{"response":"OK", "defender":"'+user.name+'","battleid":"'+user.ingame+'"}']);
                    }
-                   
+
                    if ( battle.challenger.name == user.name ) {
                        console.log('Challenger entering');
                        this.battleSessions[user.ingame]["challenger"] = user;
@@ -798,9 +811,9 @@ var GASServer = Maple.Class(function(clientClass) {
                            var aiClient = this.getClientByUsername(battle.defender.name,true);
                            aiClient.send('WAKE_UP', ['{"username":"'+battle.defender.name+'", "ingame":"'+battle._id+'"}']);
                        }
-                       
+
                    }
-                   
+
                    // if both parties have joined the arena
                    if ( this.battleSessions[user.ingame].defender  &&
                         this.battleSessions[user.ingame].challenger ){
@@ -814,7 +827,7 @@ var GASServer = Maple.Class(function(clientClass) {
                            for( var bg in battle.defender.battleteam ){
                                if ( battle.defender.gladiators[g].name == battle.defender.battleteam[bg] ){
                                    console.log('Processing', battle.defender.battleteam[bg]);
-                                   if ( battle.defender.gladiators[g].battledata === undefined ) 
+                                   if ( battle.defender.gladiators[g].battledata === undefined )
                                        battle.defender.gladiators[g]["battledata"] = {}
 
                                    if ( battle.defender.gladiators[g].battledata.pos === undefined ) {
@@ -840,17 +853,17 @@ var GASServer = Maple.Class(function(clientClass) {
                            }
                        }
                        var battle = api.editBattle(battle._id, battle);
-                       
+
                        // enable challenger
                        var chal = this.getClientByUsername(battle.challenger.name);
-                       if ( chal ) { 
+                       if ( chal ) {
                            chal.send('BATTLE_START', [JSON.stringify(battle)]);
                            console.log('Challenger activated');
                        }
 
                        // enable defender
                        var def = this.getClientByUsername(battle.defender.name,true);
-                       if ( def ) { 
+                       if ( def ) {
                            def.send('BATTLE_START', [JSON.stringify(battle)]);
                            console.log('Defender activated');
                        }
@@ -858,9 +871,9 @@ var GASServer = Maple.Class(function(clientClass) {
                    } else {
                        console.log('Still waiting for parties to join battle...');
                        console.log('Def is:'+this.battleSessions[user.ingame].defender);
-                       console.log('Chal is:'+this.battleSessions[user.ingame].challenger);                       
+                       console.log('Chal is:'+this.battleSessions[user.ingame].challenger);
                    }
-                        
+
                }
 
             break;
@@ -886,15 +899,15 @@ var GASServer = Maple.Class(function(clientClass) {
             var resp = ( _path.length == 0 ) ? "NOK" : "OK";
 
             var message = {
-                type: "MOVE_RES", 
-                name: "MOVE_RES", 
-                battleid: d.battleid, 
-                username: d.username, 
-                gladiator: d.gladiator, 
-                response: 
+                type: "MOVE_RES",
+                name: "MOVE_RES",
+                battleid: d.battleid,
+                username: d.username,
+                gladiator: d.gladiator,
+                response:
                 resp, path: _path
             }
-            
+
             // session clients will be notified of this change
             this.notifyBattleSession( d.battleid, message );
 
@@ -907,14 +920,14 @@ var GASServer = Maple.Class(function(clientClass) {
                 if ( newpos ) {
 
                     var message = {
-                        type: 'MOVE_UPDATE', 
-                        name: 'MOVE_UPDATE', 
-                        battleid: d.battleid, 
-                        username: d.username, 
-                        gladiator: d.gladiator, 
+                        type: 'MOVE_UPDATE',
+                        name: 'MOVE_UPDATE',
+                        battleid: d.battleid,
+                        username: d.username,
+                        gladiator: d.gladiator,
                         pos: newpos
                     }
-                    
+
                     this.notifyBattleSession(d.battleid, message );
                 }
             }
@@ -930,7 +943,7 @@ var GASServer = Maple.Class(function(clientClass) {
             {
                 this.notifyBattleSession(d.battleid, msg );
             }
-            
+
             break;
         case 'DEBUG_REMOVE_FROM_BATTLE':
             var d = JSON.parse(data);
@@ -948,7 +961,7 @@ var GASServer = Maple.Class(function(clientClass) {
 				console.log("message : default branch reached, type: ", type);
 		}
 	},
-    
+
     notifyBattleSession: function( battleid, message ){
         var battlesession = this.battleSessions[battleid];
         if ( battlesession.challenger ) {
@@ -964,7 +977,7 @@ var GASServer = Maple.Class(function(clientClass) {
             if ( defender ) console.log('Defender sent:', JSON.stringify(message));
         }
     }
-        
+
 })
 
 	// Create server

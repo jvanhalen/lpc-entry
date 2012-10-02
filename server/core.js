@@ -84,7 +84,7 @@ var core = {
 	dbresponse: function(response) {
 			console.log(response);
 	},
-    
+
 	createUser: function(username, password) {
 		console.log("core.createUser: ", username, password);
 
@@ -122,7 +122,7 @@ var core = {
 					core.usercache.write(body.id, userdata);
 					}
 			});
-            
+
 			// Write current user data to the usercache for gladiator hiring.
 			core.usercache.write(username, newuser);
 			// Pick the gladiators for the new user
@@ -346,7 +346,7 @@ var core = {
         if (  battle == null ) {
             battle = core.battle.init();
             battle._id = battleid;
-            // check fields according to given data - O(n^2). 
+            // check fields according to given data - O(n^2).
             // n is sufficiently small, so it should not matter.
             for( var item in battledata) {
                 for( var val in core.battle.message ) {
@@ -359,12 +359,12 @@ var core = {
             }
             // add to cache immediately
             core.battlecache.write(battle._id, battle);
-            
+
             this.dbcore.insert(configs.battledb, battle._id, battle, function(err,body){
                 if ( err ) {
                     console.log("ERROR: dbcore.createBattle: ", err.reason.body);
                 }
-                else 
+                else
                 {
                     console.log("INFO: dbcore.insert: added battle", body);
                     // update cache
@@ -387,7 +387,7 @@ var core = {
         if ( battle ) return JSON.parse(JSON.stringify(battle));
         else          return battle;
     },
-    
+
     editBattle: function(name, attributelist) {
  		//console.log("core.editBattle:", name);
 
@@ -486,14 +486,14 @@ var core = {
 	dbcore: {
 		nano: null,
         idcounter: 0,
-        // own UUID counter for 
+        // own UUID counter for
         getUUID: function() {
 
             var uuid = crypto.createHash('sha1').update(crypto.randomBytes(128)+(new Date().toISOString())).digest('hex');
             uuid = uuid + ''+ this.idcounter++;
             return uuid;
         },
-        
+
 		init: function () {
 			console.log("dbcore: init()")
 			this.nano = require('nano')('http://localhost:5984');
@@ -664,7 +664,7 @@ var core = {
             //console.log("battles are:"+JSON.stringify(battles));
 			core.battlecache.prefill(battles);
         },
-        
+
 		initItems: function(http_response) {
 			//console.log(http_response);
 			// Iterate through the data we need
@@ -952,9 +952,9 @@ var core = {
 				message: {
 					"type": 1, // Add this field automatically?
 					"name": "BUY_ITEM_REQ",
-					"username": "username",
-					"gladiator": "gladiators_name",
-					"item": "item id"
+					"username": null,	// "username",
+					"gladiator": null, 	//"gladiators_name",
+					"item": null 		//"item id"
 				},
 				init: function() {
 					return JSON.parse(JSON.stringify(this.message));
@@ -965,9 +965,11 @@ var core = {
 				message: {
 					"type": 1, // Add this field automatically?
 					"name": "BUY_ITEM_RESP",
-					"username": "username",
-					"gladiator": "gladiators_name",
-					"item": "item id"
+					"username": null, 	//"username",
+					"gladiator": null, 	//"gladiators_name",
+					"item": null,
+					"response": null,
+					"reason": null
 				},
 				init: function() {
 					return JSON.parse(JSON.stringify(this.message));
@@ -1015,7 +1017,7 @@ var core = {
 				return JSON.parse(JSON.stringify(this.message));
 			}
 		},
-        
+
         ATTACK_RESP: {
             message: {
                 "type": "ATTACK_RESP",
@@ -1117,17 +1119,17 @@ var core = {
 		"icon": null,
 		"description": null
 	},
-    
+
     battle: {
         message: {
             "_id": null,
             "history":[],
 		    "initial_state":{
-			    "basetick":0, 
-			    "challenger": null, 
+			    "basetick":0,
+			    "challenger": null,
 			    "defender": null
-		    }, 
-		    "challenger":null, 
+		    },
+		    "challenger":null,
 		    "defender":null
         },
         init: function(){
@@ -1285,7 +1287,7 @@ var core = {
 			}
 		}
 	},
-    
+
     battlecache: {
 		internalhash: {},	// Cached data
 		dirtykeys: {},		// Key to changed data

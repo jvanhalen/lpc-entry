@@ -67,7 +67,7 @@ Crafty.c('Grid', {
     attackTarget: null,
     orig_x: null, // used for manager view for return to dummy
     orig_y: null,
-    
+
     init: function()
     {
         this.requires('Tween');
@@ -82,31 +82,31 @@ Crafty.c('Grid', {
         this.orig_y = yc;
         return this;
     },
-    
+
     SetTarget: function( gladiator ){
         this.attackTarget = gladiator;
     },
-    
+
     HasTarget: function(){
         return (this.attackTarget !== undefined && this.attackTarget !== null );
     },
-    
+
     HasTargetInRange: function(){
 
         if ( this.HasTarget() == false) return false;
-            
+
         var xRange = Math.abs(this.attackTarget.gladiator.battledata.pos[0] - this.gladiator.battledata.pos[0]);
         var yRange = Math.abs(this.attackTarget.gladiator.battledata.pos[1] - this.gladiator.battledata.pos[1]);
         console.log('Checking', xRange, "and", yRange);
         if ( xRange == 1.0 && yRange == 0.0 ) return true;
         if ( yRange == 1.0 && xRange == 0.0 ) return true;
-        
+
         return false;
     },
-    
+
     SetMovePattern: function(path){
         //console.log('setting new pattern, length:' + path.length);
-        
+
         for(var i in path ){
             this.movePattern.enqueue(path[i]);
         }
@@ -1162,11 +1162,11 @@ var GAS = Class(function() {
                             targetid: g_gladiators[g].attackTarget.gladiator.name,
                             battleid: g_ingame
                         }
-                    
+
                         // attack away.
                         gas.send( attackMsg.type, [JSON.stringify(attackMsg)] );
 
-                        // TODO figure out a more reasonable "timer". 
+                        // TODO figure out a more reasonable "timer".
                         // AND make a check on server-side to verify that client does not cheat.
 
                         // set next point of attack according to nimbleness level,
@@ -1174,18 +1174,18 @@ var GAS = Class(function() {
                         var nimbleFactor = g_gladiators[g].gladiator.nimbleness;
                         g_gladiators[g].attackTimer = tick + (20000/3)/nimbleFactor;
                         console.log(g_gladiators[g].gladiator.name, 'attack timer set to', g_gladiators[g].attackTimer);
-                    
+
                 } else {
                     //console.log(g_gladiators[g].gladiator.name, 'has no target');
                 }
             }
-            
+
             for ( var g in g_gladiators )
             {
                 g_gladiators[g].UpdateMovement();
             }
-            
-            
+
+
         }
 
         if ( g_currentView == 'manager' )
@@ -1275,7 +1275,7 @@ var GAS = Class(function() {
                         if ( this.gladiator.manager == JSON.parse($.cookie('gas-login')).username ){
                             g_currentGladiator = this;
                         } else {
-                            // if we have previously selected gladiator, then 
+                            // if we have previously selected gladiator, then
                             // we attack on enemy.
                             if ( g_currentGladiator ) {
                                 g_currentGladiator.SetTarget( this );
@@ -1355,13 +1355,20 @@ var GAS = Class(function() {
 			break;
 
 		case 'HIRE_GLADIATOR_RESP':
-			console.log("Received: " + JSON.stringify(data));
+			console.log("HIRE_GLADIATOR_RESP: " + JSON.stringify(data));
+			// TODO: More clever handling for resp
+			break;
+
+		case 'BUY_ITEM_RESP':
+			console.log("BUY_ITEM_RESP: " + JSON.stringify(data));
+			// TODO: Visualize the new item
 			break;
 
         case 'TEAM_RESP':
            //console.log("Received team:"+ JSON.stringify(data));
            this.handleTeamResponse((data[0]));
 			break;
+
         case 'BATTLE_CONTROL_SYNC':
             var bc = data[0];
             this.paused = bc.paused;
@@ -1443,7 +1450,7 @@ var GAS = Class(function() {
            console.log('Received BATTLE_START:' /*+ data[0]*/);
            var battle = JSON.parse(data[0]);
            var username = JSON.parse($.cookie("gas-login")).username;
-           
+
            g_gladiators = [];
            // a very crude placement, but just to demonstrate
            this.placeGladiators( "challenger", battle.challenger.battleteam, battle.challenger.gladiators);
@@ -1473,7 +1480,7 @@ var GAS = Class(function() {
 
                    var xdiff = d.targetpos.x - d.attackerpos.x;
                    var ydiff = d.targetpos.y - d.attackerpos.y;
-                   
+
                    if      ( xdiff < 0 ) g_gladiators[gid].thrustAttack('left');
                    else if ( xdiff > 0 ) g_gladiators[gid].thrustAttack('right');
                    else if ( ydiff < 0 ) g_gladiators[gid].thrustAttack('up');
@@ -1483,8 +1490,8 @@ var GAS = Class(function() {
                        g_gladiators[gid].thrustAttack('left');
                    }
                }
-               
-               if ( g_gladiators[gid].gladiator.name == d.targetid ) { 
+
+               if ( g_gladiators[gid].gladiator.name == d.targetid ) {
                    g_gladiators[gid].gladiator.health -= d.damage;
 
                    if ( g_gladiators[gid].gladiator.health <= 0 ){
@@ -1492,13 +1499,13 @@ var GAS = Class(function() {
                        // display hurt animation
                        g_gladiators[gid].fallDown(20);
                    }
-                   
+
                }
-               
+
            }
-           // display damage animation where target should be 
+           // display damage animation where target should be
            DisplayFadingText('-'+d.damage, d.targetpos.x*32, d.targetpos.y*32, 24, 'Impact');
-           
+
 
         break;
 	    default:
