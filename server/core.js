@@ -560,6 +560,8 @@ var core = {
 					gladi.effects = [];
 					gladi.defhand = null,
 					gladi.offhand = null,
+                    gladi.armour.type = "armour";
+                    gladi.armour.subtype = "none";
 					gladi.armour.full = null,
 					gladi.armour.head = null,
 					gladi.armour.torso = null,
@@ -1062,7 +1064,7 @@ var core = {
 			"knockouts": null,
 			"injured": null,
 			// armour.body = placeholder for full armour set (leather, chain, plate). The individual slots may remain empty
-			"armour": {"body": "item_id", "head": "item_id", "torso": "item_id", "arms": "item_id", "hands": "item_id", "legs": "item_id", "feet": "item_id"},
+			    "armour": {"body": "item_id", "type":"type_id", "subtype":"subtype_id", "head": "item_id", "torso": "item_id", "arms": "item_id", "hands": "item_id", "legs": "item_id", "feet": "item_id"},
 			"offhand": "item_id",
 			"defhand": "item_id",
 			"effects":[],

@@ -411,6 +411,7 @@ var api = {
 				switch(cacheditem.slot) {
 					case 'body':
 						cachedgladiator.armour.body = item._id;
+                        cachedgladiator.armour.subtype = item.subtype;
 						core.gladiatorcache.write(cachedgladiator._id, cachedgladiator);
 						break;
 					case 'offhand':
