@@ -1,5 +1,5 @@
 { 
-  "name":"leather_armor",
+  "name":"armour_leather",
   "walk": {
         "head":{
                "image":"HEAD_leather_armor_hat.png",

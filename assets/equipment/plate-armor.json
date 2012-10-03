@@ -1,5 +1,5 @@
 {
-    "name":"plate_armor",
+    "name":"armour_plate",
     "walk": {
         "head": {
            "image":"HEAD_plate_armor_helmet.png",

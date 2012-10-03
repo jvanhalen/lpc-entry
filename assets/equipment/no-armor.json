@@ -1,5 +1,5 @@
 {
-    "name":"no_armor",
+    "name":"armor_none",
     "walk": {
         "head": null,
         "torso": null,
