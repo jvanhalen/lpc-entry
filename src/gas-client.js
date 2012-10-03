@@ -3,6 +3,9 @@ var g_gladiatorPit = {};
 var g_Animations = {}; /* storage of all animations objects used in pre-loading */
 var g_pitMessage = null;
 var g_currentGrid = null;
+// TODO rename g_currentGladiator and g_gladiatorShowCase, 
+// other is Crafty entity and other is gladiator data object.
+// for clarity, this needs to be fixed.
 var g_currentGladiator = null;
 var g_gladiatorShowCase = null;	// Gladiator at gladiatorView
 var g_enterArenaButton = null;
@@ -633,6 +636,20 @@ function showGladiatorView()
     g_currentView = "gladiator";
     LoadTileMap('inventory.json');
 
+    g_currentGladiator = Crafty.e("2D, DOM, Multiway, Keyboard, Mouse, Ape, Sprite, transparent")
+        .attr({x:450, y:220, z:7, gladiator: g_gladiatorShowCase})
+        .Ape()
+        .collision([16,32],[48,32],[48,64],[16,64])
+        .setupAnimation(g_gladiatorShowCase.race+'_body')
+        .setupAnimation(g_gladiatorShowCase.armour.type + '_' + g_gladiatorShowCase.armour.subtype)
+        .bind("MouseOver", function(){
+            console.log('mouseover on ', this.gladiator.name);
+            this.startWalking({x:0,y:1}, 20);
+        })
+        .bind("MouseOut", function(){
+            console.log('mouseout on', this.gladiator.name);
+            this.stopWalking();
+        });
 
     Crafty.sprite(64,'../pics/walkcycle/BODY_' + (g_gladiatorShowCase.race) + '.png', {
         skeleton: [0,0]
@@ -669,7 +686,7 @@ function showGladiatorView()
     });
 
 
-    Crafty.e("2D, DOM, Sprite, Mouse, skeleton")
+         /*Crafty.e("2D, DOM, Sprite, Mouse, skeleton")
         .attr({x:450, y:220, z:3})
         .sprite(0,1)
         .bind('MouseOver', function(e){
@@ -677,7 +694,7 @@ function showGladiatorView()
         })
         .bind('MouseOut', function(e){
             this.sprite(0,1);
-        });
+        });*/
 
 	//console.log(g_currentGladiator);
 
@@ -886,6 +903,14 @@ function showManagerView()
 
     //console.log("skel id:"+skel[0]);
 
+}
+
+function hideGladiatorView()
+{
+    // prevent breaking stuff with slightly different gladiator objects in different views.
+    // also previous objects cannot be shared between views.
+    g_gladiatorShowCase = null;
+    g_currentGladiator = null;
 }
 
 function hideArenaView()
@@ -1260,13 +1285,14 @@ var GAS = Class(function() {
 
                 console.log("Battledata is", JSON.stringify(gladiators[i].battledata));
                 var mypos = gladiators[i].battledata.pos;
-
+                var armorType = gladiators[i].armour.type + '_' + gladiators[i].armour.subtype;
                 var o = Crafty.e("2D, DOM, Multiway, Keyboard, Grid, Mouse, Ape, Sprite, transparent")
                     .attr({z:7, gladiator: gladiators[i]})
                     .Ape()
                     .collision([16,32],[48,32],[48,64],[16,64])
                     .Grid( mypos[0], mypos[1])
                     .setupAnimation(anim)
+                    .setupAnimation(armorType) 
                     .bind("MouseOver", function(){
                         console.log('mouseover on ', this.gladiator.name);
                     })
@@ -1360,8 +1386,17 @@ var GAS = Class(function() {
 			break;
 
 		case 'BUY_ITEM_RESP':
-			console.log("BUY_ITEM_RESP: " + JSON.stringify(data));
+			//console.log("BUY_ITEM_RESP: " + JSON.stringify(data));
 			// TODO: Visualize the new item
+
+            // assuming view is gladiator view...
+        if ( g_currentView == "gladiator" ){
+            var assetName = data[0].item.type+'_'+data[0].item.subtype;
+            console.log(g_currentGladiator.gladiator.name, "got a brand new", assetName);
+            g_currentGladiator.setupAnimation(assetName);
+        } else {
+            console.log('Received BUY_ITEM_RESP on other scene than gladiatorView?');
+        }
 			break;
 
         case 'TEAM_RESP':
@@ -1556,6 +1591,8 @@ var GAS = Class(function() {
                     xpos = 640-32;	// Align gladiator to correct "slot"
                     selectorxoff = -128;
                 }
+
+                var armorType = team.gladiators[i].armour.type+"_"+team.gladiators[i].armour.subtype;
                 //x:xpos, y:ypos,
                 var g = Crafty.e("2D, DOM, Multiway, Grid, Mouse, Ape, Sprite, transparent")
                     .attr({z:7, gladiator: team.gladiators[i], myslot:i})
@@ -1563,7 +1600,8 @@ var GAS = Class(function() {
                     .Grid(4,11+(i*3))
                     .collision([16,32],[48,32],[48,64],[16,64])
                     .setupAnimation(anim)
-                    .setupAnimation("long_spear")
+                    .setupAnimation("long_spear") // default drill weapon
+                    .setupAnimation(armorType) // takes care of setting proper armor
                     .bind("Click", function(){
 						g_gladiatorShowCase = this.gladiator;
                         Crafty.scene("gladiatorView");
@@ -1572,7 +1610,7 @@ var GAS = Class(function() {
                         DisplayFadingText(this.gladiator.name, this.x, this.y, "20pt", "Fanwood");
                     });
                 g_gladiators.push(g);
-
+                               
                 // battle team selector
                 Crafty.e("2D, DOM, Mouse, Color")
                     .attr({x:xpos+selectorxoff, y:ypos, z:7, w:64, h:64, gladiatorname: team.gladiators[i].name, gladiator: g})
