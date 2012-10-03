@@ -19,7 +19,7 @@ TODO
 - Client proper preloading 
 - Client proper loading screens (fade-ins and fade-outs)
 - Client must handle finished fight response and display you won/lost scene
-- Client visualization for bought items
+/ Client visualization for bought items (partially done, armors work)
 - Client visualization for ranged fighting
 - Client visualization for spell casting
 
