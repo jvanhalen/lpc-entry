@@ -229,19 +229,24 @@ var GASServer = Maple.Class(function(clientClass) {
 
 		var playerNames = { players:[] }
 		playerNames.players.push( clientToUsername[client.id]);
-
+        
         // take care of AI upon some weird player disconnect
         var user = api.getUser(clientToUsername[client.id]);
-        if ( user.ingame != null ) {
+        
+        if ( user != null && user.ingame != null ) {
 
             var battlesession = this.battleSessions[user.ingame];
             if ( battlesession ) {
 
-                if ( battlesession.defender !== undefined && user.name == battlesession.defender.name ) {
+                if ( battlesession.defender != undefined && 
+                     battlesession.defender != null && 
+                     user.name == battlesession.defender.name ) {
                     battlesession.defender = null;
                     console.log('Removing battlesession defender', user.name);
                 }
-                else if ( battlesession.challenger !== undefined && user.name == battlesession.challenger.name ) {
+                else if ( battlesession.challenger != undefined && 
+                          battlesession.challenger != null && 
+                          user.name == battlesession.challenger.name ) {
                     console.log('Removing battlesession challenger', user.name);
                     battlesession.challenger = null;
                     if ( battlesession.defender.ai === true) {
