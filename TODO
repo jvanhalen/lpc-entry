@@ -9,17 +9,18 @@ TODO
 - Implement spell casting during fight
 - Fix the login protocol when entering with existing cookie.
 - Tweak pause functionality timing (how long we watch, how long we modify)
-- Make gladiators controllable only during pause 
+- Make gladiators controllable only during pause
 - Response for finished fight
 - Pathfinding must avoid other gladiators. tricky when others are moving, needs random pause for both if same team, propbably attack when enemies.
 
 - Fix client page layout graphics and colors
 - Gladiator statuses visible during fight
 - Client map load times (sync parsing into async mode)
-- Client proper preloading 
+- Client proper preloading
 - Client proper loading screens (fade-ins and fade-outs)
 - Client must handle finished fight response and display you won/lost scene
 / Client visualization for bought items (partially done, armors work)
+    - FIX the skeleton body out-of-the-plate-problem (check by buying plate armor and hitting the training dummy in the lobby)
 - Client visualization for ranged fighting
 - Client visualization for spell casting
 
@@ -31,4 +32,3 @@ DONE
 * Melee fighting with hands
 * Finish battle creation on server-side and client-side (DONE)
 * pause functionality (partially done, needs timing tweaks)
-

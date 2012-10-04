@@ -3,7 +3,7 @@ var g_gladiatorPit = {};
 var g_Animations = {}; /* storage of all animations objects used in pre-loading */
 var g_pitMessage = null;
 var g_currentGrid = null;
-// TODO rename g_currentGladiator and g_gladiatorShowCase, 
+// TODO rename g_currentGladiator and g_gladiatorShowCase,
 // other is Crafty entity and other is gladiator data object.
 // for clarity, this needs to be fixed.
 var g_currentGladiator = null;
@@ -14,6 +14,7 @@ var g_timer = { view: null, time: 0};
 var loadAudio = true;
 var g_ingame = null;
 var g_playerName = null;
+var g_itemList = [];
 var g_battleTeam = {
 
     _team: [],
@@ -478,6 +479,9 @@ function handleItemSync(data) {
 	armourItems = [];
 
 	for(var key in data.itemlist) {
+		// Fill the item list for later use
+		g_itemList[data.itemlist[key]._id] = data.itemlist[key];
+		
 		switch(data.itemlist[key].type) {
 			case "weapon":
 				mightItems[mightItems.length] = data.itemlist[key];
@@ -492,7 +496,7 @@ function handleItemSync(data) {
 				magicItems[magicItems.length] = data.itemlist[key];
 				break;
 			default:
-				console.log("handleItemSync: Unidentified non-Flying Object (UN-FO).");
+				console.log("handleItemSync: Unidentified non-Flying Object (Un-FO).");
 				break;
 		}
 	}
@@ -636,12 +640,16 @@ function showGladiatorView()
     g_currentView = "gladiator";
     LoadTileMap('inventory.json');
 
+	// For armour visualization
+	var armorType = gas.getArmorStringForVisualization(g_gladiatorShowCase.armour.body);
+
     g_currentGladiator = Crafty.e("2D, DOM, Multiway, Keyboard, Mouse, Ape, Sprite, transparent")
         .attr({x:450, y:220, z:7, gladiator: g_gladiatorShowCase})
         .Ape()
         .collision([16,32],[48,32],[48,64],[16,64])
         .setupAnimation(g_gladiatorShowCase.race+'_body')
-        .setupAnimation(g_gladiatorShowCase.armour.type + '_' + g_gladiatorShowCase.armour.subtype)
+
+		.setupAnimation(armorType)
         .bind("MouseOver", function(){
             console.log('mouseover on ', this.gladiator.name);
             this.startWalking({x:0,y:1}, 20);
@@ -1264,6 +1272,19 @@ var GAS = Class(function() {
 
     },
 
+	getArmorStringForVisualization: function(armorName) {
+		var armorString = "armour_undefined";
+
+		if(armorName) {
+			var armor = g_itemList[armorName];
+			if(armor) {
+				armorString = armor.type + '_' + armor.subtype;
+			}
+		}
+
+		return armorString;
+	},
+
     placeGladiators: function( mode, battleteam, gladiators) {
 
         for (var i in gladiators )
@@ -1285,14 +1306,17 @@ var GAS = Class(function() {
 
                 console.log("Battledata is", JSON.stringify(gladiators[i].battledata));
                 var mypos = gladiators[i].battledata.pos;
-                var armorType = gladiators[i].armour.type + '_' + gladiators[i].armour.subtype;
+
+				// Visualize armour
+				var armorType = this.getArmorStringForVisualization(gladiators[i].armour.body);
+
                 var o = Crafty.e("2D, DOM, Multiway, Keyboard, Grid, Mouse, Ape, Sprite, transparent")
                     .attr({z:7, gladiator: gladiators[i]})
                     .Ape()
                     .collision([16,32],[48,32],[48,64],[16,64])
                     .Grid( mypos[0], mypos[1])
                     .setupAnimation(anim)
-                    .setupAnimation(armorType) 
+                    .setupAnimation(armorType)
                     .bind("MouseOver", function(){
                         console.log('mouseover on ', this.gladiator.name);
                     })
@@ -1592,7 +1616,9 @@ var GAS = Class(function() {
                     selectorxoff = -128;
                 }
 
-                var armorType = team.gladiators[i].armour.type+"_"+team.gladiators[i].armour.subtype;
+				// Read armor data from g_itemList
+                var armorType = this.getArmorStringForVisualization(team.gladiators[i].armour.body);
+
                 //x:xpos, y:ypos,
                 var g = Crafty.e("2D, DOM, Multiway, Grid, Mouse, Ape, Sprite, transparent")
                     .attr({z:7, gladiator: team.gladiators[i], myslot:i})
@@ -1610,7 +1636,7 @@ var GAS = Class(function() {
                         DisplayFadingText(this.gladiator.name, this.x, this.y, "20pt", "Fanwood");
                     });
                 g_gladiators.push(g);
-                               
+
                 // battle team selector
                 Crafty.e("2D, DOM, Mouse, Color")
                     .attr({x:xpos+selectorxoff, y:ypos, z:7, w:64, h:64, gladiatorname: team.gladiators[i].name, gladiator: g})
