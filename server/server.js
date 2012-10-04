@@ -229,23 +229,23 @@ var GASServer = Maple.Class(function(clientClass) {
 
 		var playerNames = { players:[] }
 		playerNames.players.push( clientToUsername[client.id]);
-        
+
         // take care of AI upon some weird player disconnect
         var user = api.getUser(clientToUsername[client.id]);
-        
+
         if ( user != null && user.ingame != null ) {
 
             var battlesession = this.battleSessions[user.ingame];
             if ( battlesession ) {
 
-                if ( battlesession.defender != undefined && 
-                     battlesession.defender != null && 
+                if ( battlesession.defender != undefined &&
+                     battlesession.defender != null &&
                      user.name == battlesession.defender.name ) {
                     battlesession.defender = null;
                     console.log('Removing battlesession defender', user.name);
                 }
-                else if ( battlesession.challenger != undefined && 
-                          battlesession.challenger != null && 
+                else if ( battlesession.challenger != undefined &&
+                          battlesession.challenger != null &&
                           user.name == battlesession.challenger.name ) {
                     console.log('Removing battlesession challenger', user.name);
                     battlesession.challenger = null;
@@ -673,7 +673,7 @@ var GASServer = Maple.Class(function(clientClass) {
 					//console.log("Updating:", this.getClients().getAt(c).id);
 					if(toUser){
 						// Send to a specific user only
-						console.log(this.getClients().getAt(c).id);
+						//console.log(this.getClients().getAt(c).id);
 						if(clientToUsername[this.getClients().getAt(c).id] == toUser) {
 							console.log("Private msg to", toUser, ":", JSON.parse(data).message);
 							this.getClients().getAt(c).send("CHAT_SYNC", [data]);

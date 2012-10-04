@@ -481,7 +481,7 @@ function handleItemSync(data) {
 	for(var key in data.itemlist) {
 		// Fill the item list for later use
 		g_itemList[data.itemlist[key]._id] = data.itemlist[key];
-		
+
 		switch(data.itemlist[key].type) {
 			case "weapon":
 				mightItems[mightItems.length] = data.itemlist[key];
@@ -510,6 +510,7 @@ function showMagicView()
         shopListObjs[i].destroy();
     }
     shopListObjs = [];
+
     for( var i in magicItems )
     {
         var item = magicItems[i];
@@ -529,7 +530,7 @@ function showMagicView()
 					})
         );
         shopListObjs.push(
-            Crafty.e("2D, DOM, Sprite, Mouse, staff"+i)
+            Crafty.e("2D, DOM, Sprite, Mouse, " + item.icon)
                 .attr({x: 54, y: _y, z: 3 , item: item})
                 .bind('Click', function(){
                     //alert('Selected equipment'+this[0]);
@@ -552,7 +553,7 @@ function showMightView()
         _y = _y + 32;
         shopListObjs.push(
             Crafty.e("2D, DOM, Text, Mouse").attr({w:200, h:32, x: 102, y: _y, z: 3, item: item })
-                .text('<a href="#" title="' + item + '">'+item.name+'</a><br />  ' +item.type + '/' +item.subtype+ ' ' + item.price + ' ' + item.damage )
+                .text('<a href="#" title="Print more specific info here">'+item.name+'</a><br />  ' +item.type + '/' +item.subtype+ ' ' + item.price + ' ' + item.damage )
                 .css({
                     "text-align": "left",
                     "font-family": "Arial",
@@ -566,7 +567,7 @@ function showMightView()
                 })
         );
         shopListObjs.push(
-            Crafty.e("2D, DOM, Sprite, Mouse, spear"+i)
+            Crafty.e("2D, DOM, Sprite, Mouse, " + item.icon)
                 .attr({x: 54, y: _y, z: 3, item: item })
                 .bind('Click', function(){
                     //alert('Selected equipment'+this[0]);
@@ -589,7 +590,7 @@ function showArmourView()
         _y = _y + 32;
         shopListObjs.push(
             Crafty.e("2D, DOM, Text, Mouse").attr({w:200, h:32, x: 102, y: _y, z: 3, item: item })
-                .text('<a href="#" title="' + item + '">'+item.name+'</a><br />  ' +item.type + '/' +item.subtype+ ' ' + item.price + ' ' + item.armourvalue )
+                .text('<a href="#" title="Print more specific info here">'+item.name+'</a><br />  ' +item.type + '/' +item.subtype+ ' ' + item.price + ' ' + item.armourvalue )
                 .css({
                     "text-align": "left",
                     "font-family": "Arial",
@@ -603,7 +604,7 @@ function showArmourView()
                 })
         );
         shopListObjs.push(
-            Crafty.e("2D, DOM, Sprite, Mouse, plate"+i)
+            Crafty.e("2D, DOM, Sprite, Mouse, " + item.icon)
                 .attr({x: 54, y: _y, z: 3, item: item })
                 .bind('Click', function(){
                     //alert('Selected equipment'+this[0]);
@@ -670,6 +671,9 @@ function showGladiatorView()
         boots0: [0,1],
         boots1: [1,1],
         boots2: [2,1],
+        potion0: [0,2],
+        potion1: [1,2],
+        potion2: [2,2],
         necklace0: [0,3],
         necklace1: [1,3],
         necklace2: [2,3],
