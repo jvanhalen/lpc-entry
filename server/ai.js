@@ -26,6 +26,9 @@ process.on('message', function(message) {
         case 'MOVE_UPDATE':
            ai.handleMoveUpdate(message);
         break;
+        case 'MOVE_RES':
+           ai.handleMoveResponse(message);
+        break;
         case 'UPDATE':
            ai.update(message.tick);
         break;
@@ -43,6 +46,7 @@ process.on('message', function(message) {
     }
 
 });
+
 
 
 
@@ -66,6 +70,30 @@ var ai = {
 	        this.selectBattleTeam(msg.battle.defender.name, [ msg.battle.defender.gladiators[0].name] );
         }
     },
+    
+    setGladiatorPosition: function(aiteam, gladiator, newpos)
+    {
+        // get previous position
+        var oldpos = gladiator.battledata.pos;
+        // update pathfinding matrix
+        aiteam.battle.map[oldpos[1]][oldpos[0]] = 0;
+        aiteam.battle.map[newpos[1]][newpos[0]] = 1;
+        // update spatial graph
+        aiteam.battle.spatialgraph[oldpos[1]][oldpos[0]] = 0;
+        aiteam.battle.spatialgraph[newpos[1]][newpos[0]] = gladiator.name;
+        // store position 
+        gladiator.battledata.pos = newpos;
+        
+    },
+    
+    handleMoveResponse: function(msg){
+        console.log('AI handling move response', msg.path);
+
+        var g = this.getGladiatorByName( this.teams[msg.username], msg.gladiator );
+        g.battledata["path"] = msg.path;
+
+        
+    },
 
     handleMoveUpdate: function(msg)
     {
@@ -80,12 +108,14 @@ var ai = {
                     {
                         if ( gladiators[g].name == msg.gladiator )
                         {
-                            console.log('Gladiator',  gladiators[g].name, "now in", msg.pos );
+                            console.log('Gladiator',  gladiators[g].name, "now in", msg.newpos );
 
-                            var pos = gladiators[g].battledata.pos;
+                            /*var pos = gladiators[g].battledata.pos;
                             this.teams[ai].battle.map[pos[1]][pos[0]] = 0;
                             pos = gladiators[g].battledata.pos = msg.pos;
-                            this.teams[ai].battle.map[pos[1]][pos[0]] = gladiators[g].name;
+                            this.teams[ai].battle.map[pos[1]][pos[0]] = gladiators[g].name;*/
+                            
+                            this.setGladiatorPosition(this.teams[ai], gladiators[g], msg.newpos);
                         }
                     }
                 } else if ( msg.username == this.teams[ai].battle.defender.name ) {
@@ -95,11 +125,12 @@ var ai = {
                     {
                         if ( gladiators[g].name == msg.gladiator )
                         {
-                            console.log('Gladiator',  gladiators[g].name, "now in", msg.pos );
-                            var pos = gladiators[g].battledata.pos;
+                            console.log('Gladiator',  gladiators[g].name, "now in", msg.newpos );
+                            /*var pos = gladiators[g].battledata.pos;
                             this.teams[ai].battle.map[pos[1]][pos[0]] = 0;
                             pos = gladiators[g].battledata.pos = msg.pos;
-                            this.teams[ai].battle.map[pos[1]][pos[0]] = gladiators[g].name;
+                            this.teams[ai].battle.map[pos[1]][pos[0]] = gladiators[g].name;*/
+                            this.setGladiatorPosition(this.teams[ai], gladiators[g], msg.newpos);
                         }
                     }
                 }
@@ -110,9 +141,7 @@ var ai = {
     handleBattleStart: function(battle)
     {
         console.log('AI received BATTLE_START:' /*+ data[0]*/);
-
-
-
+        
         // convert battle map into spatial positioning map
         for(var g in battle.challenger.gladiators)
         {
@@ -122,11 +151,13 @@ var ai = {
                 {
                     var row = gladiator.battledata.pos[1];
                     var column = gladiator.battledata.pos[0];
-                    battle.map[row][column] = gladiator.name;
+                    battle.spatialgraph[row][column] = gladiator.name;
                 }
             }
         }
 
+        this.teams[battle.defender.name]["battleteam"] = [];
+        
         for(var g in battle.defender.gladiators)
         {
             for( var bg in battle.defender.battleteam ){
@@ -135,12 +166,17 @@ var ai = {
                 {
                     var row = gladiator.battledata.pos[1];
                     var column = gladiator.battledata.pos[0];
-                    battle.map[row][column] = gladiator.name;
+                    battle.spatialgraph[row][column] = gladiator.name;
+                    gladiator.battledata["ai"] = new MoronController( this.teams[battle.defender.name],
+                                                                      gladiator);
+                    this.teams[battle.defender.name]["battleteam"].push( gladiator );
                 }
             }
         }
         // store battle into ai team property
         this.teams[battle.defender.name]["battle"] = battle;
+
+
     },
     
     handleBattleExit: function( msg ){
@@ -203,38 +239,12 @@ var ai = {
         for( var ai in this.teams ){
 
             if ( this.teams[ai].battle === undefined ) continue;
-
-            console.log(ai, 'seeking enemies...');
-            var team = this.teams[ai].battle.defender.battleteam;
-            for( var bt in team)
-            {
-                var g = this.getGladiatorByName( this.teams[ai], team[bt] );
-                // skip gladiators that aren't alive anymore.
-		if ( g == null ) continue;
-                if ( g.health <= 0 ) continue;
-
-                var target = this.teams[ai].battle.map[g.battledata.pos[1]][g.battledata.pos[0]-1];
-                
-                if ( target != 0 && target != 1 ){
-
-                    if ( this.isEnemy(this.teams[ai].ingame, target) )   
-                    {
-                        console.log('AI found an enemy nearby!', target);
-                        var attackMsg = {
-                            type: "ATTACK_REQ",
-                            name: "ATTACK_REQ",
-                            username: this.teams[ai].name,
-                            attackerid: g.name,
-                            targetid: target,
-                            battleid: this.teams[ai].ingame
-                        }
-                        
-                        process.send( JSON.stringify({name: "ATTACK_REQ", type: "ATTACK_REQ", data: attackMsg}) );
-                    }
-                    else {
-                        console.log('Something there, but its our own', name);
-                    }
-
+            
+            var battleteam = this.teams[ai].battleteam;
+            if ( battleteam ) {
+                for ( var g in battleteam)
+                {
+                    battleteam[g].battledata.ai.update(tick);
                 }
             }
         }
@@ -242,7 +252,11 @@ var ai = {
 
     /* Registers a game for AI to be handled.  */
     registerPlayerToGame: function(aiPlayer, battleid) {
-        this.teams[aiPlayer] = { ingame: battleid, name: aiPlayer };
+        this.teams[aiPlayer] = { 
+            ingame: battleid, 
+            name: aiPlayer
+        };
+
     },
 
     selectBattleTeam: function(uname, names){
@@ -289,7 +303,7 @@ var ai = {
 
     handleMessage: function(message) {
         console.log('ai is handling message ' + JSON.stringify(message.name));
-
+        
 
         // Do some message handling here
         /* ... */
@@ -297,5 +311,238 @@ var ai = {
         // Send message back to PARENT process
         //process.send(JSON.stringify({type:"SOME_RESPONSE", name: "SOME_RESPONSE", data: "Thank you for your " + message.name}));
 
-  }
+    },
+    
+
+
+
 }
+
+function AiState(aiController) {
+    this.controller = aiController;
+    this.update =  function() {}
+    this.onMessage = function(msg) {}
+}
+
+
+function MoronController(aiteam, gladiator) {
+
+    this.target = null;
+    this.state = null;
+    this.team = aiteam;
+    this.gladiator = gladiator;
+    this.attackTimer = 0;
+    
+    
+    
+
+    var controller = this;
+
+    // helpers for calling current state update / onMessage
+    this.update = function(tick){
+
+        if ( controller.gladiator.health <= 0 ) 
+            this.onMessage('GRIM_REAPER');
+        
+        controller.state.update(tick);
+    }
+    
+    this.onMessage = function(msg){
+        controller.state.onMessage(msg);
+    }
+
+    this.IDLE            = new AiState(this);
+    this.SEEK_ENEMY      = new AiState(this);
+    this.ATTACK          = new AiState(this);
+    this.MOVE_INTO_RANGE = new AiState(this);
+    this.DEAD            = new AiState(this);
+
+    this.IDLE.update = function(){
+        console.log('AI - I am idle.');
+    };
+    
+    this.SEEK_ENEMY.update = function() {
+        
+        var gladiators = controller.team.battle.challenger.gladiators;
+        var closest = null;
+        var distance;
+        console.log(controller.gladiator.name, 'seeking enemies...');
+
+        for( var g in gladiators)
+        {
+            var other = gladiators[g];
+            // skip myself
+            if ( gladiator.name  == other.name ) continue;
+            
+
+            var xdiff = other.battledata.pos[0] - gladiator.battledata.pos[0];
+            var ydiff = other.battledata.pos[1] - gladiator.battledata.pos[1];
+            var otherDistance = Math.sqrt(Math.pow(xdiff)+Math.pow(ydiff));
+
+            if ( closest == null ) {
+                closest = other;
+                distance = otherDistance;
+                continue;
+            } 
+            
+            if ( otherDistance < distance  ) {
+                closest = other;
+                distance = otherDistance;
+            }
+        }
+        
+        controller.target = closest;
+        controller.onMessage( (controller.target == null) ? 'ENEMY_NOT_FOUND' : 'ENEMY_FOUND');
+
+    };
+
+    this.SEEK_ENEMY.onMessage = function(msg){
+        console.log(msg);
+        switch(msg){
+        case 'ENEMY_NOT_FOUND':
+            controller.state = controller.IDLE;
+
+            break;
+        case 'ENEMY_FOUND':
+            controller.state = controller.MOVE_INTO_RANGE;
+            break;
+        case 'GRIM_REAPER':
+            controller.state = controller.DEAD;
+            break;
+        }
+    };
+    
+    this.MOVE_INTO_RANGE.update = function(){
+        var xdiff = Math.floor(Math.abs(controller.target.battledata.pos[0] - controller.gladiator.battledata.pos[0])); 
+        var ydiff = Math.floor(Math.abs(controller.target.battledata.pos[1] - controller.gladiator.battledata.pos[1])); 
+        
+        var inMeleeRange = ((xdiff == 1) && (ydiff == 0)) ||
+                           ((xdiff == 0) && (ydiff == 1));
+        if ( inMeleeRange ){
+            controller.state.onMessage('IN_ATTACK_RANGE');
+            
+        } else {
+            
+            //gas.send('MOVE_REQ', [ JSON.stringify( {username: player, battleid: g_ingame, gladiator: g_currentGladiator.gladiator.name, from: {x: g_currentGladiator.tile_x, y:g_currentGladiator.tile_y}, to: {x: xpos, y: ypos} })]);
+            if ( controller.gladiator.battledata.path == undefined ||
+                 controller.gladiator.battledata.path.length <= 1)
+            { 
+                delete controller.gladiator.battledata.path;
+                process.send(JSON.stringify({
+                    type:"MOVE_REQ",
+                    name:"MOVE_REQ",
+                    data:{
+                        username: controller.team.name,
+                        battleid: controller.team.ingame,
+                        gladiator: controller.gladiator.name,
+                        from: { x: controller.gladiator.battledata.pos[0],
+                                y: controller.gladiator.battledata.pos[1] },
+                        to: { x: controller.target.battledata.pos[0],
+                              y: controller.target.battledata.pos[1] }
+                    }
+                }));
+
+            } else {
+                
+                // construct message
+                var msg = {
+                    name: "MOVE_UPDATE",
+                    type: "MOVE_UPDATE",
+                    username: controller.team.name,
+                    battleid: controller.team.ingame,
+                    gladiator: controller.gladiator.name,
+                    oldpos: controller.gladiator.battledata.path[0],
+                    newpos: controller.gladiator.battledata.path[1]
+                }
+                // send update
+                process.send(JSON.stringify({name: "MOVE_UPDATE", type: "MOVE_UPDATE", data: msg}));
+                // remove first coordinate
+                controller.gladiator.battledata.path.splice(0,1);
+                if ( controller.gladiator.battledata.path.length <= 1 ){
+                    delete controller.gladiator.battledata.path;
+                }
+            }
+        }
+    }
+
+    this.MOVE_INTO_RANGE.onMessage = function(msg){
+        switch(msg){
+        case 'IN_ATTACK_RANGE':
+            controller.state = controller.ATTACK;
+            break;
+        case 'GRIM_REAPER':
+            controller.state = controller.DEAD;
+            break;
+        }
+    }
+    
+    this.ATTACK.update = function(tick) {
+        // skip attack if no target has been set.
+        if ( controller.target == null ) {
+            console.log('No enemy nearset, starting to seek...');
+            controller.ATTACK.onMessage('NO_ENEMY');
+            return;
+        }
+        var xdiff = Math.floor(Math.abs(controller.target.battledata.pos[0] - controller.gladiator.battledata.pos[0])); 
+        var ydiff = Math.floor(Math.abs(controller.target.battledata.pos[1] - controller.gladiator.battledata.pos[1])); 
+        
+        var inMeleeRange = ((xdiff == 1) && (ydiff == 0)) ||
+                           ((xdiff == 0) && (ydiff == 1));
+        console.log('xdiff:', xdiff, 'ydiff:',ydiff);
+        if ( inMeleeRange == false ){
+            console.log('Target not close enough', controller.target.name);
+            controller.ATTACK.onMessage('NO_ENEMY');
+            return;
+        }
+
+        if ( ai.isEnemy(controller.team.ingame, controller.target.name) )   
+        {
+            // restrict attack timer a bit
+            if ( controller.attackTimer < tick )
+            {
+                console.log('AI found an enemy nearby!', controller.target.name);
+                var attackMsg = {
+                    type: "ATTACK_REQ",
+                    name: "ATTACK_REQ",
+                    username: controller.team.name,
+                    attackerid: controller.gladiator.name,
+                    targetid: controller.target.name,
+                    battleid: controller.team.ingame
+                }
+
+                
+                process.send( JSON.stringify({name: "ATTACK_REQ", type: "ATTACK_REQ", data: attackMsg}) );
+
+                // TODO create proper timer
+                controller.attackTimer = tick + (20000/3)/controller.gladiator.nimbleness;
+            } else {
+                console.log('atimer ', controller.attackTimer, ' tick ', tick);
+            }
+
+        }
+        else {
+            console.log('Target is not an enemy', controller.target);
+            controller.state.onMessage('NO_ENEMY');
+        }
+        
+    };
+    
+    this.ATTACK.onMessage = function(msg){
+        switch(msg)
+        {
+        case 'NO_ENEMY':
+            controller.state = controller.SEEK_ENEMY;
+            break;
+        case 'GRIM_REAPER':
+            controller.state = controller.DEAD;
+            break;
+        default:
+            break;
+        }
+
+    };
+    
+    // default state is idle
+    this.state = this.SEEK_ENEMY;
+
+} // MoronAI
