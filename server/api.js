@@ -459,6 +459,7 @@ var api = {
         if ( !map ) return null;
 
         var matrix = [];
+        var spatialGraph = [];
 
         for( var layer=0; layer<map.layers.length;layer++)
         {
@@ -469,25 +470,31 @@ var api = {
                 var currColumn = 0;
                 // add first row (empty)
                 matrix.push([]);
+                spatialGraph.push([]);
+
                 // Process layer data
                 for(var i in map.layers[layer].data)
                 {
 
                     matrix[currRow].push(0);// walkable
+                    spatialGraph[currRow].push(null); // non-occupied
+                    
                     // non-zero means a set tile and on collision
                     // layer it means 'blocked'
                     if ( map.layers[layer].data[i] > 0 )
                     {
                         matrix[currRow][currColumn] = 1; // non-walkable
                     }
-
+                    
                     // next tile, take care of indices.
                     currColumn++;
                     if ( currColumn >= map.width ) {
                         currColumn = 0;
                         // push new row if needed.
-                        if ( i < map.layers[layer].data.length-1)
+                        if ( i < map.layers[layer].data.length-1) {
                             matrix.push([]);
+                            spatialGraph.push([]);
+                        }
 
 
                         currRow++;
@@ -496,6 +503,9 @@ var api = {
                 }
                 if ( storeMatrix ) battle["map"] = matrix;
                 else console.log('setting arena matrix skipped');
+
+                // copy matrix into spatial graph property
+                battle["spatialgraph"] = spatialGraph;
             }
 
             if ( map.layers[layer].name == "Spawnpoints" )
