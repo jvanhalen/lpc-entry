@@ -147,20 +147,32 @@ Crafty.c('Grid', {
                 //console.log(this.gladiator.name, "reached", JSON.stringify(this.targetPos));
 
                 var player = JSON.parse($.cookie("gas-login")).username;
-		// Quick fix for crash.
-		if ( g_currentView == 'arena') {
-                    gas.send('MOVE_UPDATE', [JSON.stringify({ username: player, battleid: g_ingame, gladiator: this.gladiator.name, pos: this.targetPos})]);
+		        // Quick fix for crash.
+		        if ( g_currentView == 'arena') {
+                    // send update only if player is the manager of this gladiator.
+                    if ( player == this.gladiator.manager ) 
+                    {
+                        var msg = { 
+                            username: player, 
+                            battleid: g_ingame, 
+                            gladiator: this.gladiator.name, 
+                            oldpos: this.gladiator.battledata.pos, 
+                            newpos: this.targetPos
+                        }
+                        
+                        gas.send('MOVE_UPDATE', [JSON.stringify(msg)] );
+                    }
                 }
                 // remove coordinate since we have reached it.
                 this.movePattern.dequeue();
                 //update tile position.
                 this.tile_x = this.targetPos[0];
                 this.tile_y = this.targetPos[1];
-		if ( g_currentView == 'arena' )  {
-		    // update battle position
+		        if ( g_currentView == 'arena' )  {
+		            // update battle position
                     this.gladiator.battledata.pos[0] = this.tile_x;
                     this.gladiator.battledata.pos[1] = this.tile_y;
-		}
+		        }
                 this.targetPos = null;
                 // when final pattern is consumed, stop and face the player.
                 if ( this.movePattern.isEmpty())
@@ -1531,6 +1543,28 @@ var GAS = Class(function() {
                    g_gladiators[gid].SetMovePattern( d.path);
                    break;
                }
+           }
+        break;
+        case 'MOVE_UPDATE':
+           var d = JSON.parse(data[0]);
+           if( d.username != JSON.parse($.cookie("gas-login")).username )
+           {
+               for( var gid in g_gladiators ) {
+
+                   if ( g_gladiators[gid].gladiator.name == d.gladiator ) {
+                       
+                       var battlepos = g_gladiators[gid].gladiator.battledata.pos;
+                       // verify that we are where we are supposed to be
+                       if ( d.oldpos[0] != battlepos[0] ||
+                            d.oldpos[1] != battlepos[1] )
+                       {
+                           console.log('Uh-oh, some differences in visualization, trying to compensate.');
+                       }
+                       // set movement from current position into newpos (might be jumpy)
+                       g_gladiators[gid].SetMovePattern( [g_gladiators[gid].gladiator.battledata.pos, d.newpos] );
+                       break;
+                   }
+               }                 
            }
         break;
         case 'ATTACK_RESP':
