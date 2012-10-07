@@ -28,7 +28,8 @@ var api = require('./api');
 
 var LOGIC_RATE = 10; // Logic rate in milliseconds
 var TICK_RATE = 3; // Tick rate in milliseconds
-
+var QUARTER_A_SECOND = 250 / TICK_RATE;
+var HALF_A_SECOND = 500 / TICK_RATE;
 var ONE_SECOND = 1000 / TICK_RATE;
 var TWO_SECONDS = 2000 / TICK_RATE;
 var FIVE_SECONDS = 1000 / TICK_RATE;
@@ -39,7 +40,7 @@ var THIRTY_SECONDS = 30000 / TICK_RATE;
 var ROUND_LENGTH = TWO_SECONDS; 					// Round length, round means the "free action" period after the management period
 var INITIAL_MANAGEMENT_PERIOD = THIRTY_SECONDS; 	// Initial management period after the gladiator placement
 var MANAGEMENT_PERIOD = FIVE_SECONDS; 				// Management period after the initial round
-var AI_UPDATE_PERIOD = SEVEN_SECONDS;
+var AI_UPDATE_PERIOD = QUARTER_A_SECOND;
 // Test -----------------------------------------------------------------------
 var GASServer = Maple.Class(function(clientClass) {
     Maple.Server(this, clientClass);
@@ -909,19 +910,23 @@ var GASServer = Maple.Class(function(clientClass) {
                 battleid: d.battleid,
                 username: d.username,
                 gladiator: d.gladiator,
-                response:
-                resp, path: _path
+                response: resp, 
+                path: _path
             }
 
-            // session clients will be notified of this change
-            this.notifyBattleSession( d.battleid, message );
-
+            // requesting entity will be notified of this change
+            client.send( message.name, [JSON.stringify(message)] );
+            
             break;
         case 'MOVE_UPDATE':
             var d = JSON.parse(data);
             var battle = api.getBattle(d.battleid);
+            
             if ( battle ){
-                var newpos = api.setBattlePosition(d.battleid, d.username, d.gladiator, d.pos);
+                var g = this.getGladiatorByName(battle, d.gladiator);
+                var oldpos = g.battledata.pos;
+                var newpos = api.setBattlePosition(d.battleid, d.username, d.gladiator, d.newpos);
+
                 if ( newpos ) {
 
                     var message = {
@@ -930,7 +935,8 @@ var GASServer = Maple.Class(function(clientClass) {
                         battleid: d.battleid,
                         username: d.username,
                         gladiator: d.gladiator,
-                        pos: newpos
+                        oldpos: oldpos,
+                        newpos: newpos
                     }
 
                     this.notifyBattleSession(d.battleid, message );
@@ -981,7 +987,24 @@ var GASServer = Maple.Class(function(clientClass) {
             // debug stuff
             if ( defender ) console.log('Defender sent:', JSON.stringify(message));
         }
-    }
+    },
+    
+    getGladiatorByName: function(battle, gladiatorname)
+    {
+        for(var g in battle.defender.gladiators)
+        {
+            if ( battle.defender.gladiators[g].name == gladiatorname ) 
+                return battle.defender.gladiators[g];
+        }
+
+        for(var g in battle.challenger.gladiators)
+        {
+            if ( battle.challenger.gladiators[g].name == gladiatorname ) 
+                return battle.challenger.gladiators[g];
+        }
+
+        return null;
+    },
 
 })
 
