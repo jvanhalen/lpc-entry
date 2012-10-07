@@ -424,6 +424,9 @@ var core = {
                 case "spawnpoints":
                     battle.spawnpoints = attributelist[item];
                     break;
+                case "spatialgraph":
+                    battle.spatialgraph  = attributelist[item];
+                    break;
 				default:
 					console.log("ERROR: core.editBattle: invalid attribute:", item)
 			}
