@@ -115,11 +115,13 @@
 
       function displayLogin()
       {
+           g_smokeScreen.attr({changeToScene:"loadingView"}).tween({alpha:1.0},50);
+
            $('#login').fadeOut(500, function(){
                 $('#login').empty();
                 $('#login').html('<div id="welcome_title">Enjoy your stay, '+JSON.parse($.cookie("gas-login")).username+'!</div><br />').append($('#login-nav').html());
                 $('#login').fadeIn('fast', function(){
-                    Crafty.scene("loadingView");
+                    //Crafty.scene("loadingView");
                 });
 
            });
@@ -162,18 +164,29 @@
     // Connect to GAS server
     var gas = new GAS();
 
+    // create default smokescreen
+     g_smokeScreen = Crafty.e("2D, DOM, Tween, Persist, Color")
+       .attr({x:0, y:0, w:800, h:800, alpha:0.0, z:10})
+       .color("#000000")
+       .bind("TweenEnd", function(){
+         console.log("Smokescreen faded", g_smokeScreen.alpha == 0.0 ? "out" : "in");
+         if ( g_smokeScreen.alpha == 1.0 )
+            Crafty.scene(g_smokeScreen.changeToScene);
+        });
+
+
     //gas.connect('gassrv.dyndns.org', 8080);
     gas.connect('localhost', 8080);
-    Crafty.scene("managerView", showManagerView);
+    Crafty.scene("managerView", showManagerView, hideManagerView);
     Crafty.scene("gladiatorView", showGladiatorView, hideGladiatorView);
     Crafty.scene("arenaView", showArenaView, hideArenaView);
-    Crafty.scene("gladiatorPitView", showGladiatorPitView);
-    Crafty.scene("loginView", showLoginView);
+    Crafty.scene("gladiatorPitView", showGladiatorPitView, hideGladiatorPitView);
+    Crafty.scene("loginView", showLoginView, hideLoginView);
 
     var assetArray = [];
     GetLoadableAssetsFromTileMap( 'test.json',      assetArray);
     GetLoadableAssetsFromTileMap( 'inventory.json', assetArray);
-    GetLoadableAssetsFromTileMap( 'arena.json', assetArray);
+    GetLoadableAssetsFromTileMap( 'arena.json',     assetArray);
     PreloadAnimation("skeleton-body.json");
     PreloadAnimation("human-body.json");
     PreloadAnimation("robe.json");

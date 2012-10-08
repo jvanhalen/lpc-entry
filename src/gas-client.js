@@ -15,6 +15,8 @@ var loadAudio = true;
 var g_ingame = null;
 var g_playerName = null;
 var g_itemList = [];
+var g_smokeScreen = null; 
+
 var g_battleTeam = {
 
     _team: [],
@@ -216,7 +218,8 @@ function SetArenaEnabled(value){
                 "font-size": "13pt",
             })
             .bind('Click', function(){
-                Crafty.scene("arenaView");
+                g_smokeScreen.attr({changeToScene:"arenaView"}).tween({alpha:1.0},50);
+                //Crafty.scene("arenaView");
             });
 
     } else {
@@ -306,68 +309,103 @@ function GetLoadableAssetsFromTileMap( file, assetArray )
     });
 }
 
-function LoadTileMap(file, createGrid)
+function LoadTileMap(file, cbDone, createGrid )
 {
 
     var ASSET_PREFIX = '../assets/maps/';
     var grid = undefined;
 
     // try to read json tile map
+    
+    $.getJSON(ASSET_PREFIX+file, function(map){
 
-    $.ajax({
-        url: ASSET_PREFIX+file,
-        dataType: 'json',
-        data: undefined,
-        async: false,
-        success: function(map){
+        var tilesetIndices = [];
+        for ( var i=0;i<map.tilesets.length;i++)
+        {
+            // process first tileset
+            var tileset = map.tilesets[i];
+            
+            var tmp = {};
+            var newName = map.properties.name+''+i;
+            tmp[newName] = '[0,0]';
+            // register sprite
+            Crafty.sprite(map.tilewidth, map.tilewidth, ASSET_PREFIX+tileset.image, tmp, tileset.spacing);
+            
+            // store first index
+            tilesetIndices[i]=tileset.firstgid;
+        }
 
-            var tilesetIndices = [];
-            for ( var i=0;i<map.tilesets.length;i++)
+
+        if ( createGrid)
+        {
+            grid = new PF.Grid(map.width, map.height);
+        }
+
+        /*console.log('Map:'+map.height+'x'+map.width);
+          console.log('Tile size:'+map.tileheight+'x'+map.tilewidth);
+          console.log(tileset.image);
+          console.log(map.layers[n].name);
+          console.log('Map is called: '+map.properties.name);*/
+
+        // add name dynamically so this can be made as proper function
+        for( var layer=0; layer<map.layers.length;layer++)
+        {
+            var currRow = 0;
+            var currColumn = 0;
+            // Process layers
+            for(var i in map.layers[layer].data)
             {
-                // process first tileset
-                var tileset = map.tilesets[i];
-
-                var tmp = {};
-                var newName = map.properties.name+''+i;
-                tmp[newName] = '[0,0]';
-                // register sprite
-                Crafty.sprite(map.tilewidth, map.tilewidth, ASSET_PREFIX+tileset.image, tmp, tileset.spacing);
-
-                // store first index
-                tilesetIndices[i]=tileset.firstgid;
-            }
-
-
-            if ( createGrid)
-            {
-                grid = new PF.Grid(map.width, map.height);
-            }
-
-            /*console.log('Map:'+map.height+'x'+map.width);
-              console.log('Tile size:'+map.tileheight+'x'+map.tilewidth);
-              console.log(tileset.image);
-              console.log(map.layers[n].name);
-              console.log('Map is called: '+map.properties.name);*/
-
-            // add name dynamically so this can be made as proper function
-            for( var layer=0; layer<map.layers.length;layer++)
-            {
-
-
-                var currRow = 0;
-                var currColumn = 0;
-                // Process layers
-                for(var i in map.layers[layer].data)
+                // skip ground layer
+                if ( map.layers[layer].name == "Ground" ) continue;
+                
+                // indices in JSON format are:
+                // 0: no tile.
+                // X: first tile in tileset
+                if ( map.layers[layer].data[i] == 0 &&
+                     map.layers[layer].name == "Collision" )
                 {
+                    Crafty.e("2D, DOM, Collision, Grid, Mouse, Sprite, transparent")
+                    // custom collisions need this also in ALL other colliding entities in order to work.
+                        .collision([0,0],
+                                   [map.tilewidth,0],
+                                   [map.tilewidth, map.tileheight],
+                                   [0,map.tileheight])
+                        .attr({x:currColumn*map.tilewidth, y:currRow*map.tileheight, z:6})
+                        .Grid(currColumn, currRow)
+                        .bind("Click", function(){
+                            HandleMouseClick(this.tile_x, this.tile_y);
+                        });
+                }
+                else if ( map.layers[layer].data[i] > 0 )
+                {
+                    var tilesetIndex = 0;
+                    // determine tileset we are using
+                    while ( map.layers[layer].data[i] > tilesetIndices[tilesetIndex+1])
+                        tilesetIndex++;
+                    //console.log("Tilesetindex for "+layer+' is ' + tilesetIndex);
 
+                    var tileset = map.tilesets[tilesetIndex];
 
-                    // indices in JSON format are:
-                    // 0: no tile.
-                    // X: first tile in tileset
-                    if ( map.layers[layer].data[i] == 0 &&
-                         map.layers[layer].name == "Collision" )
+                    // How many columns does our tileset contain
+                    var cols = Math.floor(tileset.imagewidth/(tileset.tileheight+tileset.spacing));
+
+                    // reduce first index number from to get proper coordinates
+                    var index = map.layers[layer].data[i]-tilesetIndices[tilesetIndex];
+                    var yc = Math.floor(index/cols);
+                    var xc = index - (cols*yc);
+
+                    // Create Crafty entity with plain sprite to be drawn.
+                    // attr x,y are expressed in pixels.
+                    var GROUND_Z = -1;
+                    var spriteName = map.properties.name+tilesetIndex;
+                    // skip collision layer
+
+                    if ( map.layers[layer].name == "Collision" )
                     {
-                        Crafty.e("2D, DOM, Collision, Grid, Mouse, Sprite, transparent")
+                        if ( grid )
+                            grid.setWalkableAt(currColumn, currRow, false);
+
+                        Crafty.e("2D, DOM, Collision, Grid, Mouse, Sprite, solid, transparent")
                         // custom collisions need this also in ALL other colliding entities in order to work.
                             .collision([0,0],
                                        [map.tilewidth,0],
@@ -378,103 +416,58 @@ function LoadTileMap(file, createGrid)
                             .bind("Click", function(){
                                 HandleMouseClick(this.tile_x, this.tile_y);
                             });
-                    }
-                    else if ( map.layers[layer].data[i] > 0 )
-                    {
-                        var tilesetIndex = 0;
-                        // determine tileset we are using
-                        while ( map.layers[layer].data[i] > tilesetIndices[tilesetIndex+1])
-                            tilesetIndex++;
-                        //console.log("Tilesetindex for "+layer+' is ' + tilesetIndex);
 
-                        var tileset = map.tilesets[tilesetIndex];
-
-                        // How many columns does our tileset contain
-                        var cols = Math.floor(tileset.imagewidth/(tileset.tileheight+tileset.spacing));
-
-                        // reduce first index number from to get proper coordinates
-                        var index = map.layers[layer].data[i]-tilesetIndices[tilesetIndex];
-                        var yc = Math.floor(index/cols);
-                        var xc = index - (cols*yc);
-
-                        // Create Crafty entity with plain sprite to be drawn.
-                        // attr x,y are expressed in pixels.
-                        var GROUND_Z = -1;
-                        var spriteName = map.properties.name+tilesetIndex;
-                        // skip collision layer
-
-                        if ( map.layers[layer].name == "Collision" )
+                    } else {
+                        // determine which layer does this thing belong to
+                        var layerZ = 0;
+                        switch( map.layers[layer].name )
                         {
-                            if ( grid )
-                                grid.setWalkableAt(currColumn, currRow, false);
-
-                            Crafty.e("2D, DOM, Collision, Grid, Mouse, Sprite, solid, transparent")
-                            // custom collisions need this also in ALL other colliding entities in order to work.
-                                .collision([0,0],
-                                           [map.tilewidth,0],
-                                           [map.tilewidth, map.tileheight],
-                                           [0,map.tileheight])
-                                .attr({x:currColumn*map.tilewidth, y:currRow*map.tileheight, z:6})
-                                .Grid(currColumn, currRow)
-                                .bind("Click", function(){
-                                    HandleMouseClick(this.tile_x, this.tile_y);
-                                });
-
-                        } else {
-                            // determine which layer does this thing belong to
-                            var layerZ = 0;
-                            switch( map.layers[layer].name )
-                            {
-                            case "Ground":
-                                layerZ = 0;
-                                break;
-                            case "Overlay":
-                                layerZ = 1;
-                                break;
-                            case "Front":
-                                layerZ = 8;
-                                break;
-                                // ones below should not exist in tile map,
-                                // but let's be prepared.
-                            case "Behind":
-                                layerZ = 2;
-                                break;
-                            case "Body":
-                                layerZ = 3;
-                                break;
-                            case "Equipment":
-                                layerZ = 4;
-                                break;
-                            case "Weapon":
-                                layerZ = 5;
-                                break;
-                            case "Mouse":
-                                layerZ = 7;
-                                break;
-                            }
-                            // create tile entity
-                            Crafty.e("2D, DOM, Sprite, "+spriteName)
-                                .sprite(xc,yc)
-                                .attr({x:currColumn*tileset.tilewidth,
-                                       y:currRow*tileset.tileheight,
-                                       z:layerZ});
+                        case "Ground":
+                            layerZ = 0;
+                            break;
+                        case "Overlay":
+                            layerZ = 1;
+                            break;
+                        case "Front":
+                            layerZ = 8;
+                            break;
+                            // ones below should not exist in tile map,
+                            // but let's be prepared.
+                        case "Behind":
+                            layerZ = 2;
+                            break;
+                        case "Body":
+                            layerZ = 3;
+                            break;
+                        case "Equipment":
+                            layerZ = 4;
+                            break;
+                        case "Weapon":
+                            layerZ = 5;
+                            break;
+                        case "Mouse":
+                            layerZ = 7;
+                            break;
                         }
+                        // create tile entity
+                        Crafty.e("2D, DOM, Sprite, "+spriteName)
+                            .sprite(xc,yc)
+                            .attr({x:currColumn*tileset.tilewidth,
+                                   y:currRow*tileset.tileheight,
+                                   z:layerZ});
                     }
-                    // next tile, take care of indices.
-                    currColumn++;
-                    if ( currColumn >= map.width ) {
-                        currColumn = 0;
-                        currRow++;
-                    }
-
                 }
+                // next tile, take care of indices.
+                currColumn++;
+                if ( currColumn >= map.width ) {
+                    currColumn = 0;
+                    currRow++;
+                }
+
             }
         }
-
+        cbDone(grid);
     });
-
-
-    return grid;
 }
 
 //var text = "Känsä the Skeleton<br>Health: 20<br>Strength:2<br>Dexterity: 5<br>Mana:7<br>Age:5/35<br>Salary:32<br>Fights: 0<br>KOs:2<br>Injury: 0<br>Melee weapon: Fist<br>missile weapon: None<br>Spell: None<br>Dodge: Dart<br>Magic res: 20%<br>Armour: None";
@@ -651,7 +644,10 @@ function showLoginView()
 function showGladiatorView()
 {
     g_currentView = "gladiator";
-    LoadTileMap('inventory.json');
+
+
+    Crafty.background("url('../assets/maps/inventory-map.png");
+    LoadTileMap('inventory.json', function(){ console.log('Loaded inventory.'); g_smokeScreen.tween({alpha:0.0},50);});
 
 	// For armour visualization
 	var armorType = gas.getArmorStringForVisualization(g_gladiatorShowCase.armour.body);
@@ -801,7 +797,9 @@ function showGladiatorView()
         })
         .areaMap([0,0],[0,60],[60,60],[60,0])
         .bind('Click', function(e){
-            Crafty.scene("managerView");
+            g_smokeScreen.attr({changeToScene:"managerView"});
+            g_smokeScreen.tween({alpha:1.0},50);
+
         });
 
 }
@@ -812,14 +810,23 @@ function showGladiatorView()
 function showManagerView()
 {
 
+
 	if(loadAudio==true)
 		PreloadAudio();
+
+
+    Crafty.background("url('../assets/maps/manager.png");
 
 	playAudio("soliloquy", -1, 0.1);
 
     g_currentView = "manager";
-    LoadTileMap( 'manager.json');
-    g_currentGrid = LoadTileMap( 'manager.json', true );
+    //LoadTileMap( 'manager.json');
+    LoadTileMap( 'manager.json', function(grid){ 
+        g_currentGrid = grid; 
+
+        console.log('loaded manager');
+
+    }, true );
 
     // load dummy object sprites
     Crafty.sprite(64, "../pics/combat_dummy/BODY_animation.png", {
@@ -919,6 +926,10 @@ function showManagerView()
             }
         });
 
+    
+
+
+
     var data = $.cookie("gas-login");
     gas.send('TEAM_REQ', [ '{"username":"'+ JSON.parse(data).username + '"}' ]);
     gas.send('GET_ONLINE_PLAYERS_REQ', [ '{"username":"'+ JSON.parse(data).username + '"}' ]);
@@ -929,12 +940,28 @@ function showManagerView()
 
 }
 
+function hideLoginView()
+{
+
+}
+
+function hideManagerView()
+{
+
+}
+
+function hideGladiatorPitView()
+{
+
+}
+
 function hideGladiatorView()
 {
     // prevent breaking stuff with slightly different gladiator objects in different views.
     // also previous objects cannot be shared between views.
     g_gladiatorShowCase = null;
     g_currentGladiator = null;
+
 }
 
 function hideArenaView()
@@ -949,11 +976,11 @@ function showArenaView()
     // notify that player has entered battle
     var login = $.cookie('gas-login');
     gas.send('ENTER_ARENA_REQ', [ '{"username":"'+ JSON.parse(login).username + '"}' ]);
-
+    Crafty.background("url('../assets/maps/arena.png");
 	playAudio("granbatalla", -1, 0.2);
 
     g_currentView = "arena";
-    g_currentGrid = LoadTileMap( 'arena.json', true );
+    g_currentGrid = LoadTileMap( 'arena.json', function(grid){ g_currentGrid = grid; console.log('loaded arena');}, true );
 
     if ( !g_currentGrid  )
     {
@@ -965,7 +992,8 @@ function showArenaView()
         .attr({w:20, h:12, x:20, y:10, z:9})
         .text('Back')
         .bind('Click', function(){
-            Crafty.scene("managerView");
+            g_smokeScreen.attr({changeToScene:"managerView"}).tween({alpha:1.0},50);
+            //Crafty.scene("managerView");
         });
     // resume buttons
     Crafty.e("2D, DOM, Mouse, Text")
@@ -1029,12 +1057,12 @@ function showArenaView()
 function showGladiatorPitView()
 {
     g_currentView = "gladiatorpit";
+    Crafty.background("url('../assets/maps/gladiatorpit.png");
 
-    console.log('loading tile map');
 
-    LoadTileMap( 'gladiatorpit.json' );
+    LoadTileMap( 'gladiatorpit.json', function(){console.log('Loaded gladiator pit');} );
 
-    console.log('loading tile map done!');
+
 
     Crafty.e("2D, DOM, Mouse, Text")
         .attr({w:200, h:32, x:20, y:10})
@@ -1530,7 +1558,9 @@ var GAS = Class(function() {
            // a very crude placement, but just to demonstrate
            this.placeGladiators( "challenger", battle.challenger.battleteam, battle.challenger.gladiators);
            this.placeGladiators( "defender",   battle.defender.battleteam,   battle.defender.gladiators);
-
+           setTimeout(function(){
+               g_smokeScreen.tween({alpha:0.0},50);
+           }, 250);
         break;
         case 'MOVE_RES':
 
@@ -1668,7 +1698,10 @@ var GAS = Class(function() {
                     .setupAnimation(armorType) // takes care of setting proper armor
                     .bind("Click", function(){
 						g_gladiatorShowCase = this.gladiator;
-                        Crafty.scene("gladiatorView");
+                        g_smokeScreen
+                            .attr({changeToScene:"gladiatorView"})
+                            .tween({alpha:1.0},50);
+
                     })
                     .bind("MouseOver", function(){
                         DisplayFadingText(this.gladiator.name, this.x, this.y, "20pt", "Fanwood");
@@ -1759,6 +1792,13 @@ var GAS = Class(function() {
 
             }
         }
+        console.log('*************** Invoking fade ***************');
+        // do magic fade thingy
+        setTimeout(function(){
+            g_smokeScreen.tween({alpha:0.0},50);
+        }, 1050);
+
+
     },
     syncedMessage: function(type, tick, data) {
         console.log('synced message:', type, tick, data);
