@@ -83,7 +83,7 @@ Crafty.c('Grid', {
     Grid: function(xc,yc){
         this.tile_x = xc;
         this.tile_y = yc;
-        this.attr({x:this.tile_x*32-16, y:this.tile_y*32-32})
+        this.attr({x:this.tile_x*32, y:this.tile_y*32-32})
         this.orig_x = xc;
         this.orig_y = yc;
         return this;
@@ -125,7 +125,7 @@ Crafty.c('Grid', {
     },
     coordinatesMatch: function(tx,ty)
     {
-        if (this.x == tx*32-16 &&
+        if (this.x == tx*32 &&
             this.y == ty*32-32)
             return true;
         else
@@ -357,23 +357,31 @@ function LoadTileMap(file, cbDone, createGrid )
             {
                 // skip ground layer
                 if ( map.layers[layer].name == "Ground" ) continue;
-                
+                if ( map.layers[layer].name == "Spawnpoints" ) continue;
                 // indices in JSON format are:
                 // 0: no tile.
                 // X: first tile in tileset
                 if ( map.layers[layer].data[i] == 0 &&
                      map.layers[layer].name == "Collision" )
                 {
-                    Crafty.e("2D, DOM, Collision, Grid, Mouse, Sprite, transparent")
+                    Crafty.e("2D, DOM, Collision, Grid, Mouse, Sprite, Color, transparent_tile")
                     // custom collisions need this also in ALL other colliding entities in order to work.
                         .collision([0,0],
                                    [map.tilewidth,0],
                                    [map.tilewidth, map.tileheight],
                                    [0,map.tileheight])
-                        .attr({x:currColumn*map.tilewidth, y:currRow*map.tileheight, z:6})
+                        .attr({x:currColumn*map.tilewidth, y:currRow*map.tileheight, z:6, alpha:0.0})
                         .Grid(currColumn, currRow)
+                        .color("#ff0000")
                         .bind("Click", function(){
-                            HandleMouseClick(this.tile_x, this.tile_y);
+                            // y needs offset fix so gladiator is positioned properly
+                            HandleMouseClick(this.tile_x, this.tile_y-1);
+                        })
+                        .bind("MouseOver", function(){
+                            this.attr({alpha:0.5})
+                        })
+                        .bind("MouseOut", function(){
+                            this.attr({alpha:0.0})
                         });
                 }
                 else if ( map.layers[layer].data[i] > 0 )
@@ -405,7 +413,7 @@ function LoadTileMap(file, cbDone, createGrid )
                         if ( grid )
                             grid.setWalkableAt(currColumn, currRow, false);
 
-                        Crafty.e("2D, DOM, Collision, Grid, Mouse, Sprite, solid, transparent")
+                        Crafty.e("2D, DOM, Collision, Grid, Mouse, Sprite, solid, transparent_tile")
                         // custom collisions need this also in ALL other colliding entities in order to work.
                             .collision([0,0],
                                        [map.tilewidth,0],
@@ -414,7 +422,8 @@ function LoadTileMap(file, cbDone, createGrid )
                             .attr({x:currColumn*map.tilewidth, y:currRow*map.tileheight, z:6})
                             .Grid(currColumn, currRow)
                             .bind("Click", function(){
-                                HandleMouseClick(this.tile_x, this.tile_y);
+                                // y needs offset fix so gladiator is positioned properly
+                                HandleMouseClick(this.tile_x, this.tile_y-1);
                             });
 
                     } else {
