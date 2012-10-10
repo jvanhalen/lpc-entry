@@ -1,6 +1,7 @@
 // transparent frame for collision with complex objects
-Crafty.sprite(64, '../pics/transparent.png', {
-    transparent: [0,0]
+Crafty.sprite(32, '../pics/transparent.png', {
+    transparent: [0,0,2,2],
+    transparent_tile: [0,0,1,1]
 });
 
 // Animation name, followed by sprites for required components.
@@ -99,6 +100,7 @@ Crafty.c('Ape', {
     },
     setupAnimation: function( animName )
     {
+        var graphicsOffset = -16;
         var a = g_Animations[animName];
         if ( !a ) {
             console.error("No such animation '"+animName+"' preloaded!");
@@ -130,7 +132,7 @@ Crafty.c('Ape', {
                     .animate("stand_left",0,1,1)
                     .animate("stand_down",0,2,1)
                     .animate("stand_right",0,3,1)
-                    .attr({x:entity.x, y:entity.y, z:val.z});
+                    .attr({x:entity.x+graphicsOffset, y:entity.y, z:val.z});
 			    entity.walk[key].visible = true;
 			    entity.attach(entity.walk[key]);
             } else {
@@ -163,7 +165,7 @@ Crafty.c('Ape', {
 				    .animate("thrust_left",1,1,7)
 				    .animate("thrust_down",1,2,7)
 				    .animate("thrust_right",1,3,7)
-				    .attr({x:entity.x, y:entity.y, z:val.z});
+				    .attr({x:entity.x+graphicsOffset, y:entity.y, z:val.z});
 			    entity.attach(entity.thrust[key]);
 			} else {
 			    if ( entity.thrust[key] ) { 
@@ -195,7 +197,7 @@ Crafty.c('Ape', {
                     .animate("slash_left",1,1,5)
                     .animate("slash_down",1,2,5)
                     .animate("slash_right",1,3,5)
-                    .attr({x:entity.x, y:entity.y, z:val.z});
+                    .attr({x:entity.x+graphicsOffset, y:entity.y, z:val.z});
 			    entity.attach(entity.slash[key]);
             } else {
 			    if ( entity.slash[key] ) { 
@@ -227,7 +229,7 @@ Crafty.c('Ape', {
                     .animate("bow_left",1,1,12)
                     .animate("bow_down",1,2,12)
                     .animate("bow_right",1,3,12)
-                    .attr({x:entity.x, y:entity.y, z:val.z});
+                    .attr({x:entity.x+graphicsOffset, y:entity.y, z:val.z});
 			    entity.attach(entity.bow[key]);
             } else {
 			    if ( entity.bow[key] ) { 
@@ -256,7 +258,7 @@ Crafty.c('Ape', {
 			    entity.hurt[key].visible = false;
 			    entity.hurt[key]
                     .animate("hurt",1,0,5)
-                    .attr({x:entity.x, y:entity.y, z:val.z});
+                    .attr({x:entity.x+graphicsOffset, y:entity.y, z:val.z});
 			    entity.attach(entity.hurt[key]);
             } else {
 			    if ( entity.hurt[key] ) { 
@@ -286,7 +288,7 @@ Crafty.c('Ape', {
                     .animate("spellcast_left",1,1,6)
                     .animate("spellcast_down",1,2,6)
                     .animate("spellcast_right",1,3,6)
-                    .attr({x:entity.x, y:entity.y, z:val.z});
+                    .attr({x:entity.x+graphicsOffset, y:entity.y, z:val.z});
 			    // by default, invisible
 			    entity.spellcast[key].visible = false;
 			    entity.attach(entity.spellcast[key]);
