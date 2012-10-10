@@ -364,7 +364,7 @@ function LoadTileMap(file, cbDone, createGrid )
                 if ( map.layers[layer].data[i] == 0 &&
                      map.layers[layer].name == "Collision" )
                 {
-                    Crafty.e("2D, DOM, Collision, Grid, Mouse, Sprite, Color, transparent_tile")
+                    Crafty.e("2D, DOM, Collision, Grid, Tween, Mouse, Sprite, Color, transparent_tile")
                     // custom collisions need this also in ALL other colliding entities in order to work.
                         .collision([0,0],
                                    [map.tilewidth,0],
@@ -378,10 +378,10 @@ function LoadTileMap(file, cbDone, createGrid )
                             HandleMouseClick(this.tile_x, this.tile_y-1);
                         })
                         .bind("MouseOver", function(){
-                            this.attr({alpha:0.5})
+                            this.tween({alpha:0.5},20);
                         })
                         .bind("MouseOut", function(){
-                            this.attr({alpha:0.0})
+                            this.tween({alpha:0.0},50);
                         });
                 }
                 else if ( map.layers[layer].data[i] > 0 )
