@@ -17,6 +17,7 @@ var g_playerName = null;
 var g_itemList = [];
 var g_smokeScreen = null; 
 
+var g_victory = null;
 var g_battleTeam = {
 
     _team: [],
@@ -48,6 +49,11 @@ var g_battleTeam = {
     }
 
 };
+
+
+Crafty.sprite(64, '../pics/spellcast/BODY_skeleton.png', {
+    magic: [0,5]
+});
 
 // Audio switches
 var muted = false;
@@ -271,10 +277,17 @@ function PreloadAudio() {
 
 	// use ffmpeg2theora for mp3 --> oga conversion, then rename oga to ogg
 	Crafty.audio.add({
-	granbatalla: ["../assets/audio/granbatalla.ogg",
-	"../assets/audio/granbatalla.m4a"],
-	soliloquy: ["../assets/audio/soliloquy.ogg",
-	"../assets/audio/soliloquy.m4a"]
+	    granbatalla: ["../assets/audio/granbatalla.ogg",
+	                  "../assets/audio/granbatalla.m4a"],
+	    soliloquy: ["../assets/audio/soliloquy.ogg",
+	                "../assets/audio/soliloquy.m4a"],
+        step: [ "../assets/audio/footsteps/step_cloth_combo.wav" ],
+        die: [ "../assets/audio/player/die1.wav"],
+        team_select: [ "../assets/audio/voices/theseenemies.wav"],
+        team_deselect: [ "../assets/audio/voices/dontyoudare.wav"],
+        hit: [ "../assets/audio/hits/hit33.mp3.wav" ],
+        hitbig: [ "../assets/audio/hits/hit37.mp3.wav" ],
+        miss: ["../assets/audio/swosh/swosh-20a.wav" ]
 	});
 	loadAudio = false;
 }
@@ -826,7 +839,7 @@ function showManagerView()
 
     Crafty.background("url('../assets/maps/manager.png");
 
-	playAudio("soliloquy", -1, 0.1);
+	//playAudio("soliloquy", -1, 0.1);
 
     g_currentView = "manager";
     //LoadTileMap( 'manager.json');
@@ -986,7 +999,7 @@ function showArenaView()
     var login = $.cookie('gas-login');
     gas.send('ENTER_ARENA_REQ', [ '{"username":"'+ JSON.parse(login).username + '"}' ]);
     Crafty.background("url('../assets/maps/arena.png");
-	playAudio("granbatalla", -1, 0.2);
+	//playAudio("granbatalla", -1, 0.2);
 
     g_currentView = "arena";
     g_currentGrid = LoadTileMap( 'arena.json', function(grid){ g_currentGrid = grid; console.log('loaded arena');}, true );
@@ -1026,10 +1039,13 @@ function showArenaView()
 
 
 
-
-
-
-
+    /*g_victory = Crafty.e("2D, DOM, Mouse, Sprite, victory")
+        .attr({w:800,h:800,x:0,y:-300,z:10});
+    */
+    
+    /*createjs.Tween.get(g_victory).to({y:0},1000,createjs.Ease.bounceOut);
+    createjs.Ticker.setFPS(20);
+    createjs.Ticker.addListener(Crafty.stage,false);*/
     /*
     var tmpObj = Crafty.e("2D, DOM, Multiway, Keyboard, Grid, Mouse, Ape, Sprite, transparent")
         .Ape()
@@ -1388,6 +1404,11 @@ var GAS = Class(function() {
                     });
 
                 g_gladiators.push(o);
+
+                // upon restart, let dead be fallen.
+                if ( o.gladiator.health <= 0 ){
+                    o.fallDown(20,"NO_SOUND");
+                }
             }
         }
     },
@@ -1571,6 +1592,32 @@ var GAS = Class(function() {
                g_smokeScreen.tween({alpha:0.0},50);
            }, 250);
         break;
+        case 'BATTLE_OVER':
+
+           console.log('Received BATTLE_STOP');
+
+           var d = JSON.parse(data[0]);
+           var username = JSON.parse($.cookie("gas-login")).username;
+
+           if ( d.victor == username) {
+               console.log('Victory view');
+           } 
+           else if ( d.victor == "" ){
+               console.log('Neither party won');
+           }
+           else {
+               console.log('Defeat view');
+           }
+           // TODO make some kind of tweening thing with a DEFEAT falling and bouncing a bit.
+           // TODO make some kind of "rising" effect with VICTORY 
+        
+           // display proper view afterwards
+        /*g_smokeScreen
+          .attr({changeToScene:"managerView"})
+            .tween({alpha:1.0},50);*/
+            
+
+        break;
         case 'MOVE_RES':
 
            var d = JSON.parse(data[0]);
@@ -1628,7 +1675,21 @@ var GAS = Class(function() {
                }
 
                if ( g_gladiators[gid].gladiator.name == d.targetid ) {
+                   // display damage animation where target should be
+
+
                    g_gladiators[gid].gladiator.health -= d.damage;
+
+                   if ( d.damage > 0 ) {
+
+                       DisplayFadingText('-'+d.damage, d.targetpos.x*32, d.targetpos.y*32, 24, 'Impact');
+                       if ( d.damage > 3 ) Crafty.audio.play('hitbig');
+                       else                Crafty.audio.play('hit');
+
+                   } else {
+                       DisplayFadingText('Miss!', d.targetpos.x*32, d.targetpos.y*32, 12, 'Arial');
+                       Crafty.audio.play('miss');
+                   }
 
                    if ( g_gladiators[gid].gladiator.health <= 0 ){
                        g_gladiators[gid].gladiator.health = 0;
@@ -1636,11 +1697,11 @@ var GAS = Class(function() {
                        g_gladiators[gid].fallDown(20);
                    }
 
-               }
-
+               } else {
+                 
+               }   
            }
-           // display damage animation where target should be
-           DisplayFadingText('-'+d.damage, d.targetpos.x*32, d.targetpos.y*32, 24, 'Impact');
+
 
 
         break;
@@ -1726,9 +1787,11 @@ var GAS = Class(function() {
                         if ( g_battleTeam.has(this.gladiatorname))
                         {
                             console.log('De-selecting ' + this.gladiatorname);
+                            Crafty.audio.play("team_deselect");
                         }
                         else {
                             console.log('Selecting ' + this.gladiatorname);
+                            Crafty.audio.play("team_select");
                         }
 
                         g_battleTeam.toggle(this.gladiatorname);
