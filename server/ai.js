@@ -38,10 +38,13 @@ process.on('message', function(message) {
         case 'STAND_DOWN':
            ai.handleBattleExit(message);
         break;
-       case 'ATTACK_RESP':
+        case 'ATTACK_RESP':
            ai.handleAttackResp(message);
         break;
-    default:
+        case 'BATTLE_OVER':
+           ai.handleBattleOver(message);
+        break;
+        default:
           ai.handleMessage(message);
     }
 
@@ -184,6 +187,12 @@ var ai = {
         console.log('AI battle exit: ', msg.username, "now idle.");
     },
     
+    handleBattleOver: function(msg){
+        // AI is always defender
+        delete this.teams[msg.defender]["battle"];
+        console.log('AI battle exit: ', msg.defender, "now idle");
+    },
+    
     handleAttackResp: function(msg) {
 
         console.log('AI ATTACK_RESP custom handler');
@@ -192,9 +201,19 @@ var ai = {
             if ( this.teams[ai].ingame == msg.ingame )
             {
                 var g = this.getGladiatorByName(this.teams[ai], msg.targetid);
-		if ( g ) {
+		        if ( g ) {
                     g.health -= msg.damage;
-		}
+                    // determine if dead and change state.
+                    if ( g.health <= 0)
+                    {
+                        // send NO_ENEMY to attacker for retrieving another target.
+                        var attacker = this.getGladiatorByName(this.teams[ai], msg.attackerid);
+                        if ( attacker ) {
+                            console.log('Sending message', 'NO_ENEMY');
+                            attacker.battledata.ai.onMessage('NO_ENEMY');
+                        }
+                    }
+		        }
             }
         }
         
@@ -373,7 +392,10 @@ function MoronController(aiteam, gladiator) {
             var other = gladiators[g];
             // skip myself
             if ( gladiator.name  == other.name ) continue;
-            
+            // skip dead ones
+            if ( other.health <= 0 ) continue;
+            // some sanity check 
+            if ( other.battledata === undefined ) continue;            
 
             var xdiff = other.battledata.pos[0] - gladiator.battledata.pos[0];
             var ydiff = other.battledata.pos[1] - gladiator.battledata.pos[1];
@@ -492,6 +514,12 @@ function MoronController(aiteam, gladiator) {
         if ( inMeleeRange == false ){
             console.log('Target not close enough', controller.target.name);
             controller.ATTACK.onMessage('NO_ENEMY');
+            return;
+        }
+        
+        if ( controller.target.health <= 0 ) {
+            console.log('Target dead, NEXT!');
+            controller.onMessage('NO_ENEMY');
             return;
         }
 
