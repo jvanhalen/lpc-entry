@@ -16,6 +16,8 @@
     <script type="text/javascript" charset="utf-8" src="../server/maple/Client.js"></script>
     <script type="text/javascript" charset="utf-8" src="./lib/sha-hash.js"></script>
     <script type="text/javascript" charset="utf-8" src="./lib/crafty.js"></script>
+<!--    <script type="text/javascript" charset="utf-8" src="./lib/tweenjs-0.3.0.min.js"></script>
+    <script type="text/javascript" charset="utf-8" src="./lib/easeljs-0.5.0.min.js"></script> -->
     <script type="text/javascript" charset="utf-8" src="./lib/pathfinding-browser.js"></script>
     <script type="text/javascript" charset="utf-8" src="./lib/Queue.compressed.js"></script>
     <script type="text/javascript" charset="utf-8" src="ape-component.js"></script>
@@ -175,6 +177,7 @@
         });
 
 
+
     //gas.connect('gassrv.dyndns.org', 8080);
     gas.connect('localhost', 8080);
     Crafty.scene("managerView", showManagerView, hideManagerView);
@@ -195,6 +198,9 @@
     PreloadAnimation("chain-armor.json");
     PreloadAnimation("no-armor.json");
     PreloadAnimation("long-spear.json");
+    
+
+
 
     Crafty.scene("loadingView", function(){
        console.log('Loading');
