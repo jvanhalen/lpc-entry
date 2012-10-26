@@ -151,7 +151,80 @@ var GASServer = Maple.Class(function(clientClass) {
                 }
 
                 // TODO check battle session activity; has battle ended (other side died?)
+                for( var bs in this.battleSessions)
+                {  
+                    if ( this.battleSessions[bs].challenger == null) {
+                        delete this.battleSessions[bs];
+                        continue;
+                    }
+                    
+                    var battleid = this.battleSessions[bs].challenger.ingame;
+                    var battle = api.getBattle(battleid);tgoog
+                    var challenger = this.battleSessions[bs].challenger;
+                    var defender   = this.battleSessions[bs].defender;
+                    
+                    // check challenger battle team
+                    var challengerGladiatorsAlive = false;
+                    for( var bt in challenger.battleteam )
+                    {
+                        var gladiatorName = challenger.battleteam[bt];
+                        var gladiator = this.getGladiatorByName(battle, gladiatorName);
+                        // a single gladiator suffices 
+                        if ( gladiator.health > 0 ) {
+                            challengerGladiatorsAlive = true;
+                            break;
+                        }
 
+                    }
+
+                    var defenderGladiatorsAlive = false;
+                    for( var bt in defender.battleteam )
+                    {
+                        var gladiatorName = defender.battleteam[bt];
+                        var gladiator = this.getGladiatorByName(battle, gladiatorName);
+                        // a single gladiator suffices 
+                        if ( gladiator.health > 0 ) {
+                            defenderGladiatorsAlive = true;
+                            break;
+                        }
+                    }
+                    
+                    var battleOverMessage = {
+                        type: 'BATTLE_OVER',
+                        name: 'BATTLE_OVER',
+                        battleid: battle._id,
+                        defender: defender.name,
+                        challenger: challenger.name,
+                        victor: ""
+                    }
+
+
+                    // Check was there a victor or not.
+                    if ( defenderGladiatorsAlive == true )
+                    {
+                        if ( challengerGladiatorsAlive == false ) {
+                            console.log('Battle over, Defender has won!');
+                            battleOverMessage.victor = defender.name;
+                        } 
+                        this.notifyBattleSession(battleid, battleOverMessage);
+                    } 
+                    else if ( challengerGladiatorsAlive == true ) 
+                    {
+
+                        if ( defenderGladiatorsAlive == false ) {
+                            console.log('Battle over, Challenger has won!');
+                            battleOverMessage.victor = challenger.name;
+                        }
+                        this.notifyBattleSession(battleid, battleOverMessage);
+                    } 
+                    else 
+                    {
+                        console.log('Both parties dead, no victor!');
+                        battleOverMessage.victor = "";
+                        this.notifyBattleSession(battleid, battleOverMessage);
+                    }
+                    
+                }
             }
         }
         else
@@ -182,25 +255,7 @@ var GASServer = Maple.Class(function(clientClass) {
         }
 
 
-        // make object move on client side.
-        /*if ( this.getClients().length > 0 )
-        {
-            var moveCmd = {
-                "name": "MOVE_REQUEST",
-                "type": 50,
-                "username": "oldman",
-                "oldpos":
-                [{"x": 1,
-                  "y": 1}],
-                "newpos":
-                [{"x": 1,
-                  "y": 1}],
-                "id":"objectid"
-            }
-            var data = [];
-            data[0] = moveCmd;
-            this.getClients().getAt(0).send(moveCmd.type, data );
-        }*/
+     
     },
 
     stopped: function() {
