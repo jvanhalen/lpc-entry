@@ -4,9 +4,9 @@ Crafty.sprite(32, '../pics/transparent.png', {
     transparent_tile: [0,0,1,1]
 });
 
-Crafty.sprite(800, '../assets/victory.png', {
+/*Crafty.sprite(800, '../assets/victory.png', {
     victory: [0,0]
-});
+});*/
 
 
 // Animation name, followed by sprites for required components.
