@@ -4,6 +4,11 @@ Crafty.sprite(32, '../pics/transparent.png', {
     transparent_tile: [0,0,1,1]
 });
 
+Crafty.sprite(800, '../assets/victory.png', {
+    victory: [0,0]
+});
+
+
 // Animation name, followed by sprites for required components.
 Crafty.c('Ape', {
     _name: undefined,
@@ -385,6 +390,7 @@ Crafty.c('Ape', {
                 }
             }
         }
+        Crafty.audio.play('miss');
         return this;
     }, 
     slashAttack: function(direction) {
@@ -440,6 +446,7 @@ Crafty.c('Ape', {
                     if ( this.walk[i] ) this.walk[i].stop().animate("walk_left", speed, -1);
                 }
             }
+
         }
         if (direction.x > 0) {
             if (!this.walk.body.isPlaying("walk_right")){
@@ -448,6 +455,7 @@ Crafty.c('Ape', {
                     if ( this.walk[i]) this.walk[i].stop().animate("walk_right", speed, -1);
                 }
             }
+
         }
         if (direction.y < 0) {
             if (!this.walk.body.isPlaying("walk_up")){
@@ -456,6 +464,7 @@ Crafty.c('Ape', {
                     if ( this.walk[i]) this.walk[i].stop().animate("walk_up", speed, -1);
                 }
             }
+
         }
         if (direction.y > 0) {
             if (!this.walk.body.isPlaying("walk_down")){
@@ -464,17 +473,19 @@ Crafty.c('Ape', {
                     if ( this.walk[i]) this.walk[i].stop().animate("walk_down", speed, -1);
                 }
             }
+
         }
         if(!direction.x && !direction.y) {
             for(var i in this.walk)
             {
                 if ( this.walk[i]) this.walk[i].stop();
             }
-
         }
+	    Crafty.audio.play("step", 1, 0.15);
+
     },
     
-    fallDown: function(speed){
+    fallDown: function(speed, nosound){
         this.hideAll();
         this.enableAnimation(this.hurt);
         if (!this.walk.body.isPlaying("hurt")){
@@ -482,6 +493,9 @@ Crafty.c('Ape', {
             {
                 if ( this.hurt[i]) this.hurt[i].stop().animate("hurt", speed, 0);
             }
+            // play sound by default
+            if (nosound === undefined )
+                Crafty.audio.play("die");
         }
     },
     
