@@ -159,7 +159,7 @@ var GASServer = Maple.Class(function(clientClass) {
                     }
                     
                     var battleid = this.battleSessions[bs].challenger.ingame;
-                    var battle = api.getBattle(battleid);tgoog
+                    var battle = api.getBattle(battleid);
                     var challenger = this.battleSessions[bs].challenger;
                     var defender   = this.battleSessions[bs].defender;
                     
