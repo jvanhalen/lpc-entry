@@ -1039,13 +1039,9 @@ function showArenaView()
 
 
 
-    /*g_victory = Crafty.e("2D, DOM, Mouse, Sprite, victory")
-        .attr({w:800,h:800,x:0,y:-300,z:10});
-    */
+
+
     
-    /*createjs.Tween.get(g_victory).to({y:0},1000,createjs.Ease.bounceOut);
-    createjs.Ticker.setFPS(20);
-    createjs.Ticker.addListener(Crafty.stage,false);*/
     /*
     var tmpObj = Crafty.e("2D, DOM, Multiway, Keyboard, Grid, Mouse, Ape, Sprite, transparent")
         .Ape()
@@ -1610,7 +1606,32 @@ var GAS = Class(function() {
            }
            // TODO make some kind of tweening thing with a DEFEAT falling and bouncing a bit.
            // TODO make some kind of "rising" effect with VICTORY 
+            g_victory = Crafty.e("2D, DOM, Mouse, Sprite, victory")
+            .attr({w:800,h:800,x:0,y:-300,z:10})
+            .bind('EnterFrame', function(){
+                TWEEN.update();
+            });
         
+        var t = Crafty.e("2D, DOM, Text")            
+            .attr( {w:130, h:20, x:30, y:-100, z:11})
+            .text("Victory!")
+            .css({
+                "text-align": "center",
+                "font-family": "Fanwood",
+                "font-size": "30pt",
+            });
+        g_victory.attach(t);
+        
+
+
+         var param = {val:-300};
+         var tween = new TWEEN.Tween(param)
+            .to({val:100},1000)
+            .delay(100)
+            .easing(TWEEN.Easing.Bounce.Out)
+            .onUpdate(function(){
+                g_victory.attr({y:param.val});
+            }).start();
            // display proper view afterwards
         /*g_smokeScreen
           .attr({changeToScene:"managerView"})
