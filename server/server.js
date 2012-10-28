@@ -158,6 +158,9 @@ var GASServer = Maple.Class(function(clientClass) {
                         continue;
                     }
                     
+                    if ( this.battleSessions[bs]["stateNotified"] !== undefined ) 
+                        continue;
+                    
                     var battleid = this.battleSessions[bs].challenger.ingame;
                     var battle = api.getBattle(battleid);
                     var challenger = this.battleSessions[bs].challenger;
@@ -223,7 +226,7 @@ var GASServer = Maple.Class(function(clientClass) {
                         battleOverMessage.victor = "";
                         this.notifyBattleSession(battleid, battleOverMessage);
                     }
-                    
+                    this.battleSessions[bs]["stateNotified"] = true;
                 }
             }
         }
