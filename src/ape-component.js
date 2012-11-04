@@ -8,6 +8,10 @@ Crafty.sprite(800, '../assets/victory.png', {
     victory: [0,0]
 });
 
+Crafty.sprite(800, '../assets/defeat.png', {
+    defeat: [0,0]
+});
+
 
 // Animation name, followed by sprites for required components.
 Crafty.c('Ape', {
