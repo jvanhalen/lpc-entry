@@ -9,21 +9,26 @@ A:hover {text-decoration: underline; color: red;}
 
 #login {
     min-width:250px;
-    height:200px;
     background-color: #2e1a20;
     color: white;
     font-family: 'Fanwood';
-    font-size: 24pt;
-    float:right;
-    padding: 1cm 1cm 1cm 1cm;
+    font-size: 14pt;
+    float: none;
+    width: 800px;
+    padding: 1mm 1mm 1mm 1mm;
     border: dashed;
     border-color: #eec06a;
-    border-width: 2px;
+    border-width: 1px;
+    margin-left:auto;
+    margin-right: auto;
+
 }
 
 .block {
-    width:250px;
-    height:200px;
+    width:700px;
+    height:50px;
+    top: 600px;
+    position: absolute;
     background-color: #2e1a20;
     color: white;
     font-family: 'Fanwood';
@@ -33,14 +38,18 @@ A:hover {text-decoration: underline; color: red;}
     border: dashed;
     border-color: #eec06a;
     border-width: 2px;
+    z-index: 15;
 }
 
 #login-nav {
-    display: none;
+     display: none;
 }
+
 body {
-    background-color: #4d5155;
+    //background-color: #4d5155;
+    background-image: url('../assets/gui/wood.png');
 }
+
 @font-face {
 	font-family: "Fanwood";
 	src: url("../assets/fonts/Fanwood.otf");
@@ -58,11 +67,38 @@ body {
 	src: url("../assets/fonts/Fanwood Text Italic.otf");
 }
 
+
+
 #chatbox {
-	float: left;
+/*	float: left;*/
 	position: relative;
-	width:100%;
-	height:90%;
+	width:760px;
+
+    padding: 1mm 1mm 1mm 1mm;
+	overflow:auto;
+	overflow-y:auto;
+	background-color: #2e1a20;
+   	color: white;
+  	font-family: 'Fanwood';
+  	font-size: 10pt;
+
+    border: dashed;
+    border-color: #eec06a;
+    border-width: 1px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+#chatbox-messages {
+    /*    float: left;*/
+    /*margin-left:auto;
+    margin-right:auto;*/
+    display: block;
+    position: absolute;
+	width:700px;
+    height:200px;
+    top: -200px;
+    z-index: 10;
 	overflow:auto;
 	overflow-y:auto;
 	background-color: #2e1a20;
@@ -71,6 +107,7 @@ body {
     	font-size: 10pt;
     	border:1px solid black;
 }
+
 .message {
 	position: relative;
 	float: left;
@@ -81,24 +118,24 @@ body {
 
 input {
     background-color: #303030;
-    -webkit-border-radius: .4em;
-    -moz-border-radius: .4em;
-    border-radius: .4em;
+    -webkit-border-radius: .0em;
+    -moz-border-radius: .0em;
+    border-radius: .0em;
 
-    -moz-box-shadow: 0 -1px 0 0 px #000;
+/*    -moz-box-shadow: 0 -1px 0 0 px #000;
     -webkit-box-shadow: 0 -1px 0 0 px #000;
-    box-shadow: 0 -1px 0 0 px #000;
+   box-shadow: 0 -1px 0 0 px #000;*/
 
     border: none;
 
     width: 116px;
     height: 27px;
-    margin:15px 0;
+    margin:0px 0;
     color:#fff;
-    padding:0 0 0 10px;
+//    padding:0 0 0 0px;
     font-family: Arial, Helvetica,sans-serif;
     font-size:8pt;
-    letter-spacing:2px;
+//    letter-spacing:2px;
   }
 
 input.error { border: 2px solid red; }
@@ -106,7 +143,7 @@ input.error { border: 2px solid red; }
 .password{
 	float:left;
 
-	margin:8px 0;
+	margin:0px 0;
 
 	font-family:MisoRegular, Helvetica,Arial,sans-serif;
 
@@ -122,20 +159,19 @@ input.error { border: 2px solid red; }
 label {
     font-family: Helvetica,Arial,sans-serif;
     text-rtransform:uppercase;
-    letter-spacing: 4px;
+    letter-spacing: 0px;
     font-size:8pt;
     color:#fff;
 }
+
 button{
 
-	width:79px;
-
-	height:24px;
-
+//	width:79px;
+//	height:14px;
 	text-align:center;
-
+//    margin: 12px 0 0 0;
 	border:none;
-
+ height: 27px;
 	float:right;
 
 
@@ -150,20 +186,20 @@ button{
 
 
 
-	-webkit-border-radius: .2em;
+/*	-webkit-border-radius: .2em;
 
 	-moz-border-radius: .2em;
 
-	border-radius: .2em;
+	border-radius: .2em;*/
 
 
-
+/*
 	-webkit-box-shadow: 0 0px 1px rgba(255,255,255,0.1);
 
 	-moz-box-shadow: 0 0px 1px rgba(255,255,255,0.1);
 
 	box-shadow: 0 0px 1px rgba(255,255,255,0.1);
-
+*/
 	color:#fff;
 
 	text-align:right;
@@ -230,9 +266,16 @@ input:focus:required:invalid {
     display:none;
     width:400px;
 }
-
-#cr-stage { border:2px solid black; margin:5px auto; color:white; float:left }
-#managers_title, #welcome_title {     font-family: 'Fanwood'; font-size: 18pt;}
+/* how Crafty window is displayed */
+#cr-stage { 
+    border:2px solid black;
+/*margin:5px auto;*/
+    color:white; 
+/*   float:left; */
+    margin-left:auto;
+    margin-right: auto;
+}
+#managers_title, #welcome_title {     font-family: 'Fanwood'; font-size: 12pt;}
 
 .team_entry {
     font-size: 10pt;
@@ -241,5 +284,22 @@ input:focus:required:invalid {
 #challenges {
     font-family: 'Fanwood-Text';
     font-size: 12pt;
-    color: white;
+
+    display: block;
+	float: left;
+	position: absolute;
+    top: 100px;
+    left: -180px;
+	width: 250px;
+    height: 300px;
+    
+    z-index:15;
+    padding: 1mm 1mm 1mm 1mm;
+	background-color: #2e1a20;
+   	color: white;
+    border: dashed;
+    border-color: #eec06a;
+    border-width: 1px;
+	overflow:auto;
+	overflow-y:auto;
 }
