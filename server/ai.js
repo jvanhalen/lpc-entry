@@ -102,6 +102,9 @@ var ai = {
     {
         console.log('AI is handling move update...');
         for( var ai in this.teams ){
+
+            if ( this.teams[ai].battle === undefined ) continue;
+
             if ( this.teams[ai].ingame == msg.battleid )
             {
                 if ( msg.username == this.teams[ai].battle.challenger.name ) {
@@ -200,6 +203,8 @@ var ai = {
         for( var ai in this.teams ){
             if ( this.teams[ai].ingame == msg.ingame )
             {
+                if ( this.teams[ai] === undefined ) continue;
+
                 var g = this.getGladiatorByName(this.teams[ai], msg.targetid);
 		        if ( g ) {
                     g.health -= msg.damage;
@@ -210,7 +215,8 @@ var ai = {
                         var attacker = this.getGladiatorByName(this.teams[ai], msg.attackerid);
                         if ( attacker ) {
                             console.log('Sending message', 'NO_ENEMY');
-                            attacker.battledata.ai.onMessage('NO_ENEMY');
+                            if ( attacker.battledata.ai !== undefined )
+                                attacker.battledata.ai.onMessage('NO_ENEMY');
                         }
                     }
 		        }
@@ -237,18 +243,21 @@ var ai = {
 
     getGladiatorByName: function(ai, gladiatorname)
     {
-        for(var g in ai.battle.defender.gladiators)
+        // battle might be deleted due BATTLE_OVER already.
+        if ( ai.battle !== undefined)
         {
-            if ( ai.battle.defender.gladiators[g].name == gladiatorname ) 
-                return ai.battle.defender.gladiators[g];
+            for(var g in ai.battle.defender.gladiators)
+            {
+                if ( ai.battle.defender.gladiators[g].name == gladiatorname ) 
+                    return ai.battle.defender.gladiators[g];
+            }
+            
+            for(var g in ai.battle.challenger.gladiators)
+            {
+                if ( ai.battle.challenger.gladiators[g].name == gladiatorname ) 
+                    return ai.battle.challenger.gladiators[g];
+            }
         }
-
-        for(var g in ai.battle.challenger.gladiators)
-        {
-            if ( ai.battle.challenger.gladiators[g].name == gladiatorname ) 
-                return ai.battle.challenger.gladiators[g];
-        }
-
         return null;
     },
    
