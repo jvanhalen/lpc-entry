@@ -1460,7 +1460,7 @@ var GAS = Class(function() {
 		case 'CHAT_SYNC':
 			if(JSON.parse($.cookie("gas-login")).username) {
 				console.log("chat_sync");
-				$('#chatbox').append('<div id="message"><a href="#" title="Some information?">'+ JSON.parse(data).username + ':</a>&nbsp;&nbsp;' + JSON.parse(data).message + '<br /></div>');
+				$('#chatbox-messages').append('<div id="message"><a href="#" title="Some information?">'+ JSON.parse(data).username + ':</a>&nbsp;&nbsp;' + JSON.parse(data).message + '</div>');
 				// Chatbox auto-scroll
 				var messages = $('#chatbox');
 				var scrollTop = messages[0].scrollHeight - messages.height();
@@ -1523,7 +1523,10 @@ var GAS = Class(function() {
 				else
 					$('#challenges').append('<div class="team_entry" id="'+data[0].players[i]+'">'+data[0].players[i]+' [<a href="#" title="Challenge '+ data[0].players[i] +' - show player rank and team info?" onclick="gas.challengePlayer(\''+data[0].players[i]+'\');">challenge</a>] [<a href="#" onclick="gas.removeFromBattle(\''+data[0].players[i]+'\');">Remove battle</a>] </div>');
 			}
-
+            // make challenges visible position them appropriately
+            var h = parseInt($('#challenges').css('height'));
+            $('#challenges').css('top', -h+'px');
+            $('#challenges').css('visibility', 'visible');
 			break;
         case 'CHALLENGE_REQ':
              console.log('Received challenge request from user:' + JSON.parse(data[0]).challenger);
@@ -1594,19 +1597,26 @@ var GAS = Class(function() {
 
            var d = JSON.parse(data[0]);
            var username = JSON.parse($.cookie("gas-login")).username;
-
+           var graphics;
+           var msg;
            if ( d.victor == username) {
                console.log('Victory view');
+               graphics = "victory";
+               msg = "Victory!";
            } 
            else if ( d.victor == "" ){
                console.log('Neither party won');
+               graphics = "defeat";
+               msg = "Tie!";
            }
            else {
                console.log('Defeat view');
+               graphics = "defeat";
+               msg = "You were defeated."
            }
            // TODO make some kind of tweening thing with a DEFEAT falling and bouncing a bit.
            // TODO make some kind of "rising" effect with VICTORY 
-            g_victory = Crafty.e("2D, DOM, Mouse, Sprite, victory")
+            g_victory = Crafty.e("2D, DOM, Mouse, Sprite, "+graphics)
             .attr({w:800,h:800,x:0,y:-300,z:10})
             .bind('EnterFrame', function(){
                 TWEEN.update();
@@ -1614,7 +1624,7 @@ var GAS = Class(function() {
         
         var t = Crafty.e("2D, DOM, Text")            
             .attr( {w:130, h:20, x:30, y:-100, z:11})
-            .text("Victory!")
+            .text(msg)
             .css({
                 "text-align": "center",
                 "font-family": "Fanwood",
