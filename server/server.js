@@ -208,8 +208,10 @@ var GASServer = Maple.Class(function(clientClass) {
                         if ( challengerGladiatorsAlive == false ) {
                             console.log('Battle over, Defender has won!');
                             battleOverMessage.victor = defender.name;
+                            this.notifyBattleSession(battleid, battleOverMessage);
+                            this.battleSessions[bs]["stateNotified"] = true;
                         } 
-                        this.notifyBattleSession(battleid, battleOverMessage);
+
                     } 
                     else if ( challengerGladiatorsAlive == true ) 
                     {
@@ -217,16 +219,19 @@ var GASServer = Maple.Class(function(clientClass) {
                         if ( defenderGladiatorsAlive == false ) {
                             console.log('Battle over, Challenger has won!');
                             battleOverMessage.victor = challenger.name;
+                            this.notifyBattleSession(battleid, battleOverMessage);
+                            this.battleSessions[bs]["stateNotified"] = true;
                         }
-                        this.notifyBattleSession(battleid, battleOverMessage);
+
                     } 
                     else 
                     {
                         console.log('Both parties dead, no victor!');
                         battleOverMessage.victor = "";
                         this.notifyBattleSession(battleid, battleOverMessage);
-                    }
-                    this.battleSessions[bs]["stateNotified"] = true;
+                        this.battleSessions[bs]["stateNotified"] = true;
+                   }
+
                 }
             }
         }
