@@ -31,6 +31,7 @@
     {
 	    type = value;
     }
+    
     </script>
 
     <script type="text/javascript" charset="utf-8">
@@ -86,10 +87,10 @@
 
 				// TODO: "a scripting language", i.e. simple commands via command line
 				if($("#typearea").val() == "clear;") {
-					$('#chatbox').empty();
+					$("#chatbox").empty();
 				}
 				else if($("#typearea").val() == "help;") {
-					$('#chatbox').append("<b>clear;</b> clear the chatbox<br /><b>help;</b> this help<br />");
+	                  //$("#chatbox").append("<b>clear;</b> clear the chatbox<br /><b>help;</b> this help<br />");
 				}
 				else {
 					gas.send("CLIENT_CHAT_REQ", ['{"username": "' + user + '", "message": "' + message + '"}']);
@@ -120,55 +121,137 @@
 
            $('#login').fadeOut(500, function(){
                 $('#login').empty();
-                $('#login').html('<div id="welcome_title">Enjoy your stay, '+JSON.parse($.cookie("gas-login")).username+'!</div><br />').append($('#login-nav').html());
+      $('#login').html('<div id="welcome_title">Enjoy your stay, '+JSON.parse($.cookie("gas-login")).username+'! <button type="submit" id="logout" onclick="logout();"> &gt;&gt;&nbsp;&nbsp;Logout</button></div>');
                 $('#login').fadeIn('fast', function(){
                     //Crafty.scene("loadingView");
                 });
 
            });
+      } 
+
+      function getWindowWidth() {
+      var myWidth = 0;
+      if( typeof( window.innerWidth ) == 'number' ) {
+      //Non-IE
+
+      myWidth = window.innerWidth;
+
+      } else if( document.documentElement && ( document.documentElement.clientWidth || document.documentElement.clientHeight ) ) {
+
+      //IE 6+ in 'standards compliant mode'
+
+      myWidth = document.documentElement.clientWidth;
+
+      } else if( document.body && ( document.body.clientWidth || document.body.clientHeight ) ) {
+
+      //IE 4 compatible
+
+      myWidth = document.body.clientWidth;
+
       }
 
+      return myWidth;
+
+      }
+
+
+      var chatEnabled = false;
+      function toggleChat()
+      {
+
+         var curVal = parseInt($("#chatbox-messages").css('top'));
+         var height = parseInt($("#chatbox-messages").css('height'));
+         var width = parseInt($("#chatbox-messages").css('width'));
+         
+         var destVal = (curVal < 0) ? 100 : -height;
+         var x = (getWindowWidth() - width)*0.5;
+
+         $("#chatbox-messages").css("display","block");                    
+         var param = {val: curVal};
+         var tween = new TWEEN.Tween(param)
+                    .to({val:destVal},1000)
+                    .delay(100)
+                    .easing(TWEEN.Easing.Elastic.Out)
+                    .onUpdate(function(){
+                    $("#chatbox-messages").css("top",param.val);
+                    $("#chatbox-messages").css("margin-left",x);
+                    }).start();
+      }
+      function toggleChallenges()
+      {
+
+         var curVal = parseInt($("#challenges").css('left'));
+         var width = parseInt($("#challenges").css('width'));
+
+         var destVal = (curVal < 0) ? 100 : -width;
+
+
+         var param = {val: curVal};
+         var tween = new TWEEN.Tween(param)
+                    .to({val:destVal},1000)
+                    .delay(100)
+                    .easing(TWEEN.Easing.Elastic.Out)
+                    .onUpdate(function(){
+                      $("#challenges").css("top","100px");
+                      $("#challenges").css("left",param.val);
+                    }).start();
+      }
     </script>
 </head>
 
 <body>
-
-  <div id="login-nav">
-    	<button type="submit" id="logout" onclick="logout();"> &gt;&gt;&nbsp;&nbsp;Logout</button>
+  <div id="nav">
   </div>
-  <div id="login">
-    <form method="post" id="loginform" action="#">
-      <fieldset>
-	<div class="form-element">
-          <label for="username">Username</label>
-          <input type="text" name="username" id="username" class="required" maxlength="12"/>
-        </div>
-	<div class="form-element">
-  	  <label for="password">Password</label>
-	  <input name="password" type="password" id="password" class="required" maxlength="12" />
-	</div>
-      </fieldset>
-      <fieldset>
+    <div id="chatbox-messages">
+    </div>
+    <div id="login-nav">
+      <button type="submit" id="logout" onclick="logout();"> &gt;&gt;&nbsp;&nbsp;Logout</button>
+    </div> 
+    <div id="login">
+      <form method="post" id="loginform" action="#">
+        <label for="username">Username</label>
+        <input type="text" name="username" id="username" class="required" maxlength="12"/>
+  	    <label for="password">Password</label>
+	    <input name="password" type="password" id="password" class="required" maxlength="12" /> 
+        
         <button type="submit" id="loginbtn" title="Log in to an existing account" onclick="setType('LOGIN_REQ');"> &gt;&gt;&nbsp;&nbsp;Login</button>
-	<button type="submit" id="createbtn" title="Create new team" onclick="setType('CREATE_USER_REQ');"> &gt;&gt;&nbsp;&nbsp;Create</button>
-      </fieldset>
-    </form>
+        <button type="submit" id="createbtn" title="Create new team" onclick="setType('CREATE_USER_REQ');"> &gt;&gt;&nbsp;&nbsp;Create</button> 
+      </form>
+        
+      </div>
   </div>
-
-
-
+  
   <div id="ranking">
   </div>
+
+
+  <div id="chatbox">
+    Chat: <input type="text" id="typearea" value="" onfocus="chatEnabled = true;" onblur="chatEnabled = false;" /> 
+
+<button type="submit" id="togglechat" onclick="toggleChat();"> Chat window </button>		
+<button type="submit" id="togglechallenger" onclick="toggleChallenges();"> Challenges </button>		
+  </div>
   <script>
-	Crafty.init(800, 800);
-    Crafty.background('#4d5155');
+	Crafty.init(800, 736);
+//    Crafty.background('#4d5155');
+    Crafty.background("url('../assets/gui/paper.png");
     // Connect to GAS server
+
     var gas = new GAS();
+    Crafty.e("2D, DOM, Persist")
+       .bind("EnterFrame", function(){TWEEN.update();})
+       .bind("KeyDown", function(e){
+        if ( chatEnabled ){
+          //$("#typearea").val( e.key);
+          //console.log(e.key);
+       }
+    });
 
     // create default smokescreen
      g_smokeScreen = Crafty.e("2D, DOM, Tween, Persist, Color")
        .attr({x:0, y:0, w:800, h:800, alpha:0.0, z:10})
        .color("#000000")
+       
        .bind("TweenEnd", function(){
          console.log("Smokescreen faded", g_smokeScreen.alpha == 0.0 ? "out" : "in");
          if ( g_smokeScreen.alpha == 1.0 )
@@ -236,17 +319,15 @@
   </script>
 
   <div id="interaction" class="container">
-	  <div id="managers" class="block">
+<!--	  <div id="managers" class="block">
 	    <div id="managers_title"></div>
 	    <div id="managers_body"></div>
-	    <div id="chatbox"></div>
-	    <div>
-		<input type="text" id="typearea" style="width:250px" value="help;" />
-	    </div>
-      </div>
-      <div id="challenges">
-      </div>
+	   
+      </div> -->
+   
   </div>
 
+  <div id="challenges">
+  </div>
 </body>
 </html>
