@@ -40,7 +40,7 @@ var THIRTY_SECONDS = 30000 / TICK_RATE;
 var ROUND_LENGTH = TWO_SECONDS; 					// Round length, round means the "free action" period after the management period
 var INITIAL_MANAGEMENT_PERIOD = THIRTY_SECONDS; 	// Initial management period after the gladiator placement
 var MANAGEMENT_PERIOD = FIVE_SECONDS; 				// Management period after the initial round
-var AI_UPDATE_PERIOD = QUARTER_A_SECOND;
+var AI_UPDATE_PERIOD = TWO_SECONDS;
 // Test -----------------------------------------------------------------------
 var GASServer = Maple.Class(function(clientClass) {
     Maple.Server(this, clientClass);
