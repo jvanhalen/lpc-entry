@@ -121,7 +121,7 @@
 
            $('#login').fadeOut(500, function(){
                 $('#login').empty();
-      $('#login').html('<div id="welcome_title">Enjoy your stay, '+JSON.parse($.cookie("gas-login")).username+'! <button type="submit" id="logout" onclick="logout();"> &gt;&gt;&nbsp;&nbsp;Logout</button></div>');
+      $('#login').html('<div id="welcome_title">Enjoy your stay, '+JSON.parse($.cookie("gas-login")).username+'! <p class="btnp"><a href="#" class="button" id="logout" onclick="logout();"> &gt;&gt;&nbsp;&nbsp;Logout</a></p>');
                 $('#login').fadeIn('fast', function(){
                     //Crafty.scene("loadingView");
                 });
@@ -196,6 +196,30 @@
                       $("#challenges").css("left",param.val);
                     }).start();
       }
+
+      function craftyToggle()
+      {
+
+         var curVal = parseInt($("#cr-stage").css('left'));
+         var width = parseInt($("#cr-stage").css('width'));
+
+         var destVal = (curVal < 0) ? 0 : -width;
+
+         var param = {val: curVal};
+         var tween = new TWEEN.Tween(param)
+                    .to({val:destVal},1000)
+                    .delay(100)
+                    .easing(TWEEN.Easing.Elastic.Out)
+                    .onUpdate(function(){
+                      $("#cr-stage").css("left",param.val);
+
+                    }).start();
+               window.setTimeout(function(){
+                                
+                  Crafty.viewport.reload();
+                                 
+                }, 1000);          
+      }
     </script>
 </head>
 
@@ -205,7 +229,7 @@
     <div id="chatbox-messages">
     </div>
     <div id="login-nav">
-      <button type="submit" id="logout" onclick="logout();"> &gt;&gt;&nbsp;&nbsp;Logout</button>
+
     </div> 
     <div id="login">
       <form method="post" id="loginform" action="#">
@@ -214,8 +238,8 @@
   	    <label for="password">Password</label>
 	    <input name="password" type="password" id="password" class="required" maxlength="12" /> 
         
-        <button type="submit" id="loginbtn" title="Log in to an existing account" onclick="setType('LOGIN_REQ');"> &gt;&gt;&nbsp;&nbsp;Login</button>
-        <button type="submit" id="createbtn" title="Create new team" onclick="setType('CREATE_USER_REQ');"> &gt;&gt;&nbsp;&nbsp;Create</button> 
+        <p class="btnp"><a href="#" class="button" id="loginbtn" title="Log in to an existing account" onclick="setType('LOGIN_REQ');$('#loginform').submit();"> &gt;&gt;&nbsp;&nbsp;Login</a></p>
+        <p class="btnp"><a href="#" class="button" id="createbtn" title="Create new team" onclick="setType('CREATE_USER_REQ');$('#loginform').submit();"> &gt;&gt;&nbsp;&nbsp;Create</a></p> 
       </form>
         
       </div>
@@ -228,8 +252,8 @@
   <div id="chatbox">
     Chat: <input type="text" id="typearea" value="" onfocus="chatEnabled = true;" onblur="chatEnabled = false;" /> 
 
-<button type="submit" id="togglechat" onclick="toggleChat();"> Chat window </button>		
-<button type="submit" id="togglechallenger" onclick="toggleChallenges();"> Challenges </button>		
+    <p class="btnp"><a href="#" class="button" id="togglechat" onclick="toggleChat();"> Chat window </a></p>		
+    <p class="btnp"><a href="#" class="button" id="togglechallenger" onclick="toggleChallenges();"> Challenges </a></p>
   </div>
   <script>
 	Crafty.init(800, 736);
@@ -326,7 +350,7 @@
       </div> -->
    
   </div>
-
+  <p class="btnp"><a href="#" class="button" onclick="craftyToggle();">Swap Crafty</a></p>
   <div id="challenges">
   </div>
 </body>

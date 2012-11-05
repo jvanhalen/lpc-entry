@@ -3,9 +3,12 @@
 A:focus { cursor: url("../pics/gauntlet_cursor.png"), pointer; }
 
 A:link {text-decoration: none; color: red;}
-A:visited {text-decoration: none; color: red;}
+A:visited {text-decoration: none;color: red; }
 A:active {text-decoration: none; color: red;}
-A:hover {text-decoration: underline; color: red;}
+A:hover {text-decoration: none; color: red; }
+
+
+
 
 #login {
     min-width:250px;
@@ -164,28 +167,41 @@ label {
     color:#fff;
 }
 
-button{
+.btnp {
+    display: inline-block;
+    margin: 0 0 0 0;
+}
+A.button:hover {
+    background-position: 0px -83px;
+    color: white;
+}
+A.button:visited {
+    background-position: 0px 0px;
+    color: white;
+}
+A.button:active {
+    background-position: 0px -41px;
+    color: white;
+}
+.shadow {
+    box-shadow: 10px 10px 5px #888888;
+}
 
-//	width:79px;
-//	height:14px;
-	text-align:center;
-//    margin: 12px 0 0 0;
+.button {
+    outline: none;
+	width:200px;
+	height:43px;
+
 	border:none;
- height: 27px;
-	float:right;
-
-
-
-	background: #363535;
-
-	background: -webkit-gradient(linear, left top, left bottom, from(#3a3a3a), to(#303030));
-
-	background: -moz-linear-gradient(bottom,  #303030,  #3a3a3a);
-
-	filter:  progid:DXImageTransform.Microsoft.gradient(startColorstr='#3a3a3a', endColorstr='#303030');
-
-
-
+    line-height:43px;
+    display: block;
+	background-image: url('../assets/gui/buttons-small.png');
+    background-position: 0px 0px;
+    font-family: 'Fanwood';
+    font-size: 16pt;
+    text-shadow: 2px 2px 2px #000000;
+	text-align:center;
+	color:white;
 /*	-webkit-border-radius: .2em;
 
 	-moz-border-radius: .2em;
@@ -200,9 +216,10 @@ button{
 
 	box-shadow: 0 0px 1px rgba(255,255,255,0.1);
 */
-	color:#fff;
 
-	text-align:right;
+
+
+
 
 	}
 
@@ -272,6 +289,8 @@ input:focus:required:invalid {
 /*margin:5px auto;*/
     color:white; 
 /*   float:left; */
+    position:relative;
+    display:block;
     margin-left:auto;
     margin-right: auto;
 }
@@ -302,4 +321,13 @@ input:focus:required:invalid {
     border-width: 1px;
 	overflow:auto;
 	overflow-y:auto;
+}
+
+.footer {
+    display:block;
+    width:800px;
+    height:200px;
+    font-family: Arial,Helvetica;
+    font-size: 8pt:
+    
 }
