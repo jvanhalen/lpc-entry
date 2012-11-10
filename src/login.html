@@ -31,10 +31,10 @@
     {
 	    type = value;
     }
-    
+
     </script>
 
-    <script type="text/javascript" charset="utf-8">
+    <script type="text/javascript">
      // ****************************************
      // validator plugin settings: when submitted,
      // we use GAS Maple server for authentication.
@@ -104,7 +104,7 @@
 
     </script>
 
-    <script type="text/javascript" charset="utf-8">
+    <script type="text/javascript">
 
       function logout()
       {
@@ -127,7 +127,7 @@
                 });
 
            });
-      } 
+      }
 
       function getWindowWidth() {
       var myWidth = 0;
@@ -162,11 +162,11 @@
          var curVal = parseInt($("#chatbox-messages").css('top'));
          var height = parseInt($("#chatbox-messages").css('height'));
          var width = parseInt($("#chatbox-messages").css('width'));
-         
+
          var destVal = (curVal < 0) ? 100 : -height;
          var x = (getWindowWidth() - width)*0.5;
 
-         $("#chatbox-messages").css("display","block");                    
+         $("#chatbox-messages").css("display","block");
          var param = {val: curVal};
          var tween = new TWEEN.Tween(param)
                     .to({val:destVal},1000)
@@ -215,10 +215,10 @@
 
                     }).start();
                window.setTimeout(function(){
-                                
+
                   Crafty.viewport.reload();
-                                 
-                }, 1000);          
+
+                }, 1000);
       }
     </script>
 </head>
@@ -230,29 +230,27 @@
     </div>
     <div id="login-nav">
 
-    </div> 
+    </div>
     <div id="login">
       <form method="post" id="loginform" action="#">
         <label for="username">Username</label>
         <input type="text" name="username" id="username" class="required" maxlength="12"/>
   	    <label for="password">Password</label>
-	    <input name="password" type="password" id="password" class="required" maxlength="12" /> 
-        
+	    <input name="password" type="password" id="password" class="required" maxlength="12" />
+
         <p class="btnp"><a href="#" class="button" id="loginbtn" title="Log in to an existing account" onclick="setType('LOGIN_REQ');$('#loginform').submit();"> &gt;&gt;&nbsp;&nbsp;Login</a></p>
-        <p class="btnp"><a href="#" class="button" id="createbtn" title="Create new team" onclick="setType('CREATE_USER_REQ');$('#loginform').submit();"> &gt;&gt;&nbsp;&nbsp;Create</a></p> 
+        <p class="btnp"><a href="#" class="button" id="createbtn" title="Create new team" onclick="setType('CREATE_USER_REQ');$('#loginform').submit();"> &gt;&gt;&nbsp;&nbsp;Create</a></p>
       </form>
-        
-      </div>
   </div>
-  
+
   <div id="ranking">
   </div>
 
 
   <div id="chatbox">
-    Chat: <input type="text" id="typearea" value="" onfocus="chatEnabled = true;" onblur="chatEnabled = false;" /> 
+    Chat: <input type="text" id="typearea" value="" onfocus="chatEnabled = true;" onblur="chatEnabled = false;" />
 
-    <p class="btnp"><a href="#" class="button" id="togglechat" onclick="toggleChat();"> Chat window </a></p>		
+    <p class="btnp"><a href="#" class="button" id="togglechat" onclick="toggleChat();"> Chat window </a></p>
     <p class="btnp"><a href="#" class="button" id="togglechallenger" onclick="toggleChallenges();"> Challenges </a></p>
   </div>
   <script>
@@ -275,7 +273,7 @@
      g_smokeScreen = Crafty.e("2D, DOM, Tween, Persist, Color")
        .attr({x:0, y:0, w:800, h:800, alpha:0.0, z:10})
        .color("#000000")
-       
+
        .bind("TweenEnd", function(){
          console.log("Smokescreen faded", g_smokeScreen.alpha == 0.0 ? "out" : "in");
          if ( g_smokeScreen.alpha == 1.0 )
@@ -304,7 +302,7 @@
     PreloadAnimation("chain-armor.json");
     PreloadAnimation("no-armor.json");
     PreloadAnimation("long-spear.json");
-    
+
 
 
 
@@ -346,9 +344,9 @@
 <!--	  <div id="managers" class="block">
 	    <div id="managers_title"></div>
 	    <div id="managers_body"></div>
-	   
+
       </div> -->
-   
+
   </div>
   <p class="btnp"><a href="#" class="button" onclick="craftyToggle();">Swap Crafty</a></p>
   <div id="challenges">
