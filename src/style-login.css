@@ -11,7 +11,8 @@ A:hover {text-decoration: none; color: red; }
 
 
 #login {
-    min-width:250px;
+	min-width: 250px;
+
     background-color: #2e1a20;
     color: white;
     font-family: 'Fanwood';
@@ -49,7 +50,7 @@ A:hover {text-decoration: none; color: red; }
 }
 
 body {
-    //background-color: #4d5155;
+    /*background-color: #4d5155; */
     background-image: url('../assets/gui/wood.png');
 }
 
@@ -284,10 +285,10 @@ input:focus:required:invalid {
     width:400px;
 }
 /* how Crafty window is displayed */
-#cr-stage { 
+#cr-stage {
     border:2px solid black;
 /*margin:5px auto;*/
-    color:white; 
+    color:white;
 /*   float:left; */
     position:relative;
     display:block;
@@ -300,6 +301,7 @@ input:focus:required:invalid {
     font-size: 10pt;
     font-family: 'Fanwood-Text';
 }
+
 #challenges {
     font-family: 'Fanwood-Text';
     font-size: 12pt;
@@ -307,11 +309,34 @@ input:focus:required:invalid {
     display: block;
 	float: left;
 	position: absolute;
-    top: 100px;
-    left: -180px;
+    top: 20px;
+    left: -230px;
 	width: 250px;
     height: 300px;
-    
+
+    z-index:15;
+    padding: 1mm 1mm 1mm 1mm;
+	background-color: #2e1a20;
+   	color: white;
+    border: dashed;
+    border-color: #eec06a;
+    border-width: 1px;
+	overflow:auto;
+	overflow-y:auto;
+}
+
+#gladiatorinfo {
+    font-family: 'Fanwood-Text';
+    font-size: 12pt;
+
+    display: block;
+	float: left;
+	position: absolute;
+    top: 340px;
+    left: -230px;
+	width: 250px;
+    height: 300px;
+
     z-index:15;
     padding: 1mm 1mm 1mm 1mm;
 	background-color: #2e1a20;
@@ -328,6 +353,6 @@ input:focus:required:invalid {
     width:800px;
     height:200px;
     font-family: Arial,Helvetica;
-    font-size: 8pt:
-    
+    font-size: 8pt;
+
 }

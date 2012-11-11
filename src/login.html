@@ -82,7 +82,7 @@
 		if(event.keyCode == 13) {
 			if($("#typearea").val() != "") {
 				//$("#chatbox").val($("#typearea").val());
-				var user = JSON.parse($.cookie("gas-login")).username
+				user = JSON.parse($.cookie("gas-login")).username
 				var message = $("#typearea").val();
 
 				// TODO: "a scripting language", i.e. simple commands via command line
@@ -110,9 +110,7 @@
       {
 		 Crafty.audio.stop();
 		 Crafty.stop();
-			 //$.cookie("gas-login").username = null;
 		 location.reload(true);
-
       }
 
       function displayLogin()
@@ -120,12 +118,11 @@
            g_smokeScreen.attr({changeToScene:"loadingView"}).tween({alpha:1.0},50);
 
            $('#login').fadeOut(500, function(){
-                $('#login').empty();
-      $('#login').html('<div id="welcome_title">Enjoy your stay, '+JSON.parse($.cookie("gas-login")).username+'! <p class="btnp"><a href="#" class="button" id="logout" onclick="logout();"> &gt;&gt;&nbsp;&nbsp;Logout</a></p>');
-                $('#login').fadeIn('fast', function(){
-                    //Crafty.scene("loadingView");
-                });
-
+			 $('#login').empty();
+			 $('#login').html('<div id="welcome_title">Enjoy your stay, '+JSON.parse($.cookie("gas-login")).username+'! <p class="btnp"><a href="#" class="button" id="logout" onclick="logout();"> &gt;&gt;&nbsp;&nbsp;Logout</a></p>');
+			 $('#login').fadeIn('fast', function(){
+					  //Crafty.scene("loadingView");
+			 });
            });
       }
 
@@ -154,7 +151,6 @@
 
       }
 
-
       var chatEnabled = false;
       function toggleChat()
       {
@@ -169,37 +165,58 @@
          $("#chatbox-messages").css("display","block");
          var param = {val: curVal};
          var tween = new TWEEN.Tween(param)
-                    .to({val:destVal},1000)
+                    .to({val:destVal},100)
                     .delay(100)
-                    .easing(TWEEN.Easing.Elastic.Out)
+					.easing(TWEEN.Easing.Elastic.Out)
                     .onUpdate(function(){
                     $("#chatbox-messages").css("top",param.val);
                     $("#chatbox-messages").css("margin-left",x);
                     }).start();
       }
+
       function toggleChallenges()
       {
+		var curVal = parseInt($("#challenges").css('left'));
+		var width = parseInt($("#challenges").css('width'));
 
-         var curVal = parseInt($("#challenges").css('left'));
-         var width = parseInt($("#challenges").css('width'));
+		var destVal = (curVal < 0) ? 0 : 20-width;
 
-         var destVal = (curVal < 0) ? 100 : -width;
+		g_cssZVal += 1;
 
-
-         var param = {val: curVal};
-         var tween = new TWEEN.Tween(param)
-                    .to({val:destVal},1000)
-                    .delay(100)
-                    .easing(TWEEN.Easing.Elastic.Out)
-                    .onUpdate(function(){
-                      $("#challenges").css("top","100px");
-                      $("#challenges").css("left",param.val);
-                    }).start();
+		var param = {val: curVal};
+		var tween = new TWEEN.Tween(param)
+				   .to({val:destVal},100)
+				   .delay(100)
+				   .onUpdate(function(){
+					 $("#challenges").css("top","20px");
+					 $("#challenges").css("left",param.val);
+					 $("#challenges").css("z-index",g_cssZVal);
+				   }).start();
       }
+
+      function toggleGladiatorInfo()
+      {
+		var curVal = parseInt($("#gladiatorinfo").css('left'));
+		var width = parseInt($("#gladiatorinfo").css('width'));
+
+		var destVal = (curVal < 0) ? 0 : 20-width;
+
+		g_cssZVal += 1;
+
+		var param = {val: curVal};
+		var tween = new TWEEN.Tween(param)
+				   .to({val:destVal},100)
+				   .delay(100)
+				   .onUpdate(function(){
+					 $("#gladiatorinfo").css("top","340px");
+					 $("#gladiatorinfo").css("left",param.val);
+					 $("#gladiatorinfo").css("z-index",g_cssZVal);
+				   }).start();
+      }
+
 
       function craftyToggle()
       {
-
          var curVal = parseInt($("#cr-stage").css('left'));
          var width = parseInt($("#cr-stage").css('width'));
 
@@ -220,6 +237,11 @@
 
                 }, 1000);
       }
+
+	  function updateZzz(element) {
+		 element.css("z-index",++g_cssZVal);	// What would be the upper limit?
+	  }
+
     </script>
 </head>
 
@@ -252,6 +274,7 @@
 
     <p class="btnp"><a href="#" class="button" id="togglechat" onclick="toggleChat();"> Chat window </a></p>
     <p class="btnp"><a href="#" class="button" id="togglechallenger" onclick="toggleChallenges();"> Challenges </a></p>
+	<p class="btnp"><a href="#" class="button" id="togglegladiatorinfo" onclick="toggleGladiatorInfo();"> Gladiator </a></p>
   </div>
   <script>
 	Crafty.init(800, 736);
@@ -280,10 +303,8 @@
             Crafty.scene(g_smokeScreen.changeToScene);
         });
 
-
-
-    //gas.connect('gassrv.dyndns.org', 8080);
-    gas.connect('localhost', 8080);
+    gas.connect('gas.dy.fi', 8080);
+    //gas.connect('localhost', 8080);
     Crafty.scene("managerView", showManagerView, hideManagerView);
     Crafty.scene("gladiatorView", showGladiatorView, hideGladiatorView);
     Crafty.scene("arenaView", showArenaView, hideArenaView);
@@ -302,8 +323,6 @@
     PreloadAnimation("chain-armor.json");
     PreloadAnimation("no-armor.json");
     PreloadAnimation("long-spear.json");
-
-
 
 
     Crafty.scene("loadingView", function(){
@@ -331,25 +350,12 @@
         gas.send('LOGIN_REQ', [ JSON.stringify(loginstring) ]);
 	}
 
-    // Ignore login for development..
-/*    $('#login').fadeOut(500, function(){
-           $('#login').empty();
-                       Crafty.scene("loadingView");
-                       });
-*/
-
   </script>
 
-  <div id="interaction" class="container">
-<!--	  <div id="managers" class="block">
-	    <div id="managers_title"></div>
-	    <div id="managers_body"></div>
-
-      </div> -->
-
-  </div>
+  <div id="interaction" class="container"></div>
   <p class="btnp"><a href="#" class="button" onclick="craftyToggle();">Swap Crafty</a></p>
-  <div id="challenges">
-  </div>
+
+  <div id="challenges" ondblclick="toggleChallenges();" ></div>
+  <div id="gladiatorinfo" class="container"></div>
 </body>
 </html>

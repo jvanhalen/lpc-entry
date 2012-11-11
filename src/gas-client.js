@@ -15,9 +15,12 @@ var loadAudio = true;
 var g_ingame = null;
 var g_playerName = null;
 var g_itemList = [];
-var g_smokeScreen = null; 
-
+var g_smokeScreen = null;
+var g_cssZVal = 10;	// Start from value 10
 var g_victory = null;
+
+var g_craftyShoppingMenus = false; // Use Crafty or plain html menus
+
 var g_battleTeam = {
 
     _team: [],
@@ -158,16 +161,16 @@ Crafty.c('Grid', {
 		        // Quick fix for crash.
 		        if ( g_currentView == 'arena') {
                     // send update only if player is the manager of this gladiator.
-                    if ( player == this.gladiator.manager ) 
+                    if ( player == this.gladiator.manager )
                     {
-                        var msg = { 
-                            username: player, 
-                            battleid: g_ingame, 
-                            gladiator: this.gladiator.name, 
-                            oldpos: this.gladiator.battledata.pos, 
+                        var msg = {
+                            username: player,
+                            battleid: g_ingame,
+                            gladiator: this.gladiator.name,
+                            oldpos: this.gladiator.battledata.pos,
                             newpos: this.targetPos
                         }
-                        
+
                         gas.send('MOVE_UPDATE', [JSON.stringify(msg)] );
                     }
                 }
@@ -329,7 +332,7 @@ function LoadTileMap(file, cbDone, createGrid )
     var grid = undefined;
 
     // try to read json tile map
-    
+
     $.getJSON(ASSET_PREFIX+file, function(map){
 
         var tilesetIndices = [];
@@ -337,13 +340,13 @@ function LoadTileMap(file, cbDone, createGrid )
         {
             // process first tileset
             var tileset = map.tilesets[i];
-            
+
             var tmp = {};
             var newName = map.properties.name+''+i;
             tmp[newName] = '[0,0]';
             // register sprite
             Crafty.sprite(map.tilewidth, map.tilewidth, ASSET_PREFIX+tileset.image, tmp, tileset.spacing);
-            
+
             // store first index
             tilesetIndices[i]=tileset.firstgid;
         }
@@ -663,167 +666,170 @@ function showLoginView()
 
 }
 
+function showGladiatorViewHtml(gladiator) {
+
+	$('#gladiatorinfo').empty();
+	$('#gladiatorinfo').append(gladiator.name + "<br />" + gladiatorHTML(gladiator));
+
+}
+
 function showGladiatorView()
 {
-    g_currentView = "gladiator";
+	g_currentView = "gladiator";
 
-
-    Crafty.background("url('../assets/maps/inventory-map.png");
-    LoadTileMap('inventory.json', function(){ console.log('Loaded inventory.'); g_smokeScreen.tween({alpha:0.0},50);});
+	Crafty.background("url('../assets/maps/inventory-map.png");
+	LoadTileMap('inventory.json', function(){ console.log('Loaded inventory.'); g_smokeScreen.tween({alpha:0.0},50);});
 
 	// For armour visualization
 	var armorType = gas.getArmorStringForVisualization(g_gladiatorShowCase.armour.body);
 
-    g_currentGladiator = Crafty.e("2D, DOM, Multiway, Keyboard, Mouse, Ape, Sprite, transparent")
-        .attr({x:450, y:220, z:7, gladiator: g_gladiatorShowCase})
-        .Ape()
-        .collision([16,32],[48,32],[48,64],[16,64])
-        .setupAnimation(g_gladiatorShowCase.race+'_body')
+	g_currentGladiator = Crafty.e("2D, DOM, Multiway, Keyboard, Mouse, Ape, Sprite, transparent")
+		.attr({x:450, y:220, z:7, gladiator: g_gladiatorShowCase})
+		.Ape()
+		.collision([16,32],[48,32],[48,64],[16,64])
+		.setupAnimation(g_gladiatorShowCase.race+'_body')
 
 		.setupAnimation(armorType)
-        .bind("MouseOver", function(){
-            console.log('mouseover on ', this.gladiator.name);
-            this.startWalking({x:0,y:1}, 20);
-        })
-        .bind("MouseOut", function(){
-            console.log('mouseout on', this.gladiator.name);
-            this.stopWalking();
-        });
+		.bind("MouseOver", function(){
+			console.log('mouseover on ', this.gladiator.name);
+			this.startWalking({x:0,y:1}, 20);
+		})
+		.bind("MouseOut", function(){
+			console.log('mouseout on', this.gladiator.name);
+			this.stopWalking();
+		});
 
-    Crafty.sprite(64,'../pics/walkcycle/BODY_' + (g_gladiatorShowCase.race) + '.png', {
-        skeleton: [0,0]
-    });
+	Crafty.sprite(64,'../pics/walkcycle/BODY_' + (g_gladiatorShowCase.race) + '.png', {
+		skeleton: [0,0]
+	});
 
-    Crafty.sprite(32, '../assets/maps/items_small.png', {
-        helmet0: [0,0],
-        helmet1: [1,0],
-        helmet2: [2,0],
-        boots0: [0,1],
-        boots1: [1,1],
-        boots2: [2,1],
-        potion0: [0,2],
-        potion1: [1,2],
-        potion2: [2,2],
-        necklace0: [0,3],
-        necklace1: [1,3],
-        necklace2: [2,3],
-        sword0: [0,4],
-        sword1: [1,4],
-        sword2: [2,4],
-        axe0: [0,5],
-        axe1: [1,5],
-        axe2: [2,5],
-        mace0: [0,6],
-        mace1: [1,6],
-        mace2: [2,6],
-        spear0: [0,7],
-        spear1: [1,7],
-        spear2: [2,7],
-        staff0: [0,8],
-        staff1: [1,8],
-        staff2: [2,8],
-        shield0: [0,9],
-        shield1: [1,9],
-        shield2: [2,9]
-    });
+	Crafty.sprite(32, '../assets/maps/items_small.png', {
+		helmet0: [0,0],
+		helmet1: [1,0],
+		helmet2: [2,0],
+		boots0: [0,1],
+		boots1: [1,1],
+		boots2: [2,1],
+		potion0: [0,2],
+		potion1: [1,2],
+		potion2: [2,2],
+		necklace0: [0,3],
+		necklace1: [1,3],
+		necklace2: [2,3],
+		sword0: [0,4],
+		sword1: [1,4],
+		sword2: [2,4],
+		axe0: [0,5],
+		axe1: [1,5],
+		axe2: [2,5],
+		mace0: [0,6],
+		mace1: [1,6],
+		mace2: [2,6],
+		spear0: [0,7],
+		spear1: [1,7],
+		spear2: [2,7],
+		staff0: [0,8],
+		staff1: [1,8],
+		staff2: [2,8],
+		shield0: [0,9],
+		shield1: [1,9],
+		shield2: [2,9]
+	});
 
 
-         /*Crafty.e("2D, DOM, Sprite, Mouse, skeleton")
-        .attr({x:450, y:220, z:3})
-        .sprite(0,1)
-        .bind('MouseOver', function(e){
-            this.sprite(0,2);
-        })
-        .bind('MouseOut', function(e){
-            this.sprite(0,1);
-        });*/
+		 /*Crafty.e("2D, DOM, Sprite, Mouse, skeleton")
+		.attr({x:450, y:220, z:3})
+		.sprite(0,1)
+		.bind('MouseOver', function(e){
+			this.sprite(0,2);
+		})
+		.bind('MouseOut', function(e){
+			this.sprite(0,1);
+		});*/
 
 	//console.log(g_currentGladiator);
 
-    Crafty.e("2D, DOM, Text").attr({ w: 400, h: 120, x: 520, y: 170, z: 3 })
-        .text(gladiatorHTML(g_gladiatorShowCase))
-        .css({
-            "text-align": "left",
-            "font-weight":"bold",
-            "font-family": "Fanwood",
-            "font-size": "12pt",
-            "color": "#000000"
-        });
+	Crafty.e("2D, DOM, Text").attr({ w: 400, h: 120, x: 520, y: 170, z: 3 })
+		.text(gladiatorHTML(g_gladiatorShowCase))
+		.css({
+			"text-align": "left",
+			"font-weight":"bold",
+			"font-family": "Fanwood",
+			"font-size": "12pt",
+			"color": "#000000"
+		});
 
 
-    Crafty.e("2D, DOM, Text").attr({ w: 400, h: 120, x: 210, y: 50, z: 3 })
-        .text("Gladiator Properties")
-        .css({
-            "text-align": "left",
-            "font-weight": "bold",
-            "font-family": "Fanwood",
-            "font-size": "24pt",
-            "color": "#000000"
-        });
-    Crafty.e("2D, DOM, Text").attr({ w: 400, h: 120, x: 50, y: 150, z: 3 })
-        .text("Shop for Everything")
-        .css({
-            "text-align": "left",
-            "font-weight": "bold",
-            "font-family": "Fanwood",
-            "font-size": "24pt",
-            "color": "#000000"
-        });
+	Crafty.e("2D, DOM, Text").attr({ w: 400, h: 120, x: 210, y: 50, z: 3 })
+		.text("Gladiator Properties")
+		.css({
+			"text-align": "left",
+			"font-weight": "bold",
+			"font-family": "Fanwood",
+			"font-size": "24pt",
+			"color": "#000000"
+		});
+	Crafty.e("2D, DOM, Text").attr({ w: 400, h: 120, x: 50, y: 150, z: 3 })
+		.text("Shop for Everything")
+		.css({
+			"text-align": "left",
+			"font-weight": "bold",
+			"font-family": "Fanwood",
+			"font-size": "24pt",
+			"color": "#000000"
+		});
 
-    Crafty.e("2D, DOM, Text, Mouse").attr({x: 50, y: 200, z: 3 })
-        .text("Might")
-        .css({
-            "text-align": "left",
-            "font-family": "Arial",
-            "font-size": "12pt",
-            "color": "#000000"
-        })
-        .areaMap([0,0],[0,60],[60,60],[60,0])
-        .bind('Click', function(e){
-            showMightView();
-        });
-    Crafty.e("2D, DOM, Text, Mouse").attr({x: 150, y: 200, z: 3 })
-        .text("Magic")
-        .css({
-            "text-align": "left",
-            "font-family": "Arial",
-            "font-size": "12pt",
-            "color": "#000000"
-        })
-        .areaMap([0,0],[0,60],[60,60],[60,0])
-        .bind('Click', function(e){
-            showMagicView();
-        });
-    Crafty.e("2D, DOM, Text, Mouse").attr({x: 250, y: 200, z: 3 })
-        .text("Armour")
-        .css({
-            "text-align": "left",
-            "font-family": "Arial",
-            "font-size": "12pt",
-            "color": "#000000"
-        })
-        .areaMap([0,0],[0,60],[60,60],[60,0])
-        .bind('Click', function(e){
-            showArmourView();
-        });
+	Crafty.e("2D, DOM, Text, Mouse").attr({x: 50, y: 200, z: 3 })
+		.text("Might")
+		.css({
+			"text-align": "left",
+			"font-family": "Arial",
+			"font-size": "12pt",
+			"color": "#000000"
+		})
+		.areaMap([0,0],[0,60],[60,60],[60,0])
+		.bind('Click', function(e){
+			showMightView();
+		});
+	Crafty.e("2D, DOM, Text, Mouse").attr({x: 150, y: 200, z: 3 })
+		.text("Magic")
+		.css({
+			"text-align": "left",
+			"font-family": "Arial",
+			"font-size": "12pt",
+			"color": "#000000"
+		})
+		.areaMap([0,0],[0,60],[60,60],[60,0])
+		.bind('Click', function(e){
+			showMagicView();
+		});
+	Crafty.e("2D, DOM, Text, Mouse").attr({x: 250, y: 200, z: 3 })
+		.text("Armour")
+		.css({
+			"text-align": "left",
+			"font-family": "Arial",
+			"font-size": "12pt",
+			"color": "#000000"
+		})
+		.areaMap([0,0],[0,60],[60,60],[60,0])
+		.bind('Click', function(e){
+			showArmourView();
+		});
 
+	Crafty.e("2D, DOM, Text, Mouse").attr({x: 50, y: 50, z: 3 })
+		.text("Back")
+		.css({
+			"text-align": "left",
+			"font-family": "Arial",
+			"font-size": "12pt",
+			"color": "#f00"
+		})
+		.areaMap([0,0],[0,60],[60,60],[60,0])
+		.bind('Click', function(e){
+			g_smokeScreen.attr({changeToScene:"managerView"});
+			g_smokeScreen.tween({alpha:1.0},50);
 
-
-    Crafty.e("2D, DOM, Text, Mouse").attr({x: 50, y: 50, z: 3 })
-        .text("Back")
-        .css({
-            "text-align": "left",
-            "font-family": "Arial",
-            "font-size": "12pt",
-            "color": "#f00"
-        })
-        .areaMap([0,0],[0,60],[60,60],[60,0])
-        .bind('Click', function(e){
-            g_smokeScreen.attr({changeToScene:"managerView"});
-            g_smokeScreen.tween({alpha:1.0},50);
-
-        });
-
+		});
 }
 
 
@@ -843,8 +849,8 @@ function showManagerView()
 
     g_currentView = "manager";
     //LoadTileMap( 'manager.json');
-    LoadTileMap( 'manager.json', function(grid){ 
-        g_currentGrid = grid; 
+    LoadTileMap( 'manager.json', function(grid){
+        g_currentGrid = grid;
 
         console.log('loaded manager');
 
@@ -890,6 +896,7 @@ function showManagerView()
                     this.animate("dummy_move", 20, 0);
                     // level goes up
                     DisplayFadingText("+1", this.x, this.y);
+
 
                 }
                 else
@@ -947,10 +954,6 @@ function showManagerView()
                 Crafty.audio.mute();
             }
         });
-
-    
-
-
 
     var data = $.cookie("gas-login");
     gas.send('TEAM_REQ', [ '{"username":"'+ JSON.parse(data).username + '"}' ]);
@@ -1041,7 +1044,7 @@ function showArenaView()
 
 
 
-    
+
     /*
     var tmpObj = Crafty.e("2D, DOM, Multiway, Keyboard, Grid, Mouse, Ape, Sprite, transparent")
         .Ape()
@@ -1124,17 +1127,21 @@ function showGladiatorPitView()
 
 function gladiatorHTML(gladiator)
 {
+
+	// Check racial max
     var HTMLstr =
-        'Name:'+gladiator.name+'<br />'+
-        'Age:'+gladiator.age+'<br />'+
-        'Health:'+gladiator.health+'<br />'+
-        'Nimbleness:'+gladiator.nimbleness+'<br />'+
-        'Strength:'+gladiator.strength+'<br />'+
-        'Mana:'+gladiator.mana+'<br />'+
-        'Salary:'+gladiator.salary+'<br />'+
-        'Fights:'+gladiator.fights+'<br />'+
-        'Knockouts:'+gladiator.knockouts+'<br />'+
-        'Injured:'+gladiator.injured;
+		'<table>' +
+        '<tr><td>Name:</td><td>'+gladiator.name+'</td><td>&nbsp;</td></tr>'+
+        '<tr><td>Age:</td><td><progress value="'+gladiator.age+'" max="35"></progress></td></tr>'+
+        '<tr><td>Health:</td><td><progress value="'+gladiator.health+'" max="35"></progress></td></tr>'+
+        '<tr><td>Nimbleness:</td><td><progress value="'+gladiator.nimbleness+'" max="35"></progress></td></tr>'+
+        '<tr><td>Strength:</td><td><progress value="'+gladiator.strength+'" max="35"></progress></td></tr>'+
+        '<tr><td>Mana:</td><td><progress value="'+gladiator.mana+'" max="35"></progress></td></tr>'+
+        '<tr><td>Salary:</td><td><progress value="'+gladiator.salary+'" max="150"></progress></td></tr>'+
+        '<tr><td>Fights:</td><td><progress value="'+gladiator.fights+'" max="100"></progress></td></tr>'+
+        '<tr><td>Knockouts:</td><td><progress value="'+gladiator.knockouts+'" max="100"></progress></td></tr>'+
+        '<tr><td>Injured:</td><td><progress value="'+gladiator.injured+'" max="15"></progress></td></tr>'+
+		'</table>';
 
     return HTMLstr;
 }
@@ -1524,9 +1531,9 @@ var GAS = Class(function() {
 					$('#challenges').append('<div class="team_entry" id="'+data[0].players[i]+'">'+data[0].players[i]+' [<a href="#" title="Challenge '+ data[0].players[i] +' - show player rank and team info?" onclick="gas.challengePlayer(\''+data[0].players[i]+'\');">challenge</a>] [<a href="#" onclick="gas.removeFromBattle(\''+data[0].players[i]+'\');">Remove battle</a>] </div>');
 			}
             // make challenges visible position them appropriately
-            var h = parseInt($('#challenges').css('height'));
-            $('#challenges').css('top', -h+'px');
-            $('#challenges').css('visibility', 'visible');
+            //var h = parseInt($('#challenges').css('height'));
+            //$('#challenges').css('top', -h+'px');
+            //$('#challenges').css('visibility', 'visible');
 			break;
         case 'CHALLENGE_REQ':
              console.log('Received challenge request from user:' + JSON.parse(data[0]).challenger);
@@ -1603,7 +1610,7 @@ var GAS = Class(function() {
                console.log('Victory view');
                graphics = "victory";
                msg = "Victory!";
-           } 
+           }
            else if ( d.victor == "" ){
                console.log('Neither party won');
                graphics = "defeat";
@@ -1615,14 +1622,14 @@ var GAS = Class(function() {
                msg = "You were defeated."
            }
            // TODO make some kind of tweening thing with a DEFEAT falling and bouncing a bit.
-           // TODO make some kind of "rising" effect with VICTORY 
+           // TODO make some kind of "rising" effect with VICTORY
             g_victory = Crafty.e("2D, DOM, Mouse, Sprite, "+graphics)
             .attr({w:800,h:800,x:0,y:-300,z:10})
             .bind('EnterFrame', function(){
                 TWEEN.update();
             });
-        
-        var t = Crafty.e("2D, DOM, Text")            
+
+        var t = Crafty.e("2D, DOM, Text")
             .attr( {w:130, h:20, x:30, y:-100, z:11})
             .text(msg)
             .css({
@@ -1631,7 +1638,7 @@ var GAS = Class(function() {
                 "font-size": "30pt",
             });
         g_victory.attach(t);
-        
+
 
 
          var param = {val:-300};
@@ -1646,7 +1653,7 @@ var GAS = Class(function() {
         /*g_smokeScreen
           .attr({changeToScene:"managerView"})
             .tween({alpha:1.0},50);*/
-            
+
 
         break;
         case 'MOVE_RES':
@@ -1669,7 +1676,7 @@ var GAS = Class(function() {
                for( var gid in g_gladiators ) {
 
                    if ( g_gladiators[gid].gladiator.name == d.gladiator ) {
-                       
+
                        var battlepos = g_gladiators[gid].gladiator.battledata.pos;
                        // verify that we are where we are supposed to be
                        if ( d.oldpos[0] != battlepos[0] ||
@@ -1681,7 +1688,7 @@ var GAS = Class(function() {
                        g_gladiators[gid].SetMovePattern( [g_gladiators[gid].gladiator.battledata.pos, d.newpos] );
                        break;
                    }
-               }                 
+               }
            }
         break;
         case 'ATTACK_RESP':
@@ -1729,8 +1736,8 @@ var GAS = Class(function() {
                    }
 
                } else {
-                 
-               }   
+
+               }
            }
 
 
@@ -1798,10 +1805,15 @@ var GAS = Class(function() {
                     .setupAnimation("long_spear") // default drill weapon
                     .setupAnimation(armorType) // takes care of setting proper armor
                     .bind("Click", function(){
-						g_gladiatorShowCase = this.gladiator;
-                        g_smokeScreen
-                            .attr({changeToScene:"gladiatorView"})
-                            .tween({alpha:1.0},50);
+						if(g_craftyShoppingMenus) {
+							g_gladiatorShowCase = this.gladiator;
+							g_smokeScreen
+								.attr({changeToScene:"gladiatorView"})
+								.tween({alpha:1.0},50);
+						}
+						else {
+							showGladiatorViewHtml(this.gladiator);
+						}
 
                     })
                     .bind("MouseOver", function(){
