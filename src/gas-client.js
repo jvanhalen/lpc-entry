@@ -668,6 +668,7 @@ function showLoginView()
 
 function showGladiatorViewHtml(gladiator) {
 
+	showGladiatorInfo();
 	$('#gladiatorinfo').empty();
 	$('#gladiatorinfo').append(gladiator.name + "<br />" + gladiatorHTML(gladiator));
 

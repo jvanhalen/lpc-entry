@@ -215,7 +215,6 @@
 				   }).start();
       }
 
-
       function craftyToggle()
       {
          var curVal = parseInt($("#cr-stage").css('left'));
@@ -237,6 +236,26 @@
                   Crafty.viewport.reload();
 
                 }, 1000);
+      }
+
+      function showGladiatorInfo()
+      {
+		var curVal = parseInt($("#gladiatorinfo").css('left'));
+		var width = parseInt($("#gladiatorinfo").css('width'));
+
+		var destVal = 0;
+
+		g_cssZVal += 1;
+
+		var param = {val: curVal};
+		var tween = new TWEEN.Tween(param)
+				   .to({val:destVal},100)
+				   .delay(100)
+				   .onUpdate(function(){
+					 $("#gladiatorinfo").css("top","340px");
+					 $("#gladiatorinfo").css("left",param.val);
+					 $("#gladiatorinfo").css("z-index",g_cssZVal);
+				   }).start();
       }
 
 	  function updateZzz(element) {
