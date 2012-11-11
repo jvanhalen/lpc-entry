@@ -192,7 +192,6 @@ A.button:active {
     outline: none;
 	width:200px;
 	height:43px;
-
 	border:none;
     line-height:43px;
     display: block;
@@ -223,8 +222,33 @@ A.button:active {
 
 
 	}
+A.button-smaller:hover {
+    background-position: 0px -83px;
+    color: white;
+}
+A.button-smaller:visited {
+    background-position: 0px 0px;
+    color: white;
+}
+A.button-smaller:active {
+    background-position: 0px -41px;
+    color: white;
+}
+.button-smaller {
+    outline: none;
+	width:145px;
+	height:43px;
 
-
+	border:none;
+    line-height:43px;
+    display: block;
+	background-image: url('../assets/gui/buttons-smaller.png');
+    background-position: 0px 0px;
+    font-family: 'Fanwood';
+    font-size: 16pt;
+    text-shadow: 2px 2px 2px #000000;
+	text-align:center;
+	color:white;
 
 	button:hover{
 
@@ -355,4 +379,63 @@ input:focus:required:invalid {
     font-family: Arial,Helvetica;
     font-size: 8pt;
 
+}
+.padding {
+    padding: 10px;
+}
+.gladiatorshowcase {
+    width: 230px;
+    height: 330px;
+    display:block;
+    border: 5px none ;
+    font-family: 'Fanwood-Text';
+    font-size: 12pt;
+    color: black;
+    background-image: url('../assets/gui/paper.png');
+}
+
+.border-top-left {
+    position:relative;
+    top:7px;
+    left:3px;
+    border: none;
+}
+.border-top-right {
+    position:relative;
+    top:7px;
+    left:-4px;
+    border: none;
+}
+.border-bottom-left {
+    position:relative;
+    top:-7px;
+    left:4px;
+    border: none;
+}
+.border-bottom-right {
+    position:relative;
+    top:-7px;
+    left:-4px;
+    border: none;
+}
+.border-left {
+    position: relative;
+ }
+
+table {
+    border-collapse: collapse;
+    position: relative;
+    top: -20px;
+    left: -10px;
+}
+td, th {
+    padding: 0;
+}
+.border-top {
+    position: relative;
+    top: 3px;
+}
+.border-bottom {
+    position: relative;
+    top: -4px;
 }

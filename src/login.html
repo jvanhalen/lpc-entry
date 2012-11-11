@@ -323,8 +323,8 @@
             Crafty.scene(g_smokeScreen.changeToScene);
         });
 
-    gas.connect('gas.dy.fi', 8080);
-    //gas.connect('localhost', 8080);
+    //gas.connect('gas.dy.fi', 8080);
+    gas.connect('localhost', 8080);
     Crafty.scene("managerView", showManagerView, hideManagerView);
     Crafty.scene("gladiatorView", showGladiatorView, hideGladiatorView);
     Crafty.scene("arenaView", showArenaView, hideArenaView);
@@ -377,5 +377,46 @@
 
   <div id="challenges" ondblclick="toggleChallenges();" ></div>
   <div id="gladiatorinfo" class="container"></div>
+
+<!-- some test code for gladiator elements 
+  <div class="padding">
+  <div class="gladiatorshowcase">
+    	<table >
+        <tr>
+          <td><img class="border-top-left" src="../assets/corner-top-left.png" ></td>
+          <td colspan="2"><img class="border-top" src="../assets/bar.png" width="200" height="20"></td>
+          <td><img class="border-top-right" src="../assets/corner-top-right.png" ></td>
+        </tr>
+        <tr>
+          <td rowspan="12"><img class="border-left" src="../assets/bar-v.png" width="22" height="300"></td>
+          <td colspan="2"> <p class="btnp"><a href="#" class="button-smaller" onclick="">Retire</a></p></td>
+
+          <td rowspan="12"><img class="border-right" src="../assets/bar-v.png" width="22" height="300"></td>
+        </tr>
+        <tr><td>Name:</td><td>gladiator.name</td><td></td></tr>
+        <tr><td>Age:</td><td><div style="padding:2px;background:#CCC;">
+  <div style="width:25%;background:#aF4;text-align:center;">
+    <span>25%</span>
+  </div>
+</div></td></tr>
+        <tr><td>Health:</td><td><meter value="12" max="35"></meter></td></tr>
+        <tr><td>Nimbleness:</td><td><meter value="12" max="35"></meter></td></tr>
+        <tr><td>Strength:</td><td><meter value="1" max="35"></meter></td></tr>
+        <tr><td>Mana:</td><td><meter value="2" max="35"></meter></td></tr>
+        <tr><td>Salary:</td><td><meter value="3" max="150"></meter></td></tr>
+        <tr><td>Fights:</td><td><meter value="4" max="100"></meter></td></tr>
+        <tr><td>Knockouts:</td><td><meter value="5" max="100"></meter></td></tr>
+        <tr><td>Injured:</td><td><meter value="6" max="15"></meter></td></tr>
+        <tr><td colspan="2"><p class="btnp"><a href="#" class="button-smaller" onclick="">Equip</a></p></td></tr>
+        <tr>
+          <td><img class="border-bottom-left" src="../assets/corner-bottom-left.png" ></td>
+          <td colspan="2"><img class="border-bottom" src="../assets/bar.png" width="200" height="20"></td>
+          <td><img class="border-bottom-right" src="../assets/corner-bottom-right.png" ></td>
+        </tr>
+		</table>
+    
+  </div>
+  </div>
+-->
 </body>
 </html>
