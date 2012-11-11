@@ -9,12 +9,15 @@ Crafty.c('Targetpos', {
     }
 });
 
-function DisplayFadingText( text, xpos, ypos, size, font )
+// Create debouncer for DisplayFadingText()
+var DisplayFadingText = _.debounce(DisplayFadingTextDebounced, 300);
+
+function DisplayFadingTextDebounced( text, xpos, ypos, size, font )
 {
 
     if ( !size ) size="34pt";
     if ( !font) font ="Impact";
-    
+
     var e = Crafty.e("2D, DOM, Targetpos, Tween, Text")
         .attr({alpha: 1.0, x:xpos, y:ypos,z:8})
         .setTarget(xpos,ypos-100)
@@ -29,4 +32,3 @@ function DisplayFadingText( text, xpos, ypos, size, font )
         });
     e.tween({alpha: 0.0, x:e.targetx, y:e.targety}, 100);
 }
-
