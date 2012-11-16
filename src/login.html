@@ -180,7 +180,7 @@
 		var curVal = parseInt($("#challenges").css('left'));
 		var width = parseInt($("#challenges").css('width'));
 
-		var destVal = (curVal < 0) ? 0 : 20-width;
+		var destVal = (curVal < 0) ? 10 : 20-width;
 
 		g_cssZVal += 1;
 
@@ -200,7 +200,7 @@
 		var curVal = parseInt($("#gladiatorinfo").css('left'));
 		var width = parseInt($("#gladiatorinfo").css('width'));
 
-		var destVal = (curVal < 0) ? 0 : 20-width;
+		var destVal = (curVal < 0) ? 10 : 20-width;
 
 		g_cssZVal += 1;
 
@@ -243,7 +243,7 @@
 		var curVal = parseInt($("#gladiatorinfo").css('left'));
 		var width = parseInt($("#gladiatorinfo").css('width'));
 
-		var destVal = 0;
+		var destVal = 10;
 
 		g_cssZVal += 1;
 
@@ -376,9 +376,9 @@
   <p class="btnp"><a href="#" class="button" onclick="craftyToggle();">Swap Crafty</a></p>
 
   <div id="challenges" ondblclick="toggleChallenges();" ></div>
-  <div id="gladiatorinfo" class="container"></div>
+  <div id="gladiatorinfo" class="block"></div>
 
-<!-- some test code for gladiator elements 
+<!--
   <div class="padding">
   <div class="gladiatorshowcase">
     	<table >
@@ -414,7 +414,7 @@
           <td><img class="border-bottom-right" src="../assets/corner-bottom-right.png" ></td>
         </tr>
 		</table>
-    
+
   </div>
   </div>
 -->

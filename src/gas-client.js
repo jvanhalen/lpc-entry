@@ -670,7 +670,7 @@ function showGladiatorViewHtml(gladiator) {
 
 	showGladiatorInfo();
 	$('#gladiatorinfo').empty();
-	$('#gladiatorinfo').append(gladiator.name + "<br />" + gladiatorHTML(gladiator));
+	$('#gladiatorinfo').append(gladiatorHTML(gladiator));
 
 }
 
@@ -1131,8 +1131,8 @@ function gladiatorHTML(gladiator)
 
 	// Check racial max
     var HTMLstr =
-		'<table>' +
-        '<tr><td>Name:</td><td>'+gladiator.name+'</td><td>&nbsp;</td></tr>'+
+		'<p><table>' +
+        '<tr><td>Name:</td><td>'+gladiator.name+'</td><td>&nbsp;</td><img src="../assets/gui/</tr>'+
         '<tr><td>Age:</td><td><progress value="'+gladiator.age+'" max="35"></progress></td></tr>'+
         '<tr><td>Health:</td><td><progress value="'+gladiator.health+'" max="35"></progress></td></tr>'+
         '<tr><td>Nimbleness:</td><td><progress value="'+gladiator.nimbleness+'" max="35"></progress></td></tr>'+
@@ -1142,7 +1142,7 @@ function gladiatorHTML(gladiator)
         '<tr><td>Fights:</td><td><progress value="'+gladiator.fights+'" max="100"></progress></td></tr>'+
         '<tr><td>Knockouts:</td><td><progress value="'+gladiator.knockouts+'" max="100"></progress></td></tr>'+
         '<tr><td>Injured:</td><td><progress value="'+gladiator.injured+'" max="15"></progress></td></tr>'+
-		'</table>';
+		'</table></p>';
 
     return HTMLstr;
 }
@@ -1620,7 +1620,7 @@ var GAS = Class(function() {
            else {
                console.log('Defeat view');
                graphics = "defeat";
-               msg = "You were defeated."
+               msg = "You have been defeated."
            }
            // TODO make some kind of tweening thing with a DEFEAT falling and bouncing a bit.
            // TODO make some kind of "rising" effect with VICTORY

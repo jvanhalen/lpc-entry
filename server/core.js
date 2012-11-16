@@ -37,38 +37,66 @@ var core = {
 		core.dbcore.init();
 
 		// Cache gladiators
-		this.dbcore.read(configs.gladiatordb + "/_all_docs?include_docs=true", function(err, body) {
+		this.dbcore.bulkread(configs.gladiatordb, function(err, body) {
+			//console.log("dbcore.bulkread: body: ", body, "error: ", err);
 			// Double check that the gladiatordb contains gladiators
-			if(body.total_rows == 0)
-				core.dbcore.generateGladiators();
-			else
-				core.dbcore.initGladiators(body);
+			if(!err) {
+				if(body.total_rows == 0) {
+					console.log("core.init: gladiatordb is empty");
+					core.dbcore.generateGladiators();
+				}
+				else {
+					core.dbcore.initGladiators(body);
+				}
+			}
+			else {
+				console.log("ERROR: init: gladiatordb", err)
+			}
 		});
 
 		// Cache users/players
-		this.dbcore.read(configs.userdb + "/_all_docs?include_docs=true", function(err, body) {
-			if(body.total_rows == 0)
-				console.log("core.init: userdb is empty");
-			else
-				core.dbcore.initUsers(body);
+		this.dbcore.bulkread(configs.userdb, function(err, body) {
+			if(!err) {
+				if(body.total_rows == 0) {
+					console.log("core.init: userdb is empty");
+				}
+				else {
+					core.dbcore.initUsers(body);
+				}
+			}
+			else {
+				console.log("ERROR: init: userdb", err)
+			}
 		});
 
         // Cache battles
-		this.dbcore.read(configs.battledb + "/_all_docs?include_docs=true", function(err, body) {
-			if(body.total_rows == 0)
-				console.log("core.init: battledb is empty");
-			else
-				core.dbcore.initBattles(body);
+		this.dbcore.bulkread(configs.battledb, function(err, body) {
+			if(!err) {
+				if(body.total_rows == 0) {
+					console.log("core.init: battledb is empty");
+				}
+				else {
+					core.dbcore.initBattles(body);
+				}
+			}
+			else {
+				console.log("ERROR: init: battledb", err)
+			}
 		});
 
 		// Cache items
-		this.dbcore.read(configs.itemdb + "/_all_docs?include_docs=true", function(err, body) {
-			if(body.total_rows == 0) {
-				console.log("core.init: itemdb is empty");
-				core.dbcore.generateItems(body);
+		this.dbcore.bulkread(configs.itemdb, function(err, body) {
+			if(!err) {
+				if(body.total_rows == 0) {
+					console.log("core.init: itemdb is empty");
+					core.dbcore.generateItems(body);
+				}
+				else {
+					core.dbcore.initItems(body);
+				}
 			}
 			else {
-				core.dbcore.initItems(body);
+				console.log("ERROR: init: itemdb", err)
 			}
 		});
 
@@ -110,7 +138,7 @@ var core = {
 			console.log("createUser", newuser._id);
 			// Store user/player to database
 
-			this.dbcore.insert(configs.userdb, newuser._id, newuser, function(err, body) {
+			this.dbcore.insert(newuser, configs.userdb, function(err, body, header) {
 				if(err) {
 					console.log("ERROR: dbcore.createUser: ", err.reason, body);
 				}
@@ -360,7 +388,7 @@ var core = {
             // add to cache immediately
             core.battlecache.write(battle._id, battle);
 
-            this.dbcore.insert(configs.battledb, battle._id, battle, function(err,body){
+            this.dbcore.insert(battle, configs.battledb, function(err,body,header){
                 if ( err ) {
                     console.log("ERROR: dbcore.createBattle: ", err.reason.body);
                 }
@@ -585,7 +613,7 @@ var core = {
 				}
 				else {
 					// Read the new data and init gladiatorcache
-					core.dbcore.read(configs.gladiatordb + "/_all_docs?include_docs=true", function(err, body) {
+					core.dbcore.bulkread(configs.gladiatordb, function(err, body) {
 								// Double check that the gladiatordb contains gladiators
 								if(body.total_rows == 0) {
 									console.log("ERROR: core.dbcore.generateGladiators: gladiators could not be created");
@@ -618,7 +646,7 @@ var core = {
 				}
 				else {
 					// Read the new data and init itemcache
-					core.dbcore.read(configs.itemdb + "/_all_docs?include_docs=true", function(err, body) {
+					core.dbcore.bulkread(configs.itemdb, function(err, body) {
 						// Double check that the gladiatordb contains gladiators
 						if(body.total_rows == 0) {
 							console.log("ERROR: core.dbcore.generateItems: items could not be created");
@@ -695,10 +723,6 @@ var core = {
 
 		read: function(dbname, callback) {
 
-			if(dbname[0] != '/') {
-			  dbname = '/' + dbname;
-			}
-
 			this.nano.db.get(dbname, function(err, body) {
 				if (!err) {
 					callback(err, body);
@@ -710,14 +734,22 @@ var core = {
 		},
 
 		bulkread: function(dbname, callback) {
-			/*
-			this.nano.db.get(dbname+ '/_all_docs?include_docs=true', function(err, body) {
-			  if (!err)
-				//console.log(dbname);
-				callback(body);
+
+			var params = {
+                db: dbname,
+                path: '/_all_docs?include_docs=true',
+                method: 'GET'
+			}
+
+			this.nano.request(params, function(err, body) {
+				if (!err) {
+					//console.log(dbname);
+					callback(err, body);
+				}
+				else {
+					console.log("ERROR: dbcore.bulkread: ", err);
+				}
 			});
-			*/
-			console.log("WARNING: dbcore.bulkread: not implemented");
 		},
 
 		insert: function(db, doc, data, callback) {
@@ -738,7 +770,7 @@ var core = {
 			//var bulkdata = {docs: data};
 			//console.log("bulkinsert:", counter++, bulkdata);
 			this.nano.request({ db: dbname,
-								doc: '_bulk_docs',
+								path: '_bulk_docs',	// doc->path: Changed after nano update
 								method: 'post',
 								//Correct format:
 								//body: {"docs":[{"_id":"Itedod","name":"Itedod","race":"skeleton","team":"null","age":"0","health":11,"nimbleness":14,"strength":14,"mana":14,"salary":13,"fights":"0","knockouts":"0","injured":"0","icon":"\"skeleton.png\""},{"_id":"Igoasop","name":"Igoasop","race":"skeleton","team":"null","age":"0","health":9,"nimbleness":12,"strength":10,"mana":12,"salary":14,"fights":"0","knockouts":"0","injured":"0","icon":"\"skeleton.png\""}]}

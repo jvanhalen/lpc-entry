@@ -136,10 +136,10 @@ input {
     height: 27px;
     margin:0px 0;
     color:#fff;
-//    padding:0 0 0 0px;
+/*    padding:0 0 0 0px; */
     font-family: Arial, Helvetica,sans-serif;
     font-size:8pt;
-//    letter-spacing:2px;
+/*    letter-spacing:2px; */
   }
 
 input.error { border: 2px solid red; }
@@ -347,29 +347,9 @@ input:focus:required:invalid {
     border-width: 1px;
 	overflow:auto;
 	overflow-y:auto;
-}
-
-#gladiatorinfo {
-    font-family: 'Fanwood-Text';
-    font-size: 12pt;
-
-    display: block;
-	float: left;
-	position: absolute;
-    top: 340px;
-    left: -230px;
-	width: 250px;
-    height: 300px;
-
-    z-index:15;
-    padding: 1mm 1mm 1mm 1mm;
-	background-color: #2e1a20;
-   	color: white;
-    border: dashed;
-    border-color: #eec06a;
-    border-width: 1px;
-	overflow:auto;
-	overflow-y:auto;
+    background-image: url('../assets/fire.png');
+    background-size: 100%;
+    background-repeat:no-repeat;
 }
 
 .footer {
@@ -391,7 +371,9 @@ input:focus:required:invalid {
     font-family: 'Fanwood-Text';
     font-size: 12pt;
     color: black;
-    background-image: url('../assets/gui/paper.png');
+    background-image: url('../assets/fire.png');
+    background-size: 100%;
+    background-repeat:no-repeat;
 }
 
 .border-top-left {
@@ -425,8 +407,8 @@ input:focus:required:invalid {
 table {
     border-collapse: collapse;
     position: relative;
-    top: -20px;
-    left: -10px;
+    top: 10px;
+    left: 10px;
 }
 td, th {
     padding: 0;
@@ -438,4 +420,31 @@ td, th {
 .border-bottom {
     position: relative;
     top: -4px;
+}
+
+#gladiatorinfo {
+    font-family: 'Fanwood-Text';
+    font-size: 12pt;
+
+    display: block;
+	float: left;
+	position: absolute;
+    top: 340px;
+    left: -230px;
+	width: 250px;
+    height: 300px;
+
+    z-index:15;
+    padding: 1mm 1mm 1mm 1mm;
+	background-color: #2e1a20;
+   	color: white;
+    border: dashed;
+    border-color: #eec06a;
+    border-width: 1px;
+	overflow:auto;
+	overflow-y:auto;
+    background-image: url('../assets/fire.png');
+    background-size: 100%;
+    background-repeat:no-repeat;
+
 }
