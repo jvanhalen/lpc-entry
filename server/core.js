@@ -1114,6 +1114,7 @@ var core = {
 		message:{
 		"_id": null,
 		"name": null,
+		"gold": 500,
 		"team": null,
 		"ingame": null,
 		"ai": false,

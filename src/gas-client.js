@@ -18,6 +18,8 @@ var g_itemList = [];
 var g_smokeScreen = null;
 var g_cssZVal = 10;	// Start from value 10
 var g_victory = null;
+var g_moneyCalc = null;
+var g_playerGold = 0;
 
 var g_craftyShoppingMenus = false; // Use Crafty or plain html menus
 
@@ -915,6 +917,16 @@ function showManagerView()
 
     }
 
+    // Money calculator
+    g_moneyCalc = Crafty.e("2D, DOM, Text").attr({ w: 100, h: 20, x: 10, y: 10 })
+        .text('<img src="../assets/gui/Claudius_II_coin_(colourised).png" alt="coins" width="30px" height="30px"/>' + g_playerGold)
+        .css({
+            "text-align": "left",
+            "font-family": "Impact",
+            "font-size": "16pt"
+        });
+
+/*
     // Add a title
     Crafty.e("2D, DOM, Text").attr({ w: 400, h: 20, x: 15, y: 10 })
         .text("Gladiator's hall")
@@ -931,6 +943,7 @@ function showManagerView()
             "font-family": "Arial",
             "font-size": "8pt"
         });
+
     // Testing info
     Crafty.e("2D, DOM, Text").attr({ w: 140, h: 20, x: 20, y: 40, z:8 })
         .text("~Legend~")
@@ -947,6 +960,7 @@ function showManagerView()
             "font-size": "10pt",
             "color": "#FFFFFF"
         })
+
         .bind('KeyDown', function () {
             if (this.isDown('P')){
                 Crafty.scene("gladiatorPitView");
@@ -955,7 +969,7 @@ function showManagerView()
                 Crafty.audio.mute();
             }
         });
-
+*/
     var data = $.cookie("gas-login");
     gas.send('TEAM_REQ', [ '{"username":"'+ JSON.parse(data).username + '"}' ]);
     gas.send('GET_ONLINE_PLAYERS_REQ', [ '{"username":"'+ JSON.parse(data).username + '"}' ]);
@@ -1132,16 +1146,16 @@ function gladiatorHTML(gladiator)
 	// Check racial max
     var HTMLstr =
 		'<p><table>' +
-        '<tr><td>Name:</td><td>'+gladiator.name+'</td><td>&nbsp;</td><img src="../assets/gui/</tr>'+
-        '<tr><td>Age:</td><td><progress value="'+gladiator.age+'" max="35"></progress></td></tr>'+
-        '<tr><td>Health:</td><td><progress value="'+gladiator.health+'" max="35"></progress></td></tr>'+
-        '<tr><td>Nimbleness:</td><td><progress value="'+gladiator.nimbleness+'" max="35"></progress></td></tr>'+
-        '<tr><td>Strength:</td><td><progress value="'+gladiator.strength+'" max="35"></progress></td></tr>'+
-        '<tr><td>Mana:</td><td><progress value="'+gladiator.mana+'" max="35"></progress></td></tr>'+
-        '<tr><td>Salary:</td><td><progress value="'+gladiator.salary+'" max="150"></progress></td></tr>'+
-        '<tr><td>Fights:</td><td><progress value="'+gladiator.fights+'" max="100"></progress></td></tr>'+
-        '<tr><td>Knockouts:</td><td><progress value="'+gladiator.knockouts+'" max="100"></progress></td></tr>'+
-        '<tr><td>Injured:</td><td><progress value="'+gladiator.injured+'" max="15"></progress></td></tr>'+
+        '<tr><td>Name</td><td>'+gladiator.name+'</td></tr>'+
+        '<tr><td>Health</td><td><progress value="'+gladiator.health+'" max="35"></progress></td></tr>'+
+        '<tr><td>Nimbleness</td><td><progress value="'+gladiator.nimbleness+'" max="35"></progress></td></tr>'+
+        '<tr><td>Strength</td><td><progress value="'+gladiator.strength+'" max="35"></progress></td></tr>'+
+        '<tr><td>Mana</td><td><progress value="'+gladiator.mana+'" max="35"></progress></td></tr>'+
+        '<tr><td>Salary</td><td>'+gladiator.salary+'</td></tr>'+
+        '<tr><td>Age</td><td>'+gladiator.age+'</td></tr>'+
+        '<tr><td>Fights</td><td>'+gladiator.fights+'</td></tr>'+
+        '<tr><td>Knockouts</td><td>'+gladiator.knockouts+'</td></tr>'+
+        '<tr><td>Injured</td><td>'+gladiator.injured+'</td></tr>'+
 		'</table></p>';
 
     return HTMLstr;
@@ -1755,6 +1769,8 @@ var GAS = Class(function() {
     handleTeamResponse: function(data)
     {
         var team = data.team;
+
+		
         // create visualization for each gladiator in team.
         if ( g_currentView == "manager")
         {
