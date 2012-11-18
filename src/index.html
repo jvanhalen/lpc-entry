@@ -1,0 +1,213 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<link rel="stylesheet" href="style.css" type="text/css"/>
+<script type="text/javascript" src="./lib/jquery-1.7.2.js"></script>
+</head>
+<body>
+
+  <div id="gas_main" class="gas_main">
+    <img src="../assets/victory.png" alt="" class="gas_preview" style="display:none;" />
+    <div class="gas_overlay"></div>
+    <h1>Galaxy All-Stars: Fantasy Edition</h1>
+
+    <div id="gas_loading" class="gas_loading">
+      <span>Loading...</span>
+    </div>
+    <!-- Navigation div -->
+
+    <ul id="gas_nav" class="gas_navigation" >
+      <!-- image node -->
+      <li class="album">
+        <span class="gas_link">
+          Current team
+          <span class="gas_arrow_down"></span>
+        </span>
+        <div class="gas_wrapper gas_thumbs_wrapper">
+          <div class="gas_thumbs">
+            <img src="../assets/portrait/thumbs/Aileen.png" alt="../assets/portrait/Aileen.png" />
+            <img src="../assets/portrait/thumbs/Bjin.png" alt="../assets/portrait/Bjin.png" />
+            <img src="../assets/portrait/thumbs/Jonas.png" alt="../assets/portrait/Jonas.png" />
+            <img src="../assets/portrait/thumbs/FlareFemaleHero1.png" alt="../assets/portrait/FlareFemaleHero1.png" />
+            <img src="../assets/portrait/thumbs/Joi.png" alt="../assets/portrait/Joi.png" />
+            <img src="../assets/portrait/thumbs/Maxime.png" alt="../assets/portrait/Maxime.png" />
+            <img src="../assets/portrait/thumbs/FlareMaleHero1.png" alt="../assets/portrait/FlareMaleHero1.png" />
+            <img src="../assets/portrait/thumbs/FlareFemaleHero3.png" alt="../assets/portrait/FlareFemaleHero3.png" />
+          </div>
+
+        </div>
+      </li>
+      <!-- Text node -->
+      <li>
+        <span class="gas_link">
+          Challenges
+          <span class="gas_arrow_down"></span>
+        </span>
+        <div class="gas_about gas_thumbs_wrapper">
+          <div class="gas_subcontent">
+
+            <p>
+              Seek victim:<input type="text" id="gas_challenge_search" value="" />
+              <p class="btnp"><a href="#" class="button-smaller" onclick="gas.searchVictim($('#gas_challenge_search').val());">Search</a></p>
+            </p>
+          </div>
+        </div>
+      </li>
+
+      <li>
+        <span class="gas_link">
+          Credits
+          <span class="gas_arrow_down"></span>
+        </span>
+        <div class="gas_about gas_thumbs_wrapper">
+          <div class="gas_subcontent">
+            <p>
+              Oldman & Green &copy; 2012.
+            </p>
+          </div>
+        </div>
+      </li>
+      <li>
+        <span class="gas_link">
+          Battles
+          <span class="gas_arrow_down"></span>
+        </span>
+   
+        <div class="gas_about gas_thumbs_wrapper">
+         
+          <div class="gas_subcontent">
+            <span id="challenger" class="gas_battle_portrait"><img src="../assets/portrait/thumbs/FlareMaleHero1.png" /></span> VS.
+            <span id="defender" class="gas_battle_portrait"><img src="../assets/portrait/thumbs/FlareFemaleHero3.png"  /></span>
+
+          </div>
+        </div>
+      </li>
+    </ul>
+
+  </div>
+  <script type="text/javascript">
+
+      var $loader = $('#gas_loading');
+      var $list = $('#gas_nav');
+      var $currImage = $('#gas_main').children('img:first');
+      
+
+      setTimeout(function(){
+         $list.animate({'left':'0px'},500);
+      $loader.hide();
+      },
+      1000);
+
+      /* Loader for first image...
+      $('<img>').load(function(){
+      $loader.hide();
+      $currImage.fadeIn(3000);
+      setTimeout(function(){
+      $list.animate({'left':'0px'},500);
+      },
+      1000);
+      }).attr('src', $currImage.attr('src'));*/
+      
+      buildThumbs();
+      // compute widths for thumbnail containers.
+      function buildThumbs(){
+      $list.children('li.album').each(function(){
+      var $elem = $(this);
+      var $thumbs_wrapper = $elem.find('.gas_thumbs_wrapper');
+      var $thumbs = $thumbs_wrapper.children(':first');
+      var finalW = $thumbs.find('img').length * 123;
+      $thumbs.css('width', finalW + 'px');
+      makeScrollable($thumbs_wrapper, $thumbs);
+      });
+      }
+
+      // arrow clicking
+      $list.find('.gas_arrow_down').live('click', function(){
+      var $this = $(this);
+      hideThumbs();
+      $this.addClass('gas_arrow_up').removeClass('gas_arrow_down');
+      console.log('here we go TOO');
+      var $elem = $this.closest('li');
+      $elem.addClass('current').animate({'height':'170px'},200);
+      var $thumbs_wrapper = $this.parent().next();
+      $thumbs_wrapper.show(200);
+      });
+
+      $list.find('.gas_arrow_up').live('click', function(){
+      console.log('here we go');
+      var $this = $(this);
+      //$this.addClass('gas_arrow_down').removeClass('gas_arrow_up');
+      hideThumbs();   
+      });
+
+      // thumb clicking
+      $list.find('.gas_thumbs img').bind('click', function(){
+      var $this = $(this);
+      $loader.show();
+      $('<img class="gas_preview"/>').load( function(){
+      var $this = $(this);     
+      var $currImage = $('#gas_main').children('img:first');
+      $this.insertBefore($currImage);
+      $loader.hide();
+      $currImage.fadeOut(2000, function(){
+      $(this).remove();
+      });
+      }).attr('src', $this.attr('alt'));
+      }).bind('mouseenter', function(){
+      $(this).stop().animate({'opacity':'1'});
+      }).bind('mouseleave', function(){
+      $(this).stop().animate({'opacity':'0.7'});
+      });
+
+      // hide thumbnails
+
+      function hideThumbs(){
+      $list.find('li.current')
+      .animate({'height':'50px'}, 400, function(){
+      $(this).removeClass('current');
+      })
+      .find('.gas_thumbs_wrapper')
+      .hide(200)
+      .andSelf()
+      .find('.gas_link span')
+      .addClass('gas_arrow_down')
+      .removeClass('gas_arrow_up');
+      }
+
+      // thumbs move on mouse
+      function makeScrollable($outer, $inner ){
+      var extra = 800;
+      var divWidth = $outer.width();
+      $outer.css({
+      overflow: 'hidden'
+      });
+
+      var lastElem = $inner.find('img:last');
+      $outer.scrollLeft(0);
+      $outer.unbind('mousemove').bind('mousemove', function(e){
+      var containerWidth = lastElem[0].offsetLeft + lastElem.outerWidth() + 2*extra;
+      var left = (e.pageX - $outer.offset().left) * (containerWidth-divWidth) / divWidth - extra;
+      $outer.scrollLeft(left);
+      });
+  }
+      var gas = {
+         searchVictim: function( $name ){
+            var $loader = $('#gas_loading').show();
+            setTimeout( function(){
+              console.log('Searching for', $name);
+              $loader.hide();}, 1000);
+          }
+      };
+
+</script>
+
+<!-- Main page with server connection info -->
+<!-- Challenges -->
+<!-- Gladiator market -->
+<!-- Gladiator tuning -->
+<!-- Battle view -->
+<!-- Ranking view -->
+
+</body>
+</html>
