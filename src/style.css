@@ -171,8 +171,88 @@ A.button-smaller:active {
     display: inline-block;
     margin: 0 0 0 0;
 }
-
+.gas_battle {
+    bottom:0px;
+    position:fixed;
+    right:50%;
+    margin-right: -200px;
+}
 .gas_battle_portrait {
+    padding: 20px;
+}
+.gas_challenges {
+    position: absolute;
+    overflow: hidden;
+    right:-200px;
+    width: 200px;
+    height:300px;
+    background-color: #000;
+}
+.gas_arena {
+    width: 100%;
+    height: 100%;
+    z-index: 300;
+}
+.gas_arena div.left {
+    position: absolute;
+    top:0px;
+    left:0px;
+    width: 152px;
+    top: -600px;
+}
+.gas_arena div.left img {
 
+    margin-left: 20px;
+}
+.gas_arena div.right img {
 
+    margin-right: 20px;
+}
+.gas_arena div.right {
+    position: absolute;
+    top: -600px;
+    right:0px;
+    width: 122px;
+}
+
+.gas_arena div.center {
+    position: fixed;
+    right: 50%;
+    top: -600px;
+    width: 700px;
+    height: 512px;
+    background-color: #000;
+}
+div.action {
+    position:absolute;
+    z-index: 1;
+    height:52px;
+    width:410px;
+    left:-500px;
+    top:0px;
+}
+
+img.battle_action {
+    width: 50px;
+    height: 50px;
+}
+img.battle_action.melee {
+    position:absolute;
+    top:79px;
+    left:0px;
+}
+img.battle_action.ranged {
+    position:absolute;
+    top:28px;
+    left:0px;
+}
+img.battle_action.defend {
+    position:absolute;
+    top:0px;
+    left:53px;
+}
+img.battle_action.cast {
+    position:absolute;
+    top:56px;
+    left:53px;
 }

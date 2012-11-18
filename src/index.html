@@ -17,11 +17,11 @@
     </div>
     <!-- Navigation div -->
 
-    <ul id="gas_nav" class="gas_navigation" >
+    <ul id="gas_nav" class="gas_navigation" style="display:none;">
       <!-- image node -->
       <li class="album">
         <span class="gas_link">
-          Current team
+          My Gladiators
           <span class="gas_arrow_down"></span>
         </span>
         <div class="gas_wrapper gas_thumbs_wrapper">
@@ -34,6 +34,22 @@
             <img src="../assets/portrait/thumbs/Maxime.png" alt="../assets/portrait/Maxime.png" />
             <img src="../assets/portrait/thumbs/FlareMaleHero1.png" alt="../assets/portrait/FlareMaleHero1.png" />
             <img src="../assets/portrait/thumbs/FlareFemaleHero3.png" alt="../assets/portrait/FlareFemaleHero3.png" />
+          </div>
+
+        </div>
+      </li>
+      <li class="album">
+        <span class="gas_link">
+          Battleteam
+          <span class="gas_arrow_down"></span>
+        </span>
+        <div class="gas_wrapper gas_thumbs_wrapper">
+          <div class="gas_thumbs">
+            <img src="../assets/portrait/thumbs/Aileen.png" alt="../assets/portrait/Aileen.png" />
+            <img src="../assets/portrait/thumbs/Bjin.png" alt="../assets/portrait/Bjin.png" />
+            <img src="../assets/portrait/thumbs/Jonas.png" alt="../assets/portrait/Jonas.png" />
+            <img src="../assets/portrait/thumbs/FlareFemaleHero1.png" alt="../assets/portrait/FlareFemaleHero1.png" />
+
           </div>
 
         </div>
@@ -68,34 +84,102 @@
           </div>
         </div>
       </li>
-      <li>
-        <span class="gas_link">
-          Battles
-          <span class="gas_arrow_down"></span>
-        </span>
-   
-        <div class="gas_about gas_thumbs_wrapper">
-         
-          <div class="gas_subcontent">
-            <span id="challenger" class="gas_battle_portrait"><img src="../assets/portrait/thumbs/FlareMaleHero1.png" /></span> VS.
-            <span id="defender" class="gas_battle_portrait"><img src="../assets/portrait/thumbs/FlareFemaleHero3.png"  /></span>
-
-          </div>
-        </div>
-      </li>
+     
     </ul>
-
   </div>
-  <script type="text/javascript">
+  <div class="gas_battle" id="gas_battle">
+    <p class="btnp" style="position:relative;left:50%;"><a href="#" class="button-smaller" onclick="gas.enterArena();">Enter the Arena</a></p>
+      <div class="gas_subcontent" style="height:150px;">
 
+      <span id="challenger" style="float:left;" class="gas_battle_portrait">
+        Anssi the Allmighty<br/>
+        <img src="../assets/portrait/thumbs/FlareMaleHero1.png" />
+      </span>
+      VS:
+      <span id="defender" style="float:right;" class="gas_battle_portrait">
+        Jaakko the Jihad<br/>
+        <img src="../assets/portrait/thumbs/FlareFemaleHero3.png"/>
+      </span>
+            
+    </div>
+  </div>
+  <div class="gas_arena" id="gas_arena">
+    <!-- my gladiators, point to select action -->
+    <div class="left" id="left">
+      <div class="gladiator">
+        <img class="face" src="../assets/portrait/thumbs/Aileen.png" alt="Aileen" />
+        <div class="action">
+          <img class="battle_action melee" src="../assets/gui/melee-attack.png">
+          <img class="battle_action ranged" src="../assets/gui/ranged-attack.png">
+          <img class="battle_action defend" src="../assets/gui/defend.png"><br/>
+          <img class="battle_action cast" src="../assets/gui/spellcast.png">
+        </div>
+      </div>
+      <div class="gladiator">
+        <img  class="face" src="../assets/portrait/thumbs/Bjin.png" alt="Bjin" />
+        <div class="action">
+          <img class="battle_action melee" src="../assets/gui/melee-attack.png">
+          <img class="battle_action ranged" src="../assets/gui/ranged-attack.png">
+          <img class="battle_action defend" src="../assets/gui/defend.png"><br/>
+          <img class="battle_action cast" src="../assets/gui/spellcast.png">
+
+        </div>
+      </div>
+      <div class="gladiator">
+        <img  class="face" src="../assets/portrait/thumbs/Jonas.png" alt="Jonas" />
+        <div class="action">
+          <img class="battle_action melee" src="../assets/gui/melee-attack.png">
+          <img class="battle_action ranged" src="../assets/gui/ranged-attack.png">
+          <img class="battle_action defend" src="../assets/gui/defend.png"><br/>
+          <img class="battle_action cast" src="../assets/gui/spellcast.png">
+        </div>
+      </div>
+      <div class="gladiator">
+        <img  class="face" src="../assets/portrait/thumbs/FlareFemaleHero1.png" alt="FemaleHero1" />
+        <div class="action">
+          <img class="battle_action melee" src="../assets/gui/melee-attack.png">
+          <img class="battle_action ranged" src="../assets/gui/ranged-attack.png">
+          <img class="battle_action defend" src="../assets/gui/defend.png"><br/>
+          <img class="battle_action cast" src="../assets/gui/spellcast.png">
+        </div>
+      </div>
+
+
+
+
+    </div>
+
+    <!-- battle visualization with crafty, point to highlight gladiator from UI -->
+    <div class="center" id="center">
+
+    </div>
+
+    <!-- enemy div, point to attack -->
+    <div class="right" id="right">
+      <img src="../assets/portrait/thumbs/Joi.png" alt="../assets/portrait/Joi.png" />
+      <img src="../assets/portrait/thumbs/Maxime.png" alt="../assets/portrait/Maxime.png" />
+      <img src="../assets/portrait/thumbs/FlareMaleHero1.png" alt="../assets/portrait/FlareMaleHero1.png" />
+      <img src="../assets/portrait/thumbs/FlareFemaleHero3.png" alt="../assets/portrait/FlareFemaleHero3.png" />
+    </div>
+    <!-- spells div, will be displayed over right edge where it is easier to select -->
+    <div class="spells" id="spells">
+    </div>
+  </div>
+  <div class="gas_challenges" id="gas_challenges">
+    hello
+  </div>
+
+
+  <script type="text/javascript">
+    
       var $loader = $('#gas_loading');
       var $list = $('#gas_nav');
       var $currImage = $('#gas_main').children('img:first');
-      
+      var $battle = $('#gas_battle');
 
       setTimeout(function(){
          $list.animate({'left':'0px'},500);
-      $loader.hide();
+         $loader.hide();
       },
       1000);
 
@@ -191,13 +275,101 @@
       $outer.scrollLeft(left);
       });
   }
+      // bind click to show action div
+      $('#left').find('img.face').each( function(){
+          $img = $(this);
+          
+          $img.bind('click', function(e){
+             hideActions();
+             $(this).next()
+                .css({'top':$(this).offset().top})
+                .addClass('current')
+                .animate({'left':'125px'},400, function(){});
+          });
+      });
+
+      // bindings for melee attack
+      $('#left').find('img.melee').each( function(){
+          $(this).bind('click', function(e){
+              var $gladiator = $(this).parent().prev('img').attr('alt');
+              console.log('clicked melee on ', $gladiator );
+         });
+      });
+      // bindings for ranged attack
+      $('#left').find('img.ranged').each( function(){
+          $(this).bind('click', function(e){
+              var $gladiator = $(this).parent().prev('img').attr('alt');
+              console.log('clicked ranged on ', $gladiator );
+         });
+      });
+      // bindings for defense
+      $('#left').find('img.defend').each( function(){
+          $(this).bind('click', function(e){
+              var $gladiator = $(this).parent().prev('img').attr('alt');
+              console.log('clicked defend on ', $gladiator );
+         });
+      });
+      // bindings for magic
+      $('#left').find('img.cast').each( function(){
+          $(this).bind('click', function(e){
+              var $gladiator = $(this).parent().prev('img').attr('alt');
+              console.log('clicked spellcast on ', $gladiator );
+         });
+      });
+
+      // hides selected actions
+      function hideActions(){
+         $('#left').find('.current').each( function(){
+            $(this).removeClass('current').animate({'left':'-500px'},400);
+         });
+      }
+      
+      // position battle start div to center
+      var $offset = -$('#gas_battle').width()/2;
+      $('#gas_battle').css({'margin-right': $offset});
+
+      // position arena div to center
+      var $coffset = -$('#center').width()/2;
+      $('#center').css({'margin-right': $coffset});
+      
       var gas = {
          searchVictim: function( $name ){
             var $loader = $('#gas_loading').show();
             setTimeout( function(){
               console.log('Searching for', $name);
               $loader.hide();}, 1000);
+          },
+
+      
+          enterArena: function(){
+            var $battle = $('#gas_battle');
+            var $height = -$battle.height();
+      
+            $battle.animate({'bottom':$height+'px'}, 400, function(){
+                  // hide enter div              
+                  $battle.css({'display':'none'});
+
+                  // get objects to show
+                  var $left = $('#left');
+                  var $right = $('#right');
+                  var $center = $('#center');
+
+                  // my side flows in first
+                  $left.animate({'top':'0px'},400); 
+                  // after that, enemy side
+                  setTimeout(function(){
+                     $right.animate({'top':'0px'},400); 
+                  }, 500);
+                  // finally, actual arena
+                  setTimeout(function(){
+                      $center.animate({'top':'20px'},1000);
+                  }, 1000);
+   
+
+            });
+            
           }
+      
       };
 
 </script>
