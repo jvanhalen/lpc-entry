@@ -917,14 +917,6 @@ function showManagerView()
 
     }
 
-    // Money calculator
-    g_moneyCalc = Crafty.e("2D, DOM, Text").attr({ w: 100, h: 20, x: 10, y: 10 })
-        .text('<img src="../assets/gui/Claudius_II_coin_(colourised).png" alt="coins" width="30px" height="30px"/>' + g_playerGold)
-        .css({
-            "text-align": "left",
-            "font-family": "Impact",
-            "font-size": "16pt"
-        });
 
 /*
     // Add a title
@@ -1506,13 +1498,13 @@ var GAS = Class(function() {
 			// TODO: Visualize the new item
 
             // assuming view is gladiator view...
-        if ( g_currentView == "gladiator" ){
-            var assetName = data[0].item.type+'_'+data[0].item.subtype;
-            console.log(g_currentGladiator.gladiator.name, "got a brand new", assetName);
-            g_currentGladiator.setupAnimation(assetName);
-        } else {
-            console.log('Received BUY_ITEM_RESP on other scene than gladiatorView?');
-        }
+			if ( g_currentView == "gladiator" ){
+				var assetName = data[0].item.type+'_'+data[0].item.subtype;
+				console.log(g_currentGladiator.gladiator.name, "got a brand new", assetName);
+				g_currentGladiator.setupAnimation(assetName);
+			} else {
+				console.log('Received BUY_ITEM_RESP on other scene than gladiatorView?');
+			}
 			break;
 
         case 'TEAM_RESP':
@@ -1770,7 +1762,8 @@ var GAS = Class(function() {
     {
         var team = data.team;
 
-		
+		this.updateMoneyCalc(team.gold);
+
         // create visualization for each gladiator in team.
         if ( g_currentView == "manager")
         {
@@ -1932,6 +1925,21 @@ var GAS = Class(function() {
 
 
     },
+
+	updateMoneyCalc: function(gold) {
+		if(g_moneyCalc)
+			g_moneyCalc.destroy();
+
+	    // Money calculator
+		g_moneyCalc = Crafty.e("2D, DOM, Text").attr({ w: 100, h: 20, x: 15, y: 10 })
+        .text('<img src="../assets/gui/Claudius_II_coin_(colourised).png" alt="coins" width="20px" height="20px"/> ' + gold)
+        .css({
+            "text-align": "left",
+            "font-family": "Impact",
+            "font-size": "16pt"
+        });
+	},
+
     syncedMessage: function(type, tick, data) {
         console.log('synced message:', type, tick, data);
     },

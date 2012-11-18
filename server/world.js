@@ -46,26 +46,26 @@ var cup = {
         // Share awards
 
         // Free resources
-    }
-}
+    },
 
-var webserver = {
-    cup: null,
 
-    launch: function(cup) {
-        this.cup = cup;
+    webserver: {
+        cup: null,
 
-        //console.log("webserver.launch")
-        var http = require("http");
+        start: function(cup) {
+            this.cup = cup;
 
-        function onRequest(request, response) {
-          console.log("webserver.onRequest");
-          response.writeHead(200, {"Content-Type": "text/plain"});
-          response.write(this.cup.generateCharts());
-          response.end();
+            //console.log("webserver.launch")
+            var http = require("http");
+
+            function onRequest(request, response) {
+              console.log("webserver.onRequest");
+              response.writeHead(200, {"Content-Type": "text/plain"});
+              response.write(this.cup.generateCharts());
+              response.end();
+            }
+
+            http.createServer(onRequest).listen(8888);
         }
-
-        http.createServer(onRequest).listen(8888);
     }
-
 }

@@ -302,6 +302,9 @@ var GASServer = Maple.Class(function(clientClass) {
         // take care of AI upon some weird player disconnect
         var user = api.getUser(clientToUsername[client.id]);
 
+		if(user)
+			api.players.logged--;
+
         if ( user != null && user.ingame != null ) {
 
             var battlesession = this.battleSessions[user.ingame];
@@ -325,7 +328,6 @@ var GASServer = Maple.Class(function(clientClass) {
                         battlesession.defender = null;
                     }
                 }
-
             }
         }
 

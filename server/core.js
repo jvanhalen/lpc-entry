@@ -23,7 +23,7 @@
 var crypto = require('crypto');
 var util = require('util');
 
-var server = require('./server');
+var worldconfig = require('../json/world');
 
 var configs = require('../json/configs'); 			// Game configuration file
 var counter = 0;
@@ -825,7 +825,7 @@ var core = {
 			var http = require("http");
 
 			function onRequest(request, response) {
-			  console.log("webstats.onRequest");
+			  //console.log("webstats.onRequest");
 			  response.writeHead(200, {"Content-Type": "text/html"});
 			  response.write(core.webstats.statistics());
 			  response.end();
@@ -848,26 +848,32 @@ var core = {
 			}
 
 			// Format HTML
-			var stats = '<html><head><title>Server statistics</title></head><body>'+
+			var stats = '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta http-equiv="refresh" content="1"><title>Server statistics</title></head><body>'+
 						'<table>'+
 
-						'<th>Players</th><th>&nbsp;</th></tr>'+
+						'<tr><th>Server</th><th>&nbsp;</th></tr>'+
+						'<tr><td>Name:</td><td>' + worldconfig.name + '</td></tr>'+
+						'<tr><td>Time:</td><td>' + new Date() + ' (' + Date.now() + ')</td></tr>'+
+						'<tr><td>Uptime:</td><td>' + util.inspect(process.uptime()) + ' seconds</td></tr>'+
+						'<tr><td>&nbsp;</td><td>&nbsp;</td></tr>'+
+
+						'<tr><th>Players</th><th>&nbsp;</th></tr>'+
 						'<tr><td>Connected:</td><td>' + core.players.connected + '</td></tr>'+
-						'<tr><td>Logged in:</td><td>' + core.players.logged + '</td></tr>'+
+						'<tr><td>Logged in:</td><td>' + core.players.logged + ' (' + (100*(core.players.logged / core.players.connected)) + '%)</td></tr>'+
 						'<tr><td>AI:</td><td>' + core.players.ai + '</td></tr>'+
 						'<tr><td>&nbsp;</td><td>&nbsp;</td></tr>'+
 
-						'<th>Gladiators</th><th>&nbsp;</th></tr>'+
-						'<tr><td>Free:</td><td>' + freegladis + ' (' + (100*freegladis/totalgladis) +'%)</td></tr>'+
+						'<tr><th>Gladiators</th><th>&nbsp;</th></tr>'+
+						'<tr><td>Free:</td><td>' + freegladis + ' (' + (100*(freegladis/totalgladis)) +'%)</td></tr>'+
 						'<tr><td>Total:</td><td>' + totalgladis + '</td></tr>'+
 						'<tr><td>&nbsp;</td><td>&nbsp;</td></tr>'+
 
-						'<th>Process</th><th>&nbsp;</th></tr>'+
+						'<tr><th>Process</th><th>&nbsp;</th></tr>'+
 						'<tr><td>Platform:</td><td>' + process.platform + ', ' + process.arch + '</td></tr>'+
 						'<tr><td>Pid:</td><td>' + process.pid + '</td></tr>'+
 						'<tr><td>Cwd:</td><td>' + process.cwd() + '</td></tr>'+
-						'<tr><td>Uptime:</td><td>' + util.inspect(process.uptime()) + ' seconds</td></tr>'+
 						'<tr><td>V8 mem usage:</td><td>' + util.inspect(process.memoryUsage()) + ' bytes</td></tr>'+
+
 						'</table>'+
 						'</body></html>';
 
