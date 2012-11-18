@@ -1,0 +1,8 @@
+{
+
+    "_id":          "world",
+
+    "name":         "Big Bang",
+    "cup":          ["Sunday", "Wednesday"]
+
+}

@@ -31,6 +31,7 @@ var api = {
 	user: core.user,
 	message: core.message,
 	gladiator: core.gladiator,
+	players: core.players,
 
 	init: function() {
 		console.log("api: init()");
@@ -216,9 +217,9 @@ var api = {
 			// Check gladiator existence
 			//att = core.gladiatorcache.read(attackername);
 			//tgt = core.gladiatorcache.read(targetname);
-            
+
             battle = core.battlecache.read(battleid);
-            
+
             if ( battle != null ) {
 
                 // seek target gladiator
@@ -228,7 +229,7 @@ var api = {
                         break;
                     }
                 }
-                
+
                 if ( tgt == null ) {
                     for( var gid in battle.challenger.gladiators ) {
                         if ( battle.challenger.gladiators[gid].name == targetname ){
@@ -286,7 +287,7 @@ var api = {
 				else {
 					console.log(targetname, "dodged the attack!");
 				}
-                
+
 				var msg = this.message.ATTACK_RESP.init(attackername, targetname, 0, false);
                 // append positions
                 msg.targetpos.x = tgt.battledata.pos[0];
@@ -336,16 +337,16 @@ var api = {
 
 			// "Illustrate/stringify" the action ,e.g. "Ouch! Mauri hit Hermanni with astalo to location for xx points of damage"
 			console.log(attackername, "hit", targetname, "for", dmg, "points of damage. That must have hurt!");
-            
+
 			var msg = this.message.ATTACK_RESP.init(attackername, targetname, dmg, true);
 
             // append positions
             msg.targetpos.x = tgt.battledata.pos[0];
             msg.targetpos.y = tgt.battledata.pos[1];
-            
+
             msg.newtargetpos.x = tgt.battledata.pos[0];
             msg.newtargetpos.y = tgt.battledata.pos[1];
-            
+
             msg.attackerpos.x = att.battledata.pos[0];
             msg.attackerpos.y = att.battledata.pos[1];
             msg.ingame = battleid;
@@ -478,14 +479,14 @@ var api = {
 
                     matrix[currRow].push(0);// walkable
                     spatialGraph[currRow].push(null); // non-occupied
-                    
+
                     // non-zero means a set tile and on collision
                     // layer it means 'blocked'
                     if ( map.layers[layer].data[i] > 0 )
                     {
                         matrix[currRow][currColumn] = 1; // non-walkable
                     }
-                    
+
                     // next tile, take care of indices.
                     currColumn++;
                     if ( currColumn >= map.width ) {

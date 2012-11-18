@@ -21,10 +21,12 @@
   */
 var Maple = require('./maple/Maple');
 var clientToUsername = [];
+
 var PF = require('pathfinding');
 var configs = require('../json/configs'); 			// Game configuration file
 
-var api = require('./api');
+var api = require('./api');		// Game api
+var world = require('./world');	// Matchmaking and "world" events
 
 var LOGIC_RATE = 10; // Logic rate in milliseconds
 var TICK_RATE = 3; // Tick rate in milliseconds
@@ -152,27 +154,27 @@ var GASServer = Maple.Class(function(clientClass) {
 
                 // TODO check battle session activity; has battle ended (other side died?)
                 for( var bs in this.battleSessions)
-                {  
+                {
                     if ( this.battleSessions[bs].challenger == null) {
                         delete this.battleSessions[bs];
                         continue;
                     }
-                    
-                    if ( this.battleSessions[bs]["stateNotified"] !== undefined ) 
+
+                    if ( this.battleSessions[bs]["stateNotified"] !== undefined )
                         continue;
-                    
+
                     var battleid = this.battleSessions[bs].challenger.ingame;
                     var battle = api.getBattle(battleid);
                     var challenger = this.battleSessions[bs].challenger;
                     var defender   = this.battleSessions[bs].defender;
-                    
+
                     // check challenger battle team
                     var challengerGladiatorsAlive = false;
                     for( var bt in challenger.battleteam )
                     {
                         var gladiatorName = challenger.battleteam[bt];
                         var gladiator = this.getGladiatorByName(battle, gladiatorName);
-                        // a single gladiator suffices 
+                        // a single gladiator suffices
                         if ( gladiator.health > 0 ) {
                             challengerGladiatorsAlive = true;
                             break;
@@ -185,13 +187,13 @@ var GASServer = Maple.Class(function(clientClass) {
                     {
                         var gladiatorName = defender.battleteam[bt];
                         var gladiator = this.getGladiatorByName(battle, gladiatorName);
-                        // a single gladiator suffices 
+                        // a single gladiator suffices
                         if ( gladiator.health > 0 ) {
                             defenderGladiatorsAlive = true;
                             break;
                         }
                     }
-                    
+
                     var battleOverMessage = {
                         type: 'BATTLE_OVER',
                         name: 'BATTLE_OVER',
@@ -210,10 +212,10 @@ var GASServer = Maple.Class(function(clientClass) {
                             battleOverMessage.victor = defender.name;
                             this.notifyBattleSession(battleid, battleOverMessage);
                             this.battleSessions[bs]["stateNotified"] = true;
-                        } 
+                        }
 
-                    } 
-                    else if ( challengerGladiatorsAlive == true ) 
+                    }
+                    else if ( challengerGladiatorsAlive == true )
                     {
 
                         if ( defenderGladiatorsAlive == false ) {
@@ -223,8 +225,8 @@ var GASServer = Maple.Class(function(clientClass) {
                             this.battleSessions[bs]["stateNotified"] = true;
                         }
 
-                    } 
-                    else 
+                    }
+                    else
                     {
                         console.log('Both parties dead, no victor!');
                         battleOverMessage.victor = "";
@@ -263,7 +265,7 @@ var GASServer = Maple.Class(function(clientClass) {
         }
 
 
-     
+
     },
 
     stopped: function() {
@@ -272,6 +274,7 @@ var GASServer = Maple.Class(function(clientClass) {
     },
 
     connected: function(client) {
+		api.players.connected++;
         console.log('Connected:', client.id);
     },
 
@@ -290,6 +293,8 @@ var GASServer = Maple.Class(function(clientClass) {
     },
 
     disconnected: function(client) {
+
+		api.players.connected--;
 
 		var playerNames = { players:[] }
 		playerNames.players.push( clientToUsername[client.id]);
@@ -668,6 +673,14 @@ var GASServer = Maple.Class(function(clientClass) {
 							console.log("Updating:", this.getClients().getAt(c).id);
 							this.getClients().getAt(c).send("PLAYER_CONNECTED_PUSH", [playerNames]);
 						}
+
+						// Update logged in player counter(s)
+						if(isAI) {
+							api.players.ai++;
+						}
+						else {
+							api.players.logged++;
+						}
 					}
 					else {
 
@@ -973,18 +986,18 @@ var GASServer = Maple.Class(function(clientClass) {
                 battleid: d.battleid,
                 username: d.username,
                 gladiator: d.gladiator,
-                response: resp, 
+                response: resp,
                 path: _path
             }
 
             // requesting entity will be notified of this change
             client.send( message.name, [JSON.stringify(message)] );
-            
+
             break;
         case 'MOVE_UPDATE':
             var d = JSON.parse(data);
             var battle = api.getBattle(d.battleid);
-            
+
             if ( battle ){
                 var g = this.getGladiatorByName(battle, d.gladiator);
                 var oldpos = g.battledata.pos;
@@ -1051,18 +1064,18 @@ var GASServer = Maple.Class(function(clientClass) {
             if ( defender ) console.log('Defender sent:', JSON.stringify(message));
         }
     },
-    
+
     getGladiatorByName: function(battle, gladiatorname)
     {
         for(var g in battle.defender.gladiators)
         {
-            if ( battle.defender.gladiators[g].name == gladiatorname ) 
+            if ( battle.defender.gladiators[g].name == gladiatorname )
                 return battle.defender.gladiators[g];
         }
 
         for(var g in battle.challenger.gladiators)
         {
-            if ( battle.challenger.gladiators[g].name == gladiatorname ) 
+            if ( battle.challenger.gladiators[g].name == gladiatorname )
                 return battle.challenger.gladiators[g];
         }
 

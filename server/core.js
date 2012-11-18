@@ -21,6 +21,10 @@
   */
 
 var crypto = require('crypto');
+var util = require('util');
+
+var server = require('./server');
+
 var configs = require('../json/configs'); 			// Game configuration file
 var counter = 0;
 var allownewedits = true;			// True by default, allow new revisions of documents -> this will increase the DB size every time a doc is updated
@@ -29,6 +33,12 @@ var allownewedits = true;			// True by default, allow new revisions of documents
 /* NOTE! Use core.toJSON(myObject) and core.toObject(myJSON) if you need to change the format */
 
 var core = {
+
+	players: {
+		connected: 0,
+		ai: 0,
+		logged: 0
+	},
 
 	init: function() {
 		console.log("core: init()");
@@ -104,8 +114,9 @@ var core = {
 		setInterval(core.dbcore.writeCache, configs.cachewriteperiod);
 
 		// Prints some statistics
-		setInterval(core.dbcore.printStatistics, configs.statswriteperiod);
-
+		//setInterval(core.dbcore.printStatistics, configs.statswriteperiod);
+		// Start statistics server
+		this.webstats.init();
 
 	},
 
@@ -790,6 +801,7 @@ var core = {
 		},
 
 		printStatistics: function() {
+
 			var freegladis = 0;
 			var totalgladis = 0;
 			for(var key in core.gladiatorcache.internalhash) {
@@ -804,6 +816,65 @@ var core = {
 			console.log("\tCaches (r/w): gladiator ("+core.gladiatorcache.reads + "/" + core.gladiatorcache.writes+ "), user (" + core.usercache.reads + "/" + core.usercache.writes+"), item ("+core.itemcache.reads + "/" + core.itemcache.writes+", battle ("+core.battlecache.reads + "/" + core.battlecache.writes+")");
 		}
 	}, // dbcore
+
+
+	webstats: {
+		init: function() {
+
+			//console.log("webserver.launch")
+			var http = require("http");
+
+			function onRequest(request, response) {
+			  console.log("webstats.onRequest");
+			  response.writeHead(200, {"Content-Type": "text/html"});
+			  response.write(core.webstats.statistics());
+			  response.end();
+			}
+
+			http.createServer(onRequest).listen(8181);
+		},
+
+		statistics: function() {
+			var freegladis = 0;
+			var totalgladis = 0;
+			var connectedplayers = 0;
+			var totalplayers = 0;
+
+			for(var key in core.gladiatorcache.internalhash) {
+				totalgladis++;
+				if(core.gladiatorcache.internalhash[key].status == "free") {
+					freegladis++;
+				}
+			}
+
+			// Format HTML
+			var stats = '<html><head><title>Server statistics</title></head><body>'+
+						'<table>'+
+
+						'<th>Players</th><th>&nbsp;</th></tr>'+
+						'<tr><td>Connected:</td><td>' + core.players.connected + '</td></tr>'+
+						'<tr><td>Logged in:</td><td>' + core.players.logged + '</td></tr>'+
+						'<tr><td>AI:</td><td>' + core.players.ai + '</td></tr>'+
+						'<tr><td>&nbsp;</td><td>&nbsp;</td></tr>'+
+
+						'<th>Gladiators</th><th>&nbsp;</th></tr>'+
+						'<tr><td>Free:</td><td>' + freegladis + ' (' + (100*freegladis/totalgladis) +'%)</td></tr>'+
+						'<tr><td>Total:</td><td>' + totalgladis + '</td></tr>'+
+						'<tr><td>&nbsp;</td><td>&nbsp;</td></tr>'+
+
+						'<th>Process</th><th>&nbsp;</th></tr>'+
+						'<tr><td>Platform:</td><td>' + process.platform + ', ' + process.arch + '</td></tr>'+
+						'<tr><td>Pid:</td><td>' + process.pid + '</td></tr>'+
+						'<tr><td>Cwd:</td><td>' + process.cwd() + '</td></tr>'+
+						'<tr><td>Uptime:</td><td>' + util.inspect(process.uptime()) + ' seconds</td></tr>'+
+						'<tr><td>V8 mem usage:</td><td>' + util.inspect(process.memoryUsage()) + ' bytes</td></tr>'+
+						'</table>'+
+						'</body></html>';
+
+			return stats;
+		}
+
+	},
 
 // MESSAGE STRUCTURES
 	message: {
