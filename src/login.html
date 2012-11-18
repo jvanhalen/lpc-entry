@@ -197,8 +197,8 @@
 
       function toggleGladiatorInfo()
       {
-		var curVal = parseInt($("#gladiatorinfo").css('left'));
-		var width = parseInt($("#gladiatorinfo").css('width'));
+		var curVal = parseInt($("#thumbContainer").css('left'));
+		var width = parseInt($("#thumbContainer").css('width'));
 
 		var destVal = (curVal < 0) ? 0 : 20-width;
 
@@ -206,12 +206,11 @@
 
 		var param = {val: curVal};
 		var tween = new TWEEN.Tween(param)
-				   .to({val:destVal},100)
+				   .to({val:destVal},1000)
 				   .delay(100)
+                   .easing(TWEEN.Easing.Elastic.Out)
 				   .onUpdate(function(){
-					 $("#gladiatorinfo").css("top","340px");
-					 $("#gladiatorinfo").css("left",param.val);
-					 $("#gladiatorinfo").css("z-index",g_cssZVal);
+					 $("#thumbContainer").css("left",param.val);
 				   }).start();
       }
 
@@ -266,6 +265,7 @@
 </head>
 
 <body>
+	
   <div id="nav">
   </div>
     <div id="chatbox-messages">
@@ -378,7 +378,7 @@
   <div id="challenges" ondblclick="toggleChallenges();" ></div>
   <div id="gladiatorinfo" class="container"></div>
 
-<!-- some test code for gladiator elements 
+<!-- some test code for gladiator elements  -->
   <div class="padding">
   <div class="gladiatorshowcase">
     	<table >
@@ -417,6 +417,302 @@
     
   </div>
   </div>
--->
+<!-- -->
+  <div class="padding">
+  <div class="gladiatorshowcase">
+
+    	<table >
+        <tr>
+          <td><img class="border-top-left" src="../assets/corner-top-left.png" ></td>
+          <td colspan="2"><img class="border-top" src="../assets/bar.png" width="200" height="20"></td>
+          <td><img class="border-top-right" src="../assets/corner-top-right.png" ></td>
+        </tr>
+        <tr>
+          <td rowspan="12"><img class="border-left" src="../assets/bar-v.png" width="22" height="300"></td>
+          <td colspan="2"> <p class="btnp"><a href="#" class="button-smaller" onclick="">Retire</a></p></td>
+
+          <td rowspan="12"><img class="border-right" src="../assets/bar-v.png" width="22" height="300"></td>
+        </tr>
+        <tr><td>Name:</td><td>gladiator.name</td><td></td></tr>
+        <tr><td>Age:</td><td><div style="padding:2px;background:#CCC;">
+  <div style="width:25%;background:#aF4;text-align:center;">
+    <span>25%</span>
+  </div>
+</div></td></tr>
+        <tr><td>Health:</td><td><meter value="12" max="35"></meter></td></tr>
+        <tr><td>Nimbleness:</td><td><meter value="12" max="35"></meter></td></tr>
+        <tr><td>Strength:</td><td><meter value="1" max="35"></meter></td></tr>
+        <tr><td>Mana:</td><td><meter value="2" max="35"></meter></td></tr>
+        <tr><td>Salary:</td><td><meter value="3" max="150"></meter></td></tr>
+        <tr><td>Fights:</td><td><meter value="4" max="100"></meter></td></tr>
+        <tr><td>Knockouts:</td><td><meter value="5" max="100"></meter></td></tr>
+        <tr><td>Injured:</td><td><meter value="6" max="15"></meter></td></tr>
+        <tr><td colspan="2"><p class="btnp"><a href="#" class="button-smaller" onclick="">Equip</a></p></td></tr>
+        <tr>
+          <td><img class="border-bottom-left" src="../assets/corner-bottom-left.png" ></td>
+          <td colspan="2"><img class="border-bottom" src="../assets/bar.png" width="200" height="20"></td>
+          <td><img class="border-bottom-right" src="../assets/corner-bottom-right.png" ></td>
+        </tr>
+		</table>
+    
+  </div>
+  </div>
+
+<div id="thumbContainer">
+			<div id="thumbScroller">
+				<div class="container">
+
+                  <div class="content"><div><a href="#"><img src="../assets/portrait/Aileen.png" alt="" class="thumb" /></a>Oogliv</div></div>
+                  <div class="content"><div><a href="#"><img src="../assets/portrait/Alec.png" alt="" class="thumb" /></a></div></div>
+                  <div class="content"><div><a href="#"><img src="../assets/portrait/Andrew.png" alt="" class="thumb" /></a></div></div>
+                  <div class="content"><div><a href="#"><img src="../assets/portrait/Ashita.png" alt="" class="thumb" /></a></div></div>
+                  <div class="content"><div><a href="#"><img src="../assets/portrait/Bjin.png" alt="" class="thumb" /></a></div></div>
+                  <div class="content"><div><a href="#"><img src="../assets/portrait/Branko2.png" alt="" class="thumb" /></a></div></div>
+                  <div class="content"><div><a href="#"><img src="../assets/portrait/Branko.png" alt="" class="thumb" /></a></div></div>
+                  <div class="content"><div><a href="#"><img src="../assets/portrait/BrendanPortrait.png" alt="" class="thumb" /></a></div></div>
+                  <div class="content"><div><a href="#"><img src="../assets/portrait/FlareFemaleHero1.png" alt="" class="thumb" /></a></div></div>
+                  <div class="content"><div><a href="#"><img src="../assets/portrait/FlareFemaleHero2.png" alt="" class="thumb" /></a></div></div>
+                  <div class="content"><div><a href="#"><img src="../assets/portrait/FlareFemaleHero3.png" alt="" class="thumb" /></a></div></div>
+                  <div class="content"><div><a href="#"><img src="../assets/portrait/FlareMaleHero1.png" alt="" class="thumb" /></a></div></div>
+                  <div class="content"><div><a href="#"><img src="../assets/portrait/FlareMaleHero2.png" alt="" class="thumb" /></a></div></div>
+                  <div class="content"><div><a href="#"><img src="../assets/portrait/FlareMaleHero3.png" alt="" class="thumb" /></a></div></div>
+                  <div class="content"><div><a href="#"><img src="../assets/portrait/Florent.png" alt="" class="thumb" /></a></div></div>
+                  <div class="content"><div><a href="#"><img src="../assets/portrait/FredG.png" alt="" class="thumb" /></a></div></div>
+                  <div class="content"><div><a href="#"><img src="../assets/portrait/Frieda.png" alt="" class="thumb" /></a></div></div>
+                  <div class="content"><div><a href="#"><img src="../assets/portrait/Joi.png" alt="" class="thumb" /></a></div></div>
+                  <div class="content"><div><a href="#"><img src="../assets/portrait/Jonas2.png" alt="" class="thumb" /></a></div></div>
+                  <div class="content"><div><a href="#"><img src="../assets/portrait/Jonas.png" alt="" class="thumb" /></a></div></div>
+                  <div class="content"><div><a href="#"><img src="../assets/portrait/Jordan.png" alt="" class="thumb" /></a></div></div>
+                  <div class="content"><div><a href="#"><img src="../assets/portrait/JordanPortrait.png" alt="" class="thumb" /></a></div></div>
+                  <div class="content"><div><a href="#"><img src="../assets/portrait/Kain.png" alt="" class="thumb" /></a></div></div>
+                  <div class="content"><div><a href="#"><img src="../assets/portrait/LauraPortrait.png" alt="" class="thumb" /></a></div></div>
+                  <div class="content"><div><a href="#"><img src="../assets/portrait/Leslie.png" alt="" class="thumb" /></a></div></div>
+                  <div class="content"><div><a href="#"><img src="../assets/portrait/lessig.png" alt="" class="thumb" /></a></div></div>
+                  <div class="content"><div><a href="#"><img src="../assets/portrait/Linksvayer.png" alt="" class="thumb" /></a></div></div>
+                  <div class="content"><div><a href="#"><img src="../assets/portrait/Marcos.png" alt="" class="thumb" /></a></div></div>
+                  <div class="content"><div><a href="#"><img src="../assets/portrait/Markus.png" alt="" class="thumb" /></a></div></div>
+                  <div class="content"><div><a href="#"><img src="../assets/portrait/Maxime.png" alt="" class="thumb" /></a></div></div>
+
+					
+				</div>
+			</div>
+		</div>
+  <!-- The JavaScript -->
+        <script type="text/javascript" src="./lib/jquery.1.7.2.js"></script>
+		<script type="text/javascript" src="./lib/jquery.easing.1.3.js"></script>
+		<script type="text/javascript">
+			$(function() {
+				//index of current item
+				var current				= 0;
+				//speeds / ease type for animations
+				var fadeSpeed			= 400;
+				var animSpeed			= 600;
+				var easeType			= 'easeOutCirc';
+				//caching
+				var $thumbScroller		= $('#thumbScroller');
+				var $scrollerContainer	= $thumbScroller.find('.container');
+				var $scrollerContent	= $thumbScroller.find('.content');
+				var $pg_title 			= $('#pg_title');
+				var $pg_preview 		= $('#pg_preview');
+				var $pg_desc1 			= $('#pg_desc1');
+				var $pg_desc2 			= $('#pg_desc2');
+				var $overlay			= $('#overlay');
+				//number of items
+				var scrollerContentCnt  = $scrollerContent.length;
+				var sliderHeight		= $(window).height();
+				//we will store the total height
+				//of the scroller container in this variable
+				var totalContent		= 0;
+				//one items height
+				var itemHeight			= 0;
+				
+				//First let's create the scrollable container,
+				//after all its images are loaded
+				var cnt		= 0;
+				$thumbScroller.find('img').each(function(){
+					var $img 	= $(this);
+					$('<img/>').load(function(){
+						++cnt;
+						if(cnt == scrollerContentCnt){
+							//one items height
+							itemHeight = $thumbScroller.find('.content:first').height();
+							buildScrollableItems();
+							//show the scrollable container
+							$thumbScroller.stop().animate({'left':'0px'},animSpeed);
+						}
+					}).attr('src',$img.attr('src'));
+				});
+				
+				//when we click an item from the scrollable container
+				//we want to display the items content
+				//we use the index of the item in the scrollable container
+				//to know which title / image / descriptions we will show
+				$scrollerContent.bind('click',function(e){
+                    console.log('Clicked');
+					var $this 				= $(this);
+					
+					var idx 				= $this.index();
+					//if we click on the one shown then return
+					if(current==idx) return;
+					
+					//if the current image is enlarged,
+					//then we will remove it but before
+					//we animate it just like we would do with the thumb
+					var $pg_large			= $('#pg_large');
+					if($pg_large.length > 0){
+						$pg_large.animate({'left':'350px','opacity':'0'},animSpeed,function(){
+							$pg_large.remove();
+						});
+					}
+					
+					//get the current and clicked items elements
+					var $currentTitle 		= $pg_title.find('h1:nth-child('+(current+1)+')');
+					var $nextTitle 			= $pg_title.find('h1:nth-child('+(idx+1)+')');
+					var $currentThumb		= $pg_preview.find('img.pg_thumb:eq('+current+')');
+					var $nextThumb			= $pg_preview.find('img.pg_thumb:eq('+idx+')');
+					var $currentDesc1 		= $pg_desc1.find('div:nth-child('+(current+1)+')');
+					var $nextDesc1 			= $pg_desc1.find('div:nth-child('+(idx+1)+')');
+					var $currentDesc2 		= $pg_desc2.find('div:nth-child('+(current+1)+')');
+					var $nextDesc2 			= $pg_desc2.find('div:nth-child('+(idx+1)+')');
+					
+					//the new current is now the index of the clicked scrollable item
+					current		 			= idx;
+					
+					//animate the current title up,
+					//hide it, and animate the next one down
+					$currentTitle.stop().animate({'top':'-50px'},animSpeed,function(){
+						$(this).hide();
+						$nextTitle.show().stop().animate({'top':'25px'},animSpeed);
+					});
+					
+					//show the next image,
+					//animate the current to the left and fade it out
+					//so that the next gets visible
+					$nextThumb.show();
+					$currentThumb.stop().animate({'left': '350px','opacity':'0'},animSpeed,function(){
+						$(this).hide().css({
+							'left'		: '250px',
+							'opacity'	: 1,
+							'z-index'	: 1
+						});
+						$nextThumb.css({'z-index':9999});
+					});
+					
+					//animate both current descriptions left / right and fade them out
+					//fade in and animate the next ones right / left
+					$currentDesc1.stop().animate({'left':'205px','opacity':'0'},animSpeed,function(){
+						$(this).hide();
+						$nextDesc1.show().stop().animate({'left':'250px','opacity':'1'},animSpeed);
+					});
+					$currentDesc2.stop().animate({'left':'295px','opacity':'0'},animSpeed,function(){
+						$(this).hide();
+						$nextDesc2.show().stop().animate({'left':'250px','opacity':'1'},animSpeed);
+					});
+					e.preventDefault();
+				});
+				
+				//when we click a thumb, the thumb gets enlarged,
+				//to the sizes of the large image (fixed values).
+				//then we load the large image, and insert it after
+				//the thumb. After that we hide the thumb so that
+				//the large one gets displayed
+				$pg_preview.find('.pg_thumb').bind('click',showLargeImage);
+				
+				//enlarges the thumb
+				function showLargeImage(){
+					//if theres a large one remove
+					$('#pg_large').remove();
+					var $thumb 		= $(this);
+					$thumb.unbind('click');
+					var large_src 	= $thumb.attr('alt');
+
+					$overlay.fadeIn(200);
+					//animate width to 600px,height to 500px
+					$thumb.stop().animate({
+						'width'	: '600px',
+						'height': '500px'
+					},500,function(){
+						$('<img id="pg_large"/>').load(function(){
+							var $largeImg = $(this);
+							$largeImg.insertAfter($thumb).show();
+							$thumb.hide().css({
+								'left'		: '250px',
+								'opacity'	: 1,
+								'z-index'	: 1,
+								'width'		: '360px',
+								'height'	: '300px'
+							});
+							//when we click the large image
+							//we revert the animation
+							$largeImg.bind('click',function(){
+								$thumb.show();
+								$overlay.fadeOut(200);
+								$(this).stop().animate({
+									'width'	: '360px',
+									'height': '300px'
+								},500,function(){
+									$(this).remove();
+									$thumb.css({'z-index'	: 9999});
+									//bind again the click event
+									$thumb.bind('click',showLargeImage);
+								});
+								
+							});
+						}).attr('src',large_src);
+					});
+				}
+				
+				//resize window event:
+				//the scroller container needs to update
+				//its height based on the new windows height
+				$(window).resize(function() {
+					var w_h			= $(window).height();
+					$thumbScroller.css('height',w_h);
+					sliderHeight	= w_h;
+				});
+				
+				//create the scrollable container
+				//taken from Manos :
+				//http://manos.malihu.gr/jquery-thumbnail-scroller
+				function buildScrollableItems(){
+					totalContent = (scrollerContentCnt+1)*itemHeight;
+					$thumbScroller.css('height',sliderHeight)
+					.mousemove(function(e){
+						if($scrollerContainer.height()>sliderHeight){
+							var mouseCoords		= (e.pageY - this.offsetTop);
+							var mousePercentY	= mouseCoords/sliderHeight;
+							var destY			= -(((totalContent-(sliderHeight-itemHeight))-sliderHeight)*(mousePercentY));
+							var thePosA			= mouseCoords-destY;
+							var thePosB			= destY-mouseCoords;
+							if(mouseCoords==destY)
+								$scrollerContainer.stop();
+							else if(mouseCoords>destY)
+								$scrollerContainer.stop()
+							.animate({
+								top: -thePosA
+							},
+							animSpeed,
+							easeType);
+							else if(mouseCoords<destY)
+								$scrollerContainer.stop()
+							.animate({
+								top: thePosB
+							},
+							animSpeed,
+							easeType);
+						}
+					}).find('.thumb')
+					.fadeTo(fadeSpeed, 0.6)
+					.hover(
+					function(){ //mouse over
+						$(this).fadeTo(fadeSpeed, 1);
+					},
+					function(){ //mouse out
+						$(this).fadeTo(fadeSpeed, 0.6);
+					}
+				);
+				}
+			});
+		</script>
 </body>
 </html>
