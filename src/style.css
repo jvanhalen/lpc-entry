@@ -80,6 +80,8 @@ ul.gas_navigation li span.gas_link {
     background-color: #000;
     float: left;
     position: relative;
+    left:0px;
+
     line-height: 50px;
     padding: 0px 20px;
 }
@@ -94,24 +96,30 @@ ul.gas_navigation li span.gas_arrow_down, ul.gas_navigation li span.gas_arrow_up
 
 ul.gas_navigation li span.gas_arrow_down {
     background:#000 url(../assets/gui/icons/down.png) no-repeat center center;
+    float: right;
+    top: 0px;
+    right: -40px;
 }
 
 ul.gas_navigation li span.gas_arrow_up {
     background:#000 url(../assets/gui/icons/up.png) no-repeat center center;
+    float: right;
+    top: 0px;
+    right: -40px;
 }
 
 .gas_wrapper {
     display: none;
     position: absolute;
-    width: 100%;
-    height: 126px;
+    height: 100%;
+    width: 126px;
     overflow-y: hidden;
     top: 50px;
-    left: 0px;
+    right: 0px;
 }
 
 .gas_thumbs {
-    height: 126px;
+    width: 126px;
     margin: 0;
 }
 
@@ -172,7 +180,7 @@ A.button-smaller:active {
     margin: 0 0 0 0;
 }
 .gas_battle {
-    bottom:0px;
+    bottom:-600px;
     position:fixed;
     right:50%;
     margin-right: -200px;
@@ -187,6 +195,7 @@ A.button-smaller:active {
     width: 200px;
     height:300px;
     background-color: #000;
+    display:none;
 }
 .gas_arena {
     width: 100%;
@@ -233,26 +242,29 @@ div.action {
 }
 
 img.battle_action {
-    width: 50px;
-    height: 50px;
+    width: 70px;
+    height: 70px;
 }
 img.battle_action.melee {
-    position:absolute;
-    top:79px;
-    left:0px;
+ 
+ 
 }
 img.battle_action.ranged {
-    position:absolute;
-    top:28px;
-    left:0px;
+ 
+ 
+ 
 }
 img.battle_action.defend {
-    position:absolute;
-    top:0px;
-    left:53px;
+ 
 }
 img.battle_action.cast {
-    position:absolute;
-    top:56px;
-    left:53px;
+ 
+}
+
+img.desaturate { 
+    filter: grayscale(100%);
+    -webkit-filter: grayscale(100%);
+    -moz-filter: grayscale(100%);
+    -ms-filter: grayscale(100%);
+    -o-filter: grayscale(100%);
 }

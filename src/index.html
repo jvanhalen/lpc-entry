@@ -8,7 +8,7 @@
 <body>
 
   <div id="gas_main" class="gas_main">
-    <img src="../assets/victory.png" alt="" class="gas_preview" style="display:none;" />
+    <img src="../assets/gui/pattern.png" alt="" class="gas_preview"  />
     <div class="gas_overlay"></div>
     <h1>Galaxy All-Stars: Fantasy Edition</h1>
 
@@ -17,14 +17,14 @@
     </div>
     <!-- Navigation div -->
 
-    <ul id="gas_nav" class="gas_navigation" style="display:none;">
+    <ul id="gas_nav" class="gas_navigation" >
       <!-- image node -->
       <li class="album">
-        <span class="gas_link">
+        <span class="gas_link mygladiators">
           My Gladiators
-          <span class="gas_arrow_down"></span>
         </span>
-        <div class="gas_wrapper gas_thumbs_wrapper">
+
+<!--        <div class="gas_wrapper gas_thumbs_wrapper">
           <div class="gas_thumbs">
             <img src="../assets/portrait/thumbs/Aileen.png" alt="../assets/portrait/Aileen.png" />
             <img src="../assets/portrait/thumbs/Bjin.png" alt="../assets/portrait/Bjin.png" />
@@ -36,55 +36,30 @@
             <img src="../assets/portrait/thumbs/FlareFemaleHero3.png" alt="../assets/portrait/FlareFemaleHero3.png" />
           </div>
 
-        </div>
+        </div> -->
       </li>
       <li class="album">
-        <span class="gas_link">
+        <span class="gas_link battleteam">
           Battleteam
-          <span class="gas_arrow_down"></span>
         </span>
-        <div class="gas_wrapper gas_thumbs_wrapper">
-          <div class="gas_thumbs">
-            <img src="../assets/portrait/thumbs/Aileen.png" alt="../assets/portrait/Aileen.png" />
-            <img src="../assets/portrait/thumbs/Bjin.png" alt="../assets/portrait/Bjin.png" />
-            <img src="../assets/portrait/thumbs/Jonas.png" alt="../assets/portrait/Jonas.png" />
-            <img src="../assets/portrait/thumbs/FlareFemaleHero1.png" alt="../assets/portrait/FlareFemaleHero1.png" />
-
-          </div>
-
-        </div>
       </li>
       <!-- Text node -->
       <li>
-        <span class="gas_link">
+        <span class="gas_link challenges">
           Challenges
-          <span class="gas_arrow_down"></span>
         </span>
-        <div class="gas_about gas_thumbs_wrapper">
-          <div class="gas_subcontent">
-
-            <p>
-              Seek victim:<input type="text" id="gas_challenge_search" value="" />
-              <p class="btnp"><a href="#" class="button-smaller" onclick="gas.searchVictim($('#gas_challenge_search').val());">Search</a></p>
-            </p>
-          </div>
-        </div>
+        
       </li>
-
+       <li>
+        <span class="gas_link market">
+          Market
+        </span>
+      </li>
       <li>
-        <span class="gas_link">
+        <span class="gas_link credits">
           Credits
-          <span class="gas_arrow_down"></span>
         </span>
-        <div class="gas_about gas_thumbs_wrapper">
-          <div class="gas_subcontent">
-            <p>
-              Oldman & Green &copy; 2012.
-            </p>
-          </div>
-        </div>
       </li>
-     
     </ul>
   </div>
   <div class="gas_battle" id="gas_battle">
@@ -144,16 +119,15 @@
         </div>
       </div>
 
-
-
-
     </div>
 
     <!-- battle visualization with crafty, point to highlight gladiator from UI -->
     <div class="center" id="center">
-
+      <span style="position:relative; left:50%; top:50%;">
+        <p class="btnp"><a href="#" class="button-smaller" onclick="gas.yieldBattle();">Yield Battle</a></p>
+      </span>
     </div>
-
+    
     <!-- enemy div, point to attack -->
     <div class="right" id="right">
       <img src="../assets/portrait/thumbs/Joi.png" alt="../assets/portrait/Joi.png" />
@@ -165,116 +139,162 @@
     <div class="spells" id="spells">
     </div>
   </div>
-  <div class="gas_challenges" id="gas_challenges">
-    hello
+  <div class="gas_market" id="gas_market">
+    <div class="gas_wrapper gas_thumbs_wrapper">
+      <div class="gas_thumbs">
+        <img src="../assets/portrait/thumbs/Aileen.png" alt="../assets/portrait/Aileen.png" />
+        <img src="../assets/portrait/thumbs/Bjin.png" alt="../assets/portrait/Bjin.png" />
+        <img src="../assets/portrait/thumbs/Jonas.png" alt="../assets/portrait/Jonas.png" />
+        <img src="../assets/portrait/thumbs/FlareFemaleHero1.png" alt="../assets/portrait/FlareFemaleHero1.png" />
+        <img src="../assets/portrait/thumbs/Joi.png" alt="../assets/portrait/Joi.png" />
+        <img src="../assets/portrait/thumbs/Maxime.png" alt="../assets/portrait/Maxime.png" />
+        <img src="../assets/portrait/thumbs/FlareMaleHero1.png" alt="../assets/portrait/FlareMaleHero1.png" />
+        <img src="../assets/portrait/thumbs/FlareFemaleHero3.png" alt="../assets/portrait/FlareFemaleHero3.png" />
+        <img src="../assets/portrait/thumbs/Aileen.png" alt="../assets/portrait/Aileen.png" />
+        <img src="../assets/portrait/thumbs/Bjin.png" alt="../assets/portrait/Bjin.png" />
+        <img src="../assets/portrait/thumbs/Jonas.png" alt="../assets/portrait/Jonas.png" />
+        <img src="../assets/portrait/thumbs/FlareFemaleHero1.png" alt="../assets/portrait/FlareFemaleHero1.png" />
+        <img src="../assets/portrait/thumbs/Joi.png" alt="../assets/portrait/Joi.png" />
+        <img src="../assets/portrait/thumbs/Maxime.png" alt="../assets/portrait/Maxime.png" />
+        <img src="../assets/portrait/thumbs/FlareMaleHero1.png" alt="../assets/portrait/FlareMaleHero1.png" />
+        <img src="../assets/portrait/thumbs/FlareFemaleHero3.png" alt="../assets/portrait/FlareFemaleHero3.png" />
+        <img src="../assets/portrait/thumbs/Aileen.png" alt="../assets/portrait/Aileen.png" />
+        <img src="../assets/portrait/thumbs/Bjin.png" alt="../assets/portrait/Bjin.png" />
+        <img src="../assets/portrait/thumbs/Jonas.png" alt="../assets/portrait/Jonas.png" />
+        <img src="../assets/portrait/thumbs/FlareFemaleHero1.png" alt="../assets/portrait/FlareFemaleHero1.png" />
+        <img src="../assets/portrait/thumbs/Joi.png" alt="../assets/portrait/Joi.png" />
+        <img src="../assets/portrait/thumbs/Maxime.png" alt="../assets/portrait/Maxime.png" />
+        <img src="../assets/portrait/thumbs/FlareMaleHero1.png" alt="../assets/portrait/FlareMaleHero1.png" />
+        <img src="../assets/portrait/thumbs/FlareFemaleHero3.png" alt="../assets/portrait/FlareFemaleHero3.png" />
+        </div>
+    </div>
   </div>
 
 
+
   <script type="text/javascript">
-    
+     // prevent touch moving in tablet apps
+    $(document).bind( 'touchmove',function(e) {
+       e.preventDefault();
+    });
+     
+   
       var $loader = $('#gas_loading');
       var $list = $('#gas_nav');
       var $currImage = $('#gas_main').children('img:first');
       var $battle = $('#gas_battle');
 
       setTimeout(function(){
-         $list.animate({'left':'0px'},500);
+         showLinks();
          $loader.hide();
       },
       1000);
 
       /* Loader for first image...
       $('<img>').load(function(){
-      $loader.hide();
-      $currImage.fadeIn(3000);
-      setTimeout(function(){
-      $list.animate({'left':'0px'},500);
-      },
-      1000);
+          $loader.hide();
+          $currImage.fadeIn(3000);
+          setTimeout(function(){
+          $list.animate({'left':'0px'},500);
+          },
+          1000);
       }).attr('src', $currImage.attr('src'));*/
       
-      buildThumbs();
-      // compute widths for thumbnail containers.
-      function buildThumbs(){
-      $list.children('li.album').each(function(){
-      var $elem = $(this);
-      var $thumbs_wrapper = $elem.find('.gas_thumbs_wrapper');
-      var $thumbs = $thumbs_wrapper.children(':first');
-      var finalW = $thumbs.find('img').length * 123;
-      $thumbs.css('width', finalW + 'px');
-      makeScrollable($thumbs_wrapper, $thumbs);
-      });
-      }
+      makeMarketThumbs();
+     
+     function makeMarketThumbs(){
+       var $thumbs_wrapper = $('#gas_market').find('.gas_thumbs_wrapper');
+       var $thumbs = $thumbs_wrapper.children(':first');
+       var finalH = $thumbs.find('img').length * 123;
+       $thumbs.css('height', finalH + 'px');
+       makeScrollable($thumbs_wrapper, $thumbs);
+     }
+     
+     
+     function hideLinks(){
+        $('#gas_nav').animate({'left':'-300px'},300);
+     }
 
-      // arrow clicking
-      $list.find('.gas_arrow_down').live('click', function(){
-      var $this = $(this);
-      hideThumbs();
-      $this.addClass('gas_arrow_up').removeClass('gas_arrow_down');
-      console.log('here we go TOO');
-      var $elem = $this.closest('li');
-      $elem.addClass('current').animate({'height':'170px'},200);
-      var $thumbs_wrapper = $this.parent().next();
-      $thumbs_wrapper.show(200);
-      });
+     function showLinks(){
+        $('#gas_nav').animate({'left':'0px'},500);
 
-      $list.find('.gas_arrow_up').live('click', function(){
-      console.log('here we go');
-      var $this = $(this);
-      //$this.addClass('gas_arrow_down').removeClass('gas_arrow_up');
-      hideThumbs();   
-      });
+     }
+     ////////////////////
+     // bindings for clicks
+     $('li span.mygladiators').bind('click', function(){
+         console.log('My gladiators');
+     });
+     $('li span.battleteam').bind('click', function(){
+         console.log('My gladiators');
+     });
+     $('li span.challenges').bind('click', function(){
+         var $bottom = $('#gas_battle').show().css('bottom');
+
+         if ( $bottom != '0px') $('#gas_battle').animate({'bottom':'0px'},400);
+          else                  $('#gas_battle').animate({'bottom':'-600px'},400);
+
+         $('#gas_market').find('.gas_wrapper').hide();
+     });
+     $('li span.market').bind('click', function(){
+         $('#gas_market').find('.gas_wrapper').show();
+     });
+     $('li span.credits').bind('click', function(){
+         console.log('My gladiators');
+     });
+
 
       // thumb clicking
-      $list.find('.gas_thumbs img').bind('click', function(){
-      var $this = $(this);
-      $loader.show();
-      $('<img class="gas_preview"/>').load( function(){
-      var $this = $(this);     
-      var $currImage = $('#gas_main').children('img:first');
-      $this.insertBefore($currImage);
-      $loader.hide();
-      $currImage.fadeOut(2000, function(){
-      $(this).remove();
-      });
-      }).attr('src', $this.attr('alt'));
+      $('#gas_market').find('.gas_thumbs img').bind('click', function(){
+         var $this = $(this);
+         $loader.show();
+         $('<img class="gas_preview"/>').load( function(){
+            var $this = $(this); 
+            var $currImage = $('#gas_main').children('img:first');
+            $this.insertBefore($currImage);
+            $loader.hide();
+            $currImage.fadeOut(2000, function(){
+              $(this).remove();
+            });
+        }).attr('src', $this.attr('alt'));
       }).bind('mouseenter', function(){
-      $(this).stop().animate({'opacity':'1'});
+         $(this).stop().animate({'opacity':'1'});
       }).bind('mouseleave', function(){
-      $(this).stop().animate({'opacity':'0.7'});
+         $(this).stop().animate({'opacity':'0.7'});
       });
 
       // hide thumbnails
 
       function hideThumbs(){
+
       $list.find('li.current')
       .animate({'height':'50px'}, 400, function(){
-      $(this).removeClass('current');
+          $(this).removeClass('current');
       })
-      .find('.gas_thumbs_wrapper')
-      .hide(200)
-      .andSelf()
-      .find('.gas_link span')
-      .addClass('gas_arrow_down')
-      .removeClass('gas_arrow_up');
+     .find('.gas_thumbs_wrapper')
+     .hide(200)
+     .andSelf()
+     .find('.gas_link span')
+     .addClass('gas_arrow_down')
+     .removeClass('gas_arrow_up')
       }
 
       // thumbs move on mouse
       function makeScrollable($outer, $inner ){
       var extra = 800;
-      var divWidth = $outer.width();
+      var divHeight = $outer.height();
       $outer.css({
       overflow: 'hidden'
       });
 
       var lastElem = $inner.find('img:last');
-      $outer.scrollLeft(0);
+      $outer.scrollTop(0);
       $outer.unbind('mousemove').bind('mousemove', function(e){
-      var containerWidth = lastElem[0].offsetLeft + lastElem.outerWidth() + 2*extra;
-      var left = (e.pageX - $outer.offset().left) * (containerWidth-divWidth) / divWidth - extra;
-      $outer.scrollLeft(left);
+      console.log('mousemove here');
+      var containerHeight = lastElem[0].offsetTop + lastElem.outerHeight() + 2*extra;
+      var top = (e.pageY - $outer.offset().top) * (containerHeight-divHeight) / divHeight - extra;
+      $outer.scrollTop(top);
       });
-  }
+     }
       // bind click to show action div
       $('#left').find('img.face').each( function(){
           $img = $(this);
@@ -344,16 +364,20 @@
           enterArena: function(){
             var $battle = $('#gas_battle');
             var $height = -$battle.height();
-      
+            
             $battle.animate({'bottom':$height+'px'}, 400, function(){
                   // hide enter div              
-                  $battle.css({'display':'none'});
-
+                  $battle.hide();
+     
                   // get objects to show
                   var $left = $('#left');
                   var $right = $('#right');
                   var $center = $('#center');
-
+                  // reset positions to top
+                  $left.css({'top':'-600px'}).show();
+                  $right.css({'top':'-600px'}).show();
+                  $center.css({'top':'-600px'}).show();
+                  
                   // my side flows in first
                   $left.animate({'top':'0px'},400); 
                   // after that, enemy side
@@ -364,10 +388,21 @@
                   setTimeout(function(){
                       $center.animate({'top':'20px'},1000);
                   }, 1000);
-   
-
             });
+            $('#gas_nav').animate({'left':'-300px'},300, function(){});
             
+          },
+     
+          yieldBattle: function(){
+     
+               $('#center').animate({'top':'600px'},400, function(){ $(this).hide();});
+               $('#left').animate({'top':'600px'},700, function(){ $(this).hide();});
+               $('#right').animate({'top':'600px'},900, function(){ $(this).hide();});
+               $('#gas_nav').css('display','inline').css('left','–300px');
+               setTimeout( function(){
+                  showLinks();
+               },500);
+     
           }
       
       };
