@@ -1,8 +1,12 @@
 {
 
-    "_id":          "world",
+    "_id":              "world",
 
-    "name":         "Big Bang",
-    "cup":          ["Sunday", "Wednesday"]
+    "name":             "Big Bang",
+    "cupdays":          ["Sunday", "Wednesday"],
+
+    "webserver":  {
+        "port":      8282
+    }
 
 }

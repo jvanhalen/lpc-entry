@@ -7,65 +7,94 @@ var server = require ('./server');
 var world = {
 
     globalNotification: function() {
-
+        // Send a global notification to all connected (or logged in?) players
     },
 
     prepareCup: function() {
 
         // Send "invitations" to all players
 
-        // Create cup chart
-
+        // Generate cup
+        var nextCup = cup.init(worldconfig.webserver.port, Date.now());
+        if(nextCup) {
+            nextCup.server.start();
+        }
+        else {
+            console.log("ERROR: world.prepareCup: Could not init a new Cup!");
+        }
     }
 
 }
 
 var cup = {
-    attendees: {},
-    chart: {},
 
-    init: function() {
-        // Init chart (wait until enough players)
-
-        // Start webserver, publish chart
+    init: function(port, startAt) {
+        this.server.port = port;
+        this.server.initiated = new Date();
+        return this;
     },
 
-    start: function() {
-        // Send notifications to all attendees
+    server: {
+        attendees: [],
+        chart: 0,
+        initiated: 0,
+        startAt: 0,
+        port: 0,
 
-        // Handle and update cup matches
-    },
+        sendInvitations: function() {
 
-    update: function() {
+        },
 
-    },
+        start: function() {
+            // Send notifications to all attendees
 
-    end: function() {
-        // Publish cup chart
+            // Handle and update cup matches
+            this.startweb(this);
+        },
 
-        // Share awards
+        update: function() {
 
-        // Free resources
-    },
+        },
+
+        end: function() {
+            // Publish cup chart
+
+            // Share awards
+
+            // Free resources
+        },
+
+        generateCharts: function() {
+            var chart =
+                '<table>'+
+
+                '<tr><th>CUP</th><th>&nbsp;</th></tr>'+
+                '<tr><td>Name:</td><td>' + worldconfig.name + '</td></tr>'+
+                '<tr><td>Started:</td><td>' + new Date() + ' (' + Date.now() + ')</td></tr>'+
+                '<tr><td>#teams:</td><td>' + this.attendees.length + '</td></tr>'+
+                '<tr><td>&nbsp;</td><td>&nbsp;</td></tr>'+
+
+                '<tr><th>Chart</th><th>&nbsp;</th></tr>'+
+
+                '<tr><td>&nbsp;</td><td>&nbsp;</td></tr>'+
+                '</table>'
+                return chart;
+        },
 
 
-    webserver: {
-        cup: null,
-
-        start: function(cup) {
-            this.cup = cup;
-
-            //console.log("webserver.launch")
+        startweb: function() {
+            console.log("cup.server.webserver.start: ", this.port)
             var http = require("http");
 
             function onRequest(request, response) {
-              console.log("webserver.onRequest");
-              response.writeHead(200, {"Content-Type": "text/plain"});
-              response.write(this.cup.generateCharts());
+              response.writeHead(200, {"Content-Type": "text/html"});
+              response.write(cup.server.generateCharts());
               response.end();
             }
-
-            http.createServer(onRequest).listen(8888);
+            http.createServer(onRequest).listen(this.port);
         }
     }
 }
+
+
+world.prepareCup();

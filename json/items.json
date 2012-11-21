@@ -49,6 +49,17 @@
         },
 
         {
+        "_id": "Rusty gladius",
+        "name": "Rusty gladius",
+		"type": "weapon",
+        "subtype": "sword",
+        "slot": "offhand",
+		"price": "25",
+		"tohit": "50", "toblock": "10",	"tocrit": "1", "armourvalue": "1d3-1", "damage": "1d4-1",
+		"health": "0", "nimbleness": null, "strength": null, "mana": null, "age": null,
+		"icon": "sword0",
+        "description": "A rusty gladius."
+        },{
         "_id": "Bronze sword",
         "name": "Bronze sword",
 		"type": "weapon",
