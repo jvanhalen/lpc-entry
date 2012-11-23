@@ -3,7 +3,16 @@
     "_id":              "world",
 
     "name":             "Big Bang",
-    "cupdays":          ["Sunday", "Wednesday"],
+    "Monday":           1,
+    "Tuesday":          2,
+    "Wednesday":        3,
+    "Thursday":         4,
+    "Friday":           5,
+    "Saturday":         6,
+    "Sunday":           7,
+    "cupdays":          [3, 4, 7],
+    "cuphours":         [9, 13, 17, 20],
+    "replytimeout":     5,
 
     "webserver":  {
         "port":      8282

@@ -60,7 +60,8 @@ var core = {
 				}
 			}
 			else {
-				console.log("ERROR: init: gladiatordb", err)
+				//  TODO: Tag all ERROR prints with __filename, __line for better traceability
+				console.log("ERROR: init: gladiatordb", err, ":", __filename, "line",  __line );
 			}
 		});
 
@@ -75,7 +76,7 @@ var core = {
 				}
 			}
 			else {
-				console.log("ERROR: init: userdb", err)
+				console.log("ERROR: init: userdb", err, ":", __filename, "line",  __line );
 			}
 		});
 
@@ -90,7 +91,7 @@ var core = {
 				}
 			}
 			else {
-				console.log("ERROR: init: battledb", err)
+				console.log("ERROR: init: battledb", err, ":", __filename, "line",  __line );
 			}
 		});
 
@@ -106,7 +107,7 @@ var core = {
 				}
 			}
 			else {
-				console.log("ERROR: init: itemdb", err)
+				console.log("ERROR: init: itemdb", err, ":", __filename, "line",  __line );
 			}
 		});
 
@@ -151,7 +152,7 @@ var core = {
 
 			this.dbcore.insert(newuser, configs.userdb, function(err, body, header) {
 				if(err) {
-					console.log("ERROR: dbcore.createUser: ", err.reason, body);
+					console.log("ERROR: dbcore.createUser: ", err.reason, body, ":", __filename, "line",  __line );
 				}
 				else {
 					// Add user _rev to cached data
@@ -966,6 +967,28 @@ var core = {
 				}
 		},
 
+		CUP_INVITATION_REQ: {
+				message: {
+					"type": 1, // Add this field automatically?
+					"name": "CUP_INVITATION_REQ",
+				},
+				init: function() {
+					return JSON.parse(JSON.stringify(this.message));
+				}
+		},
+
+		CUP_INVITATION_RESP: {
+				message: {
+					"type": 1, // Add this field automatically?
+					"name": "CUP_INVITATION_RESP",
+					"username": "username",
+					"response": "OK/NOK",
+				},
+   			init: function() {
+					return JSON.parse(JSON.stringify(this.message));
+				}
+		},
+
 		GET_AVAILABLE_GLADIATORS_REQ: {
 				"type": 1, // Add this field automatically?
 				"name": "GET_AVAILABLE_GLADIATORS_REQ",
@@ -1454,5 +1477,30 @@ var core = {
 	}
 
 }
+
+// DEBUGGING
+Object.defineProperty(global, '__stack', {
+  get: function(){
+    var orig = Error.prepareStackTrace;
+    Error.prepareStackTrace = function(_, stack){ return stack; };
+    var err = new Error;
+    Error.captureStackTrace(err, arguments.callee);
+    var stack = err.stack;
+    Error.prepareStackTrace = orig;
+    return stack;
+  }
+});
+
+Object.defineProperty(global, '__line', {
+  get: function(){
+    return __stack[1].getLineNumber();
+  }
+});
+
+Object.defineProperty(global, '__file', {
+  get: function(){
+    return __stack[1].getFileName();
+  }
+});
 
 module.exports = core;

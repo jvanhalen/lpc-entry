@@ -323,8 +323,8 @@
             Crafty.scene(g_smokeScreen.changeToScene);
         });
 
-    gas.connect('gas.dy.fi', 8080);
-    //gas.connect('localhost', 8080);
+    //gas.connect('gas.dy.fi', 8080);
+    gas.connect('localhost', 8080);
     Crafty.scene("managerView", showManagerView, hideManagerView);
     Crafty.scene("gladiatorView", showGladiatorView, hideGladiatorView);
     Crafty.scene("arenaView", showArenaView, hideArenaView);
@@ -377,6 +377,7 @@
 
   <div id="challenges" ondblclick="toggleChallenges();" ></div>
   <div id="gladiatorinfo" class="block"></div>
+  <div id="cup_invitation" ></div>
 
 <!--
   <div class="padding">

@@ -11,7 +11,7 @@ A:hover {text-decoration: none; color: red; }
 
 
 #login {
-	min-width: 250px;
+    min-width: 250px;
 
     background-color: #2e1a20;
     color: white;
@@ -55,36 +55,36 @@ body {
 }
 
 @font-face {
-	font-family: "Fanwood";
-	src: url("../assets/fonts/Fanwood.otf");
+    font-family: "Fanwood";
+    src: url("../assets/fonts/Fanwood.otf");
 }
 @font-face {
-	font-family: "Fanwood-Italic";
-	src: url("../assets/fonts/Fanwood Italic.otf");
+    font-family: "Fanwood-Italic";
+    src: url("../assets/fonts/Fanwood Italic.otf");
 }
 @font-face {
-	font-family: "Fanwood-Text";
-	src: url("../assets/fonts/Fanwood Text.otf");
+    font-family: "Fanwood-Text";
+    src: url("../assets/fonts/Fanwood Text.otf");
 }
 @font-face {
-	font-family: "Fanwood-Text-Italic";
-	src: url("../assets/fonts/Fanwood Text Italic.otf");
+    font-family: "Fanwood-Text-Italic";
+    src: url("../assets/fonts/Fanwood Text Italic.otf");
 }
 
 
 
 #chatbox {
-/*	float: left;*/
-	position: relative;
-	width:760px;
+/*  float: left;*/
+    position: relative;
+    width:760px;
 
     padding: 1mm 1mm 1mm 1mm;
-	overflow:auto;
-	overflow-y:auto;
-	background-color: #2e1a20;
-   	color: white;
-  	font-family: 'Fanwood';
-  	font-size: 10pt;
+    overflow:auto;
+    overflow-y:auto;
+    background-color: #2e1a20;
+    color: white;
+    font-family: 'Fanwood';
+    font-size: 10pt;
 
     border: dashed;
     border-color: #eec06a;
@@ -99,25 +99,25 @@ body {
     margin-right:auto;*/
     display: block;
     position: absolute;
-	width:700px;
+    width:700px;
     height:200px;
     top: -200px;
     z-index: 10;
-	overflow:auto;
-	overflow-y:auto;
-	background-color: #2e1a20;
-    	color: white;
-    	font-family: 'Fanwood';
-    	font-size: 10pt;
-    	border:1px solid black;
+    overflow:auto;
+    overflow-y:auto;
+    background-color: #2e1a20;
+        color: white;
+        font-family: 'Fanwood';
+        font-size: 10pt;
+        border:1px solid black;
 }
 
 .message {
-	position: relative;
-	float: left;
-	clear: both;
-    	font-size: 10pt;
-    	font-family: 'Fanwood-Text';
+    position: relative;
+    float: left;
+    clear: both;
+        font-size: 10pt;
+        font-family: 'Fanwood-Text';
 }
 
 input {
@@ -145,21 +145,21 @@ input {
 input.error { border: 2px solid red; }
 
 .password{
-	float:left;
+    float:left;
 
-	margin:0px 0;
+    margin:0px 0;
 
-	font-family:MisoRegular, Helvetica,Arial,sans-serif;
+    font-family:MisoRegular, Helvetica,Arial,sans-serif;
 
-	text-transform:uppercase;
+    text-transform:uppercase;
 
-	letter-spacing:4px;
+    letter-spacing:4px;
 
-	font-size:8pt;
+    font-size:8pt;
 
-	color:#fff;
+    color:#fff;
 
-	}
+    }
 label {
     font-family: Helvetica,Arial,sans-serif;
     text-rtransform:uppercase;
@@ -190,38 +190,38 @@ A.button:active {
 
 .button {
     outline: none;
-	width:200px;
-	height:43px;
-	border:none;
+    width:200px;
+    height:43px;
+    border:none;
     line-height:43px;
     display: block;
-	background-image: url('../assets/gui/buttons-small.png');
+    background-image: url('../assets/gui/buttons-small.png');
     background-position: 0px 0px;
     font-family: 'Fanwood';
     font-size: 16pt;
     text-shadow: 2px 2px 2px #000000;
-	text-align:center;
-	color:white;
-/*	-webkit-border-radius: .2em;
+    text-align:center;
+    color:white;
+/*  -webkit-border-radius: .2em;
 
-	-moz-border-radius: .2em;
+    -moz-border-radius: .2em;
 
-	border-radius: .2em;*/
+    border-radius: .2em;*/
 
 
 /*
-	-webkit-box-shadow: 0 0px 1px rgba(255,255,255,0.1);
+    -webkit-box-shadow: 0 0px 1px rgba(255,255,255,0.1);
 
-	-moz-box-shadow: 0 0px 1px rgba(255,255,255,0.1);
+    -moz-box-shadow: 0 0px 1px rgba(255,255,255,0.1);
 
-	box-shadow: 0 0px 1px rgba(255,255,255,0.1);
+    box-shadow: 0 0px 1px rgba(255,255,255,0.1);
 */
 
 
 
 
 
-	}
+    }
 A.button-smaller:hover {
     background-position: 0px -83px;
     color: white;
@@ -236,50 +236,50 @@ A.button-smaller:active {
 }
 .button-smaller {
     outline: none;
-	width:145px;
-	height:43px;
+    width:145px;
+    height:43px;
 
-	border:none;
+    border:none;
     line-height:43px;
     display: block;
-	background-image: url('../assets/gui/buttons-smaller.png');
+    background-image: url('../assets/gui/buttons-smaller.png');
     background-position: 0px 0px;
     font-family: 'Fanwood';
     font-size: 16pt;
     text-shadow: 2px 2px 2px #000000;
-	text-align:center;
-	color:white;
+    text-align:center;
+    color:white;
 
-	button:hover{
+    button:hover{
 
-		background: #363535;
+        background: #363535;
 
-		background: -webkit-gradient(linear, left top, left bottom, from(#4b4b4b), to(#303030));
+        background: -webkit-gradient(linear, left top, left bottom, from(#4b4b4b), to(#303030));
 
-		background: -moz-linear-gradient(bottom,  #303030,  #4b4b4b);
+        background: -moz-linear-gradient(bottom,  #303030,  #4b4b4b);
 
-		filter:  progid:DXImageTransform.Microsoft.gradient(startColorstr='#4b4b4b', endColorstr='#303030');
+        filter:  progid:DXImageTransform.Microsoft.gradient(startColorstr='#4b4b4b', endColorstr='#303030');
 
-	}
+    }
 
 
 
-		button:active{
+        button:active{
 
-			border:none;
+            border:none;
 
-			-webkit-box-shadow: 0 0px 2px rgba(255,255,255,0.2);
+            -webkit-box-shadow: 0 0px 2px rgba(255,255,255,0.2);
 
-			-moz-box-shadow: 0 0px 2px rgba(255,255,255,0.2);
+            -moz-box-shadow: 0 0px 2px rgba(255,255,255,0.2);
 
-			box-shadow: 0 0px 2px rgba(255,255,255,0.2);
+            box-shadow: 0 0px 2px rgba(255,255,255,0.2);
 
-		}
+        }
 
 
 
 input:focus:required:invalid {
-	color:#000;
+    color:#000;
 }
 
 
@@ -331,22 +331,22 @@ input:focus:required:invalid {
     font-size: 12pt;
 
     display: block;
-	float: left;
-	position: absolute;
+    float: left;
+    position: absolute;
     top: 20px;
     left: -230px;
-	width: 250px;
+    width: 250px;
     height: 300px;
 
     z-index:15;
     padding: 1mm 1mm 1mm 1mm;
-	background-color: #2e1a20;
-   	color: white;
+    background-color: #2e1a20;
+    color: white;
     border: dashed;
     border-color: #eec06a;
     border-width: 1px;
-	overflow:auto;
-	overflow-y:auto;
+    overflow:auto;
+    overflow-y:auto;
     background-image: url('../assets/fire.png');
     background-size: 100%;
     background-repeat:no-repeat;
@@ -427,24 +427,50 @@ td, th {
     font-size: 12pt;
 
     display: block;
-	float: left;
-	position: absolute;
+    float: left;
+    position: absolute;
     top: 340px;
     left: -230px;
-	width: 250px;
+    width: 250px;
     height: 300px;
 
     z-index:15;
     padding: 1mm 1mm 1mm 1mm;
-	background-color: #2e1a20;
-   	color: white;
+    background-color: #2e1a20;
+    color: white;
     border: dashed;
     border-color: #eec06a;
     border-width: 1px;
-	overflow:auto;
-	overflow-y:auto;
+    overflow:auto;
+    overflow-y:auto;
     background-image: url('../assets/fire.png');
     background-size: 100%;
     background-repeat:no-repeat;
 
+}
+
+#cup_invitation {
+    font-family: 'Fanwood-Text';
+    font-size: 12pt;
+
+    display: none;
+    float: left;
+    position: absolute;
+    top: 400px;
+    left: 600px;
+    width: 250px;
+    height: 50px;
+
+    z-index:15;
+    padding: 1mm 1mm 1mm 1mm;
+    background-color: #2e1a20;
+    color: white;
+    border: dashed;
+    border-color: #eec06a;
+    border-width: 1px;
+    overflow:auto;
+    overflow-y:auto;
+    background-image: url('../assets/fire.png');
+    background-size: 100%;
+    background-repeat:no-repeat;
 }

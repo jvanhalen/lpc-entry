@@ -383,7 +383,12 @@ var GASServer = Maple.Class(function(clientClass) {
 		// Initialize api
 		api.init();
 
+		// Initialize "world ai"
+		world.init(this);
+		world.prepareCup();
+
     },
+
     querydb: function(querypath, client, type, data) {
 		var options = {host: '127.0.0.1', port: 5984, path: '/'};
 		var http = require('http');
@@ -670,6 +675,12 @@ var GASServer = Maple.Class(function(clientClass) {
 						var playerNames = { players:[] }
 						playerNames.players.push(JSON.parse(data).username);
 
+						// Send invitation to cup if the invitation period is on
+						if("apply" == world.cupStatus()) {
+							console.log("Invite to cup");
+							client.send(api.message.CUP_INVITATION_REQ.message.name, [api.toJSON(api.message.CUP_INVITATION_REQ.init())]);
+						}
+
 						for( var c=0; c < this.getClients().length; c++)
 						{
 							console.log("Updating:", this.getClients().getAt(c).id);
@@ -739,32 +750,26 @@ var GASServer = Maple.Class(function(clientClass) {
 				var username = "";
 				var toUser = "";
 
-				console.log(msg, msg.substring(0,1));
+				//console.log(msg, msg.substring(0,1));
 				if(msg.substring(0,1) == "@" && msg.length > 2) {
-					username = msg.split(":");
+					username = msg.split(" ");
 					toUser = username[0];
 					toUser = toUser.substring(1, toUser.length);
-					console.log("username:", toUser);
+					console.log("username:", username, ":", toUser);
 				}
 
-				for( var c=0; c < this.getClients().length; c++ )
-				{
-					//console.log("Updating:", this.getClients().getAt(c).id);
-					if(toUser){
-						// Send to a specific user only
-						//console.log(this.getClients().getAt(c).id);
-						if(clientToUsername[this.getClients().getAt(c).id] == toUser) {
-							console.log("Private msg to", toUser, ":", JSON.parse(data).message);
-							this.getClients().getAt(c).send("CHAT_SYNC", [data]);
-							break;
-						}
-
-					}
-					else {
-						// A global message, send to all users
-						this.getClients().getAt(c).send("CHAT_SYNC", [data]);
-					}
+				if(toUser) {
+					this.sendPrivateMessage("CHAT_SYNC", data, toUser);
 				}
+				else {
+					this.sendGlobalMessage("CHAT_SYNC", data);
+				}
+
+			break;
+
+			case 'CUP_INVITATION_RESP':
+				// Route invitation responses
+				world.handleInvitationResp(JSON.parse(data));
 			break;
 
 			case 'GET_ONLINE_PLAYERS_REQ':
@@ -961,11 +966,13 @@ var GASServer = Maple.Class(function(clientClass) {
                }
 
             break;
+
         case 'BATTLE_STATUS_REQ':
             var user = api.getUser(JSON.parse(data).username);
             console.log('user '+user.name +' is in : ' + user.ingame );
             client.send('BATTLE_STATUS_RES', [ JSON.stringify({username:user.name, ingame:user.ingame}) ]);
             break;
+
         case 'BATTLETEAM_SELECT_REQ':
             var user = api.getUser(JSON.parse(data).username);
             user.battleteam = JSON.parse(data).gladiators;
@@ -977,6 +984,7 @@ var GASServer = Maple.Class(function(clientClass) {
             })]);
 
             break;
+
         case 'MOVE_REQ':
             var d = JSON.parse(data);
             var _path = api.move( d.battleid, d.username, d.gladiator, d.from, d.to);
@@ -996,6 +1004,7 @@ var GASServer = Maple.Class(function(clientClass) {
             client.send( message.name, [JSON.stringify(message)] );
 
             break;
+
         case 'MOVE_UPDATE':
             var d = JSON.parse(data);
             var battle = api.getBattle(d.battleid);
@@ -1021,6 +1030,7 @@ var GASServer = Maple.Class(function(clientClass) {
                 }
             }
             break;
+
         case 'ATTACK_REQ':
             var d = JSON.parse(data);
 
@@ -1034,15 +1044,17 @@ var GASServer = Maple.Class(function(clientClass) {
             }
 
             break;
+
         case 'DEBUG_REMOVE_FROM_BATTLE':
             var d = JSON.parse(data);
             var user = api.getUser(d.player);
             user.ingame = null;
             api.updateUser(user);
             // notify so GUI reflects change
-            var client = this.getClientByUsername( d.player, true);
-            client.send('BATTLE_STATUS_RES', [ JSON.stringify({username:d.player, ingame:null}) ]);
+            var tmpclient = this.getClientByUsername( d.player, true);
+            tmpclient.send('BATTLE_STATUS_RES', [ JSON.stringify({username:d.player, ingame:null}) ]);
             break;
+
    		case 'DONT_CARE':
 			break;
 
@@ -1066,6 +1078,24 @@ var GASServer = Maple.Class(function(clientClass) {
             if ( defender ) console.log('Defender sent:', JSON.stringify(message));
         }
     },
+
+	sendGlobalMessage: function(msgname, msgdata) {
+		// Timeout to prevent message spamming?
+		for( var c=0; c < this.getClients().length; c++ )
+		{
+			this.getClients().getAt(c).send(msgname, [msgdata]);
+		}
+	},
+
+	sendPrivateMessage: function(msgname, msgdata, toUser) {
+		for( var c=0; c < this.getClients().length; c++ )
+		{
+			if(clientToUsername[this.getClients().getAt(c).id] == toUser) {
+				this.getClients().getAt(c).send(msgname, [msgdata]);
+				break;
+			}
+		}
+	},
 
     getGladiatorByName: function(battle, gladiatorname)
     {

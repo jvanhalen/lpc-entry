@@ -1484,6 +1484,19 @@ var GAS = Class(function() {
 			}
 			break;
 
+		case 'CUP_INVITATION_REQ':
+			/*
+				var resp = {
+					"type": 1,
+					"name": "CUP_INVITATION_RESP",
+					"username": JSON.parse($.cookie("gas-login")).username,
+					"response": "OK",
+				}
+				gas.send('CUP_INVITATION_RESP', [JSON.stringify(resp)]);
+				*/
+				this.handleCupInvitationReq();
+			break;
+
 	    case 50:
            console.log("Received: " + data[0].name);
 			break;
@@ -1542,6 +1555,7 @@ var GAS = Class(function() {
             //$('#challenges').css('top', -h+'px');
             //$('#challenges').css('visibility', 'visible');
 			break;
+
         case 'CHALLENGE_REQ':
              console.log('Received challenge request from user:' + JSON.parse(data[0]).challenger);
 
@@ -1555,6 +1569,7 @@ var GAS = Class(function() {
             //this.send('CHALLENGE_RES', ['{"response":"OK", "defender":"'+$.cookie("gas-login").username+'", "challenger":"'+JSON.parse(data[0]).challenger+'"}']);
 
             break;
+
         case 'CHALLENGE_RES':
             if ( JSON.parse(data[0]).response === "OK" )
             {
@@ -1573,6 +1588,7 @@ var GAS = Class(function() {
             }
 
 		    break;
+
         case 'BATTLE_STATUS_RES':
             g_ingame = JSON.parse(data[0]).ingame;
             console.log('BATTLE_STATUS_RES:'+ g_ingame);
@@ -1586,12 +1602,14 @@ var GAS = Class(function() {
             }
 
         break;
+
         case 'BATTLETEAM_SELECT_RES':
             var resp = JSON.parse(data[0]);
             if ( resp.response ==  "OK") {
                 console.log("Battle team confirmed, " + resp.gladiators);
             }
         break;
+
         case 'BATTLE_START':
            console.log('Received BATTLE_START:' /*+ data[0]*/);
            var battle = JSON.parse(data[0]);
@@ -1605,6 +1623,7 @@ var GAS = Class(function() {
                g_smokeScreen.tween({alpha:0.0},50);
            }, 250);
         break;
+
         case 'BATTLE_OVER':
 
            console.log('Received BATTLE_STOP');
@@ -1646,8 +1665,6 @@ var GAS = Class(function() {
             });
         g_victory.attach(t);
 
-
-
          var param = {val:-300};
          var tween = new TWEEN.Tween(param)
             .to({val:100},1000)
@@ -1663,6 +1680,7 @@ var GAS = Class(function() {
 
 
         break;
+
         case 'MOVE_RES':
 
            var d = JSON.parse(data[0]);
@@ -1676,6 +1694,7 @@ var GAS = Class(function() {
                }
            }
         break;
+
         case 'MOVE_UPDATE':
            var d = JSON.parse(data[0]);
            if( d.username != JSON.parse($.cookie("gas-login")).username )
@@ -1698,6 +1717,7 @@ var GAS = Class(function() {
                }
            }
         break;
+
         case 'ATTACK_RESP':
            console.log('Received attack result data');
            var d = JSON.parse(data[0]);
@@ -1750,14 +1770,36 @@ var GAS = Class(function() {
 
 
         break;
+
 	    default:
-	      console.log("Default branch reached in 'message handling'"+type);
+	      console.log("Default branch reached in 'message handling'" + type + JSON.parse(data[0]));
 	    break;
 	}
 
         return true; // return true to mark this message as handled
 
     },
+
+	handleCupInvitationReq: function() {
+
+		$("#cup_invitation").append("Participate Cup? <br />" +
+						"<input type=\"button\" onclick=\"gas.handleCupInvitationResp(true);\" value=\"Yes\">"+
+						"<input type=\"button\" onclick=\"gas.handleCupInvitationResp(false);\" value=\"No\"></div>");
+
+		$("#cup_invitation").fadeIn("slow", function() {
+			$(this).show();
+		});
+	},
+
+	handleCupInvitationResp: function(response) {
+
+		this.send('CUP_INVITATION_RESP', [ '{ "username":"'+ JSON.parse($.cookie("gas-login")).username + '",'+
+									 '  "response":"'+(response == true ? "OK" : "NOK")+'"}' ]);
+		$("#cup_invitation").fadeOut("slow", function(){
+			$(this).remove();
+		});
+	},
+
     handleTeamResponse: function(data)
     {
         var team = data.team;
