@@ -1,0 +1,107 @@
+{
+    "attribute":
+    [{
+        "_id": "Boost strength",
+        "name": "Boost strength",
+		"type": "advancement",
+        "subtype": "attribute",
+        "maxlevel": 10,
+		"price": 1,
+        "effect": [{"strength": "+1"}],
+		"icon": null,
+        "description": "Boost strength."
+    },{
+        "_id": "Boost nimbleness",
+        "name": "Boost nimbleness",
+		"type": "advancement",
+        "subtype": "attribute",
+        "maxlevel": 10,
+		"price": 1,
+        "effect": [{"nimbleness": "+1"}],
+		"icon": null,
+        "description": "Boost nimbleness."
+    },{
+        "_id": "Boost health",
+        "name": "Boost health",
+		"type": "advancement",
+        "subtype": "attribute",
+        "maxlevel": 10,
+		"price": 1,
+        "effect": [{"health": "+1"}],
+		"icon": null,
+        "description": "Boost health."
+    },{
+        "_id": "Boost mana",
+        "name": "Boost mana",
+		"type": "advancement",
+        "subtype": "attribute",
+        "maxlevel": 10,
+		"price": 1,
+        "effect": [{"mana": "+1"}],
+		"icon": null,
+        "description": "Boost mana."
+    },{
+        "_id": "Keep going!",
+        "name": "Keep going!",
+		"type": "advancement",
+        "subtype": "attribute",
+        "maxlevel": 3,
+		"price": 5,
+        "effect": [{"age": "-1"}],
+		"icon": null,
+        "description": "Continue your career."
+    }],
+
+    "skill":
+    [{
+        "_id": "Precision",
+        "name": "Precision",
+		"type": "advancement",
+        "subtype": "skill",
+        "maxlevel": 10,
+		"price": 1,
+        "effect": [{"tohit": "+1"}],
+		"icon": null,
+        "description": "Be more accurate."
+    },{
+        "_id": "Finesse",
+        "name": "Finesse",
+		"type": "advancement",
+        "subtype": "skill",
+        "maxlevel": 10,
+		"price": 3,
+        "effect": [{"tocrit": "+1"}],
+		"icon": null,
+        "description": "Excel at hurting people."
+    },{
+        "_id": "Prevention",
+        "name": "Prevention",
+		"type": "advancement",
+        "subtype": "skill",
+        "maxlevel": 10,
+		"price": 3,
+        "effect": [{"toevade": "+1"}],
+		"icon": null,
+        "description": "Avoid being hit."
+    },{
+        "_id": "Minced meat",
+        "name": "Minced meat",
+		"type": "advancement",
+        "subtype": "skill",
+        "maxlevel": 10,
+		"price": 4,
+        "effect": [{"dmg": "+1"}],
+		"icon": null,
+        "description": "For those who prefer minced meat."
+    },{
+        "_id": "Dual wield",
+        "name": "Dual wield",
+		"type": "advancement",
+        "subtype": "skill",
+        "maxlevel": 10,
+		"price": 4,
+        "effect": [{"dualwield": "+1"}],
+		"icon": null,
+        "description": "Dual wield weapons."
+    }]
+}

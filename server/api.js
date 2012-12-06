@@ -202,6 +202,8 @@ var api = {
 
 	attack: function (attackername, targetname, battleid) {
 
+		// TODO: Calculate XP for both attacker and target
+
 		// Attacker and defender data
 		var att = null;
 		var tgt = null;
@@ -266,6 +268,7 @@ var api = {
 
 		if(valid) {
 
+			// TODO: check advancements
 			// Check hit / miss
 			weapon = core.itemcache.read(att.offhand);
 			shield = core.itemcache.read(tgt.defhand);
@@ -273,14 +276,18 @@ var api = {
 			console.log(weapon, "against", shield);
 
 			// Check target defense modifiers
-			if(shield)
+			if(shield) {
 				def = shield.toblock;
+			}
 
+			// TODO: check evade ( = (nimbleness / 5) + toevade)
+
+			// TODO: check advancements
 			def += tgt.nimbleness;
 			var dice = core.rollDice("d100");
 			console.log(attackername, "rolled", dice, "while def was", def);
 			if(dice < def) {
-
+				// TODO: experience++ (60% propability)
 				if(shield) {
 					console.log(targetname, "blocked the attack!");
 				}
@@ -303,8 +310,11 @@ var api = {
 			}
 
 			// If hit, calculate damage and pick a hit location
+			// TODO: support for rulesets/combat.json hit locations
+			// TODO: check advancements
 			var dmg = 0;
 			if(weapon) {
+				// TODO: Crush modifier
 				dmg = core.rollDice(weapon.damage);
 			}
 			else {
@@ -313,8 +323,9 @@ var api = {
                 dmg = att.strength - 10 + luckMod;	// TODO: Bare hands, calculate some dmg ???
 			}
 
-			if(dmg < 1)
+			if(dmg < 1) {
 				dmg = 1;
+			}
 
 			var armourvalue = 0;
 
@@ -336,9 +347,12 @@ var api = {
 			// Modify changed attributes @ attacker / target
 
 			// "Illustrate/stringify" the action ,e.g. "Ouch! Mauri hit Hermanni with astalo to location for xx points of damage"
-			console.log(attackername, "hit", targetname, "for", dmg, "points of damage. That must have hurt!");
+			var descr = attackername + " hit " + targetname + " for " + dmg + " points of damage. That must have hurt!";
+			console.log(descr);
 
-			var msg = this.message.ATTACK_RESP.init(attackername, targetname, dmg, true);
+			// TODO: attacker experience++ (60% propability)
+
+			var msg = this.message.ATTACK_RESP.init(attackername, targetname, dmg, true, descr);
 
             // append positions
             msg.targetpos.x = tgt.battledata.pos[0];
@@ -382,7 +396,7 @@ var api = {
 
 	},
 
-	practice: function(trainee, attribute) {
+	practise: function(trainee, attribute) {
 
 		// Send a gladiator to a specific training dummy for some practice or end practicing
 	},

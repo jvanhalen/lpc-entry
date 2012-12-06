@@ -1164,6 +1164,7 @@ var core = {
                 "targetid": "Kaensae",
                 "ingame": "null",
                 "damage": "damagetaken",
+				"description": "X got hit by Y",
                 "attackerpos": {"x": 1,
                                 "y": 1},
                 "targetpos": {"x": 2,
@@ -1171,11 +1172,12 @@ var core = {
                 "newtargetpos": {"x": 1,
                                  "y": 1}
             },
-            init: function(attacker, target, damage, success ) {
-                this.message.response   = (success ? "OK" : "NOK");
-                this.message.attackerid = attacker;
-                this.message.targetid   = target,
-                this.message.damage     = damage;
+            init: function(attacker, target, damage, success, description) {
+                this.message.response   	= (success ? "OK" : "NOK");
+                this.message.attackerid 	= attacker;
+                this.message.targetid   	= target,
+                this.message.damage     	= damage;
+				this.message.description 	= description;
 
                 return JSON.parse(JSON.stringify(this.message));
             }
@@ -1198,12 +1200,14 @@ var core = {
 			"fights": null,
 			"knockouts": null,
 			"injured": null,
+			"experience": null,			//  Experience available for character development
+			"advancements": [],		// Advancements bought with experience
 			// armour.body = placeholder for full armour set (leather, chain, plate). The individual slots may remain empty
 			    "armour": {"body": "item_id", "head": "item_id", "torso": "item_id", "arms": "item_id", "hands": "item_id", "legs": "item_id", "feet": "item_id"},
 			"offhand": "item_id",
 			"defhand": "item_id",
-			"effects":[],
-			"icon": null
+			"icon": null,
+			"portrait": null,
 			},
 			init: function() {
 				return JSON.parse(JSON.stringify(this.data));
@@ -1245,6 +1249,7 @@ var core = {
 		"tohit": null,
 		"toblock": null,
 		"tocrit": null,
+		"toevade": null,
 		"armourvalue": null,
 		// modifiers (minus sign for decrease, plus  (or no sign) for increase)
 		"health": null,			// for healing spells and items providing bonus health
@@ -1253,6 +1258,34 @@ var core = {
 		"strength": null,
 		"mana": null,
 		"age":	null,
+
+		"icon": null,
+		"description": null
+	},
+
+	advancement: {	// See items.json for item listing
+		"_id": null,			// Unique advancement identifier (created on init (per server))
+		"name": null,			// Name of the advancement
+		"type": null,			// advancement
+		"subtype": null,		// attribute, skill
+		"maxlevel": null,		// Maximum level
+		"price": null,			// Amount of experience points consumed
+
+		// tohit, tocrit, toblock scale 0-100 (%)
+		"effect": [],			// See list of effects below
+		/*
+		"tohit": null,
+		"toblock": null,
+		"tocrit": null,
+		"toevade": null,
+		"armourvalue": null,
+		// modifiers (minus sign for decrease, plus  (or no sign) for increase)
+		"health": null,			// for healing spells and items providing bonus health
+		"damage": null,			// for wapons and attack spells
+		"nimbleness": null,
+		"strength": null,
+		"mana": null,
+		"age":	null, */
 
 		"icon": null,
 		"description": null

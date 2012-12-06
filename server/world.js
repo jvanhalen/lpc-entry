@@ -10,6 +10,7 @@ var world = {
     cupState: false,
 
     init: function(server) {
+        console.log("world: init()");
         this.server = server;
         setInterval(this.keepOnRocking, 1000,null);
     },

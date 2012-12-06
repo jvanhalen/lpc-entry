@@ -30,7 +30,7 @@
     var type=10;
     function setType(value)
     {
-	    type = value;
+        type = value;
     }
 
     </script>
@@ -41,7 +41,7 @@
      // we use GAS Maple server for authentication.
      // ****************************************
      $.validator.setDefaults({
-	 submitHandler: function() {
+     submitHandler: function() {
       var hashPass = Sha1.hash($('#password').val());
       var login = $('#username').val();
        // set cookie for later use
@@ -54,53 +54,53 @@
      // ****************************************
       $().ready(function(){
 
-	  // TODO: Create a custom (animated) cursor for "manager"
-	   //$('*').css('cursor','pointer');
-	   	$('*').css('cursor', 'url("../pics/gauntlet_cursor.png"), pointer');
+      // TODO: Create a custom (animated) cursor for "manager"
+       //$('*').css('cursor','pointer');
+        $('*').css('cursor', 'url("../pics/gauntlet_cursor.png"), pointer');
 
         $('#loginform').validate({
          rules: {
-         	username: { required: true, minlength: 3, maxlength: 12 },
-         	password: { required: true, minlength: 4, maxlength: 12 }	// TODO: minlength 4 -> 6 before releasing the game
+            username: { required: true, minlength: 3, maxlength: 12 },
+            password: { required: true, minlength: 4, maxlength: 12 }   // TODO: minlength 4 -> 6 before releasing the game
          }});
 
 
-	$("#username").keypress(function(event) {
-		event.preventDefault;
-		var $th = $(this);
-		$th.val( $th.val().replace(/[^a-zA-Z0-9]/g, function(str) { return ''; } ) );
+    $("#username").keypress(function(event) {
+        event.preventDefault;
+        var $th = $(this);
+        $th.val( $th.val().replace(/[^a-zA-Z0-9]/g, function(str) { return ''; } ) );
 
-	})
+    })
 
-	$("#username").keydown(function(event) {
-		event.preventDefault;
-		var $th = $(this);
-		$th.val( $th.val().replace(/[^a-zA-Z0-9]/g, function(str) { return ''; } ) );
+    $("#username").keydown(function(event) {
+        event.preventDefault;
+        var $th = $(this);
+        $th.val( $th.val().replace(/[^a-zA-Z0-9]/g, function(str) { return ''; } ) );
 
-	})
+    })
 
-	$("#typearea").keydown(function(event) {
-		if(event.keyCode == 13) {
-			if($("#typearea").val() != "") {
-				//$("#chatbox").val($("#typearea").val());
-				user = JSON.parse($.cookie("gas-login")).username
-				var message = $("#typearea").val();
+    $("#typearea").keydown(function(event) {
+        if(event.keyCode == 13) {
+            if($("#typearea").val() != "") {
+                //$("#chatbox").val($("#typearea").val());
+                user = JSON.parse($.cookie("gas-login")).username
+                var message = $("#typearea").val();
 
-				// TODO: "a scripting language", i.e. simple commands via command line
-				if($("#typearea").val() == "clear;") {
-					$("#chatbox").empty();
-				}
-				else if($("#typearea").val() == "help;") {
-	                  //$("#chatbox").append("<b>clear;</b> clear the chatbox<br /><b>help;</b> this help<br />");
-				}
-				else {
-					gas.send("CLIENT_CHAT_REQ", ['{"username": "' + user + '", "message": "' + message + '"}']);
-				}
+                // TODO: "a scripting language", i.e. simple commands via command line
+                if($("#typearea").val() == "clear;") {
+                    $("#chatbox").empty();
+                }
+                else if($("#typearea").val() == "help;") {
+                      //$("#chatbox").append("<b>clear;</b> clear the chatbox<br /><b>help;</b> this help<br />");
+                }
+                else {
+                    gas.send("CLIENT_CHAT_REQ", ['{"username": "' + user + '", "message": "' + message + '"}']);
+                }
 
-				$("#typearea").val("");
-		    }
-		}
-	});
+                $("#typearea").val("");
+            }
+        }
+    });
  })
 
     </script>
@@ -109,9 +109,9 @@
 
       function logout()
       {
-		 Crafty.audio.stop();
-		 Crafty.stop();
-		 location.reload(true);
+         Crafty.audio.stop();
+         Crafty.stop();
+         location.reload(true);
       }
 
       function displayLogin()
@@ -119,11 +119,11 @@
            g_smokeScreen.attr({changeToScene:"loadingView"}).tween({alpha:1.0},50);
 
            $('#login').fadeOut(500, function(){
-			 $('#login').empty();
-			 $('#login').html('<div id="welcome_title">Enjoy your stay, '+JSON.parse($.cookie("gas-login")).username+'! <p class="btnp"><a href="#" class="button" id="logout" onclick="logout();"> &gt;&gt;&nbsp;&nbsp;Logout</a></p>');
-			 $('#login').fadeIn('fast', function(){
-					  //Crafty.scene("loadingView");
-			 });
+             $('#login').empty();
+             $('#login').html('<div id="welcome_title">Enjoy your stay, '+JSON.parse($.cookie("gas-login")).username+'! <p class="btnp"><a href="#" class="button" id="logout" onclick="logout();"> &gt;&gt;&nbsp;&nbsp;Logout</a></p>');
+             $('#login').fadeIn('fast', function(){
+                      //Crafty.scene("loadingView");
+             });
            });
       }
 
@@ -168,7 +168,7 @@
          var tween = new TWEEN.Tween(param)
                     .to({val:destVal},100)
                     .delay(100)
-					.easing(TWEEN.Easing.Elastic.Out)
+                    .easing(TWEEN.Easing.Elastic.Out)
                     .onUpdate(function(){
                     $("#chatbox-messages").css("top",param.val);
                     $("#chatbox-messages").css("margin-left",x);
@@ -177,41 +177,41 @@
 
       function toggleChallenges()
       {
-		var curVal = parseInt($("#challenges").css('left'));
-		var width = parseInt($("#challenges").css('width'));
+        var curVal = parseInt($("#challenges").css('left'));
+        var width = parseInt($("#challenges").css('width'));
 
-		var destVal = (curVal < 0) ? 10 : 20-width;
+        var destVal = (curVal < 0) ? 10 : 20-width;
 
-		g_cssZVal += 1;
+        g_cssZVal += 1;
 
-		var param = {val: curVal};
-		var tween = new TWEEN.Tween(param)
-				   .to({val:destVal},100)
-				   .delay(100)
-				   .onUpdate(function(){
-					 $("#challenges").css("top","20px");
-					 $("#challenges").css("left",param.val);
-					 $("#challenges").css("z-index",g_cssZVal);
-				   }).start();
+        var param = {val: curVal};
+        var tween = new TWEEN.Tween(param)
+                   .to({val:destVal},100)
+                   .delay(100)
+                   .onUpdate(function(){
+                     $("#challenges").css("top","20px");
+                     $("#challenges").css("left",param.val);
+                     $("#challenges").css("z-index",g_cssZVal);
+                   }).start();
       }
 
       function toggleGladiatorInfo()
       {
-		var curVal = parseInt($("#thumbContainer").css('left'));
-		var width = parseInt($("#thumbContainer").css('width'));
+        var curVal = parseInt($("#thumbContainer").css('left'));
+        var width = parseInt($("#thumbContainer").css('width'));
 
-		var destVal = (curVal < 0) ? 10 : 20-width;
+        var destVal = (curVal < 0) ? 10 : 20-width;
 
-		g_cssZVal += 1;
+        g_cssZVal += 1;
 
-		var param = {val: curVal};
-		var tween = new TWEEN.Tween(param)
-				   .to({val:destVal},1000)
-				   .delay(100)
+        var param = {val: curVal};
+        var tween = new TWEEN.Tween(param)
+                   .to({val:destVal},1000)
+                   .delay(100)
                    .easing(TWEEN.Easing.Elastic.Out)
-				   .onUpdate(function(){
-					 $("#thumbContainer").css("left",param.val);
-				   }).start();
+                   .onUpdate(function(){
+                     $("#thumbContainer").css("left",param.val);
+                   }).start();
       }
 
       function craftyToggle()
@@ -239,27 +239,27 @@
 
       function showGladiatorInfo()
       {
-		var curVal = parseInt($("#gladiatorinfo").css('left'));
-		var width = parseInt($("#gladiatorinfo").css('width'));
+        var curVal = parseInt($("#gladiatorinfo").css('left'));
+        var width = parseInt($("#gladiatorinfo").css('width'));
 
-		var destVal = 10;
+        var destVal = 10;
 
-		g_cssZVal += 1;
+        g_cssZVal += 1;
 
-		var param = {val: curVal};
-		var tween = new TWEEN.Tween(param)
-				   .to({val:destVal},100)
-				   .delay(100)
-				   .onUpdate(function(){
-					 $("#gladiatorinfo").css("top","340px");
-					 $("#gladiatorinfo").css("left",param.val);
-					 $("#gladiatorinfo").css("z-index",g_cssZVal);
-				   }).start();
+        var param = {val: curVal};
+        var tween = new TWEEN.Tween(param)
+                   .to({val:destVal},100)
+                   .delay(100)
+                   .onUpdate(function(){
+                     $("#gladiatorinfo").css("top","340px");
+                     $("#gladiatorinfo").css("left",param.val);
+                     $("#gladiatorinfo").css("z-index",g_cssZVal);
+                   }).start();
       }
 
-	  function updateZzz(element) {
-		 element.css("z-index",++g_cssZVal);	// What would be the upper limit?
-	  }
+      function updateZzz(element) {
+         element.css("z-index",++g_cssZVal);    // What would be the upper limit?
+      }
 
     </script>
 </head>
@@ -277,8 +277,8 @@
       <form method="post" id="loginform" action="#">
         <label for="username">Username</label>
         <input type="text" name="username" id="username" class="required" maxlength="12"/>
-  	    <label for="password">Password</label>
-	    <input name="password" type="password" id="password" class="required" maxlength="12" />
+        <label for="password">Password</label>
+        <input name="password" type="password" id="password" class="required" maxlength="12" />
 
         <p class="btnp"><a href="#" class="button" id="loginbtn" title="Log in to an existing account" onclick="setType('LOGIN_REQ');$('#loginform').submit();"> &gt;&gt;&nbsp;&nbsp;Login</a></p>
         <p class="btnp"><a href="#" class="button" id="createbtn" title="Create new team" onclick="setType('CREATE_USER_REQ');$('#loginform').submit();"> &gt;&gt;&nbsp;&nbsp;Create</a></p>
@@ -294,10 +294,10 @@
 
     <p class="btnp"><a href="#" class="button" id="togglechat" onclick="toggleChat();"> Chat window </a></p>
     <p class="btnp"><a href="#" class="button" id="togglechallenger" onclick="toggleChallenges();"> Challenges </a></p>
-	<p class="btnp"><a href="#" class="button" id="togglegladiatorinfo" onclick="toggleGladiatorInfo();"> Gladiator </a></p>
+    <p class="btnp"><a href="#" class="button" id="togglegladiatorinfo" onclick="toggleGladiatorInfo();"> Gladiator </a></p>
   </div>
   <script>
-	Crafty.init(800, 736);
+    Crafty.init(800, 736);
 //    Crafty.background('#4d5155');
     Crafty.background("url('../assets/gui/paper.png");
     // Connect to GAS server
@@ -323,8 +323,8 @@
             Crafty.scene(g_smokeScreen.changeToScene);
         });
 
-    //gas.connect('gas.dy.fi', 8080);
-    gas.connect('localhost', 8080);
+    gas.connect('gas.dy.fi', 8080);
+    //gas.connect('localhost', 8080);
     Crafty.scene("managerView", showManagerView, hideManagerView);
     Crafty.scene("gladiatorView", showGladiatorView, hideGladiatorView);
     Crafty.scene("arenaView", showArenaView, hideArenaView);
@@ -344,7 +344,6 @@
     PreloadAnimation("no-armor.json");
     PreloadAnimation("long-spear.json");
 
-
     Crafty.scene("loadingView", function(){
        console.log('Loading');
        for( var i=0;i< assetArray.length;i++)
@@ -363,12 +362,12 @@
 
 
     if ( $.cookie("gas-login")) {
-		var loginstring = {
-		'username': JSON.parse($.cookie("gas-login")).username,
-		'sessionid': JSON.parse($.cookie("gas-login")).sessionid
-		}
+        var loginstring = {
+        'username': JSON.parse($.cookie("gas-login")).username,
+        'sessionid': JSON.parse($.cookie("gas-login")).sessionid
+        }
         gas.send('LOGIN_REQ', [ JSON.stringify(loginstring) ]);
-	}
+    }
 
   </script>
 
@@ -379,10 +378,11 @@
   <div id="gladiatorinfo" class="block"></div>
   <div id="cup_invitation" ></div>
 
-<!-- some test code for gladiator elements  -->
+<!-- some test code for gladiator elements
+
   <div class="padding">
   <div class="gladiatorshowcase">
-    	<table >
+        <table >
         <tr>
           <td><img class="border-top-left" src="../assets/corner-top-left.png" ></td>
           <td colspan="2"><img class="border-top" src="../assets/bar.png" width="200" height="20"></td>
@@ -396,11 +396,11 @@
         </tr>
         <tr><td>Name:</td><td>gladiator.name</td><td></td></tr>
         <tr><td>Age:</td><td>
-		<div style="padding:2px;background:#CCC;">
-		  <div style="width:25%;background:#aF4;text-align:center;">
-			<span>25%</span>
-		  </div>
-		</div></td></tr>
+        <div style="padding:2px;background:#CCC;">
+          <div style="width:25%;background:#aF4;text-align:center;">
+            <span>25%</span>
+          </div>
+        </div></td></tr>
         <tr><td>Health:</td><td><meter value="12" max="35"></meter></td></tr>
         <tr><td>Nimbleness:</td><td><meter value="12" max="35"></meter></td></tr>
         <tr><td>Strength:</td><td><meter value="1" max="35"></meter></td></tr>
@@ -415,15 +415,14 @@
           <td colspan="2"><img class="border-bottom" src="../assets/bar.png" width="200" height="20"></td>
           <td><img class="border-bottom-right" src="../assets/corner-bottom-right.png" ></td>
         </tr>
-		</table>
+        </table>
 
   </div>
   </div>
-
+-->
 <div id="thumbContainer">
-			<div id="thumbScroller">
-				<div class="container">
-
+            <div id="thumbScroller">
+                <div class="container">
                   <div class="content"><div><a href="#"><img src="../assets/portrait/Aileen.png" alt="" class="thumb" /></a>Oogliv</div></div>
                   <div class="content"><div><a href="#"><img src="../assets/portrait/Alec.png" alt="" class="thumb" /></a></div></div>
                   <div class="content"><div><a href="#"><img src="../assets/portrait/Andrew.png" alt="" class="thumb" /></a></div></div>
@@ -454,227 +453,225 @@
                   <div class="content"><div><a href="#"><img src="../assets/portrait/Marcos.png" alt="" class="thumb" /></a></div></div>
                   <div class="content"><div><a href="#"><img src="../assets/portrait/Markus.png" alt="" class="thumb" /></a></div></div>
                   <div class="content"><div><a href="#"><img src="../assets/portrait/Maxime.png" alt="" class="thumb" /></a></div></div>
-
-
-				</div>
-			</div>
-		</div>
+                </div>
+            </div>
+        </div>
   <!-- The JavaScript -->
         <script type="text/javascript" src="./lib/jquery.1.7.2.js"></script>
-		<script type="text/javascript" src="./lib/jquery.easing.1.3.js"></script>
-		<script type="text/javascript">
-			$(function() {
-				//index of current item
-				var current				= 0;
-				//speeds / ease type for animations
-				var fadeSpeed			= 400;
-				var animSpeed			= 600;
-				var easeType			= 'easeOutCirc';
-				//caching
-				var $thumbScroller		= $('#thumbScroller');
-				var $scrollerContainer	= $thumbScroller.find('.container');
-				var $scrollerContent	= $thumbScroller.find('.content');
-				var $pg_title 			= $('#pg_title');
-				var $pg_preview 		= $('#pg_preview');
-				var $pg_desc1 			= $('#pg_desc1');
-				var $pg_desc2 			= $('#pg_desc2');
-				var $overlay			= $('#overlay');
-				//number of items
-				var scrollerContentCnt  = $scrollerContent.length;
-				var sliderHeight		= $(window).height();
-				//we will store the total height
-				//of the scroller container in this variable
-				var totalContent		= 0;
-				//one items height
-				var itemHeight			= 0;
+        <script type="text/javascript" src="./lib/jquery.easing.1.3.js"></script>
+        <script type="text/javascript">
+            $(function() {
+                //index of current item
+                var current             = 0;
+                //speeds / ease type for animations
+                var fadeSpeed           = 400;
+                var animSpeed           = 600;
+                var easeType            = 'easeOutCirc';
+                //caching
+                var $thumbScroller      = $('#thumbScroller');
+                var $scrollerContainer  = $thumbScroller.find('.container');
+                var $scrollerContent    = $thumbScroller.find('.content');
+                var $pg_title           = $('#pg_title');
+                var $pg_preview         = $('#pg_preview');
+                var $pg_desc1           = $('#pg_desc1');
+                var $pg_desc2           = $('#pg_desc2');
+                var $overlay            = $('#overlay');
+                //number of items
+                var scrollerContentCnt  = $scrollerContent.length;
+                var sliderHeight        = $(window).height();
+                //we will store the total height
+                //of the scroller container in this variable
+                var totalContent        = 0;
+                //one items height
+                var itemHeight          = 0;
 
-				//First let's create the scrollable container,
-				//after all its images are loaded
-				var cnt		= 0;
-				$thumbScroller.find('img').each(function(){
-					var $img 	= $(this);
-					$('<img/>').load(function(){
-						++cnt;
-						if(cnt == scrollerContentCnt){
-							//one items height
-							itemHeight = $thumbScroller.find('.content:first').height();
-							buildScrollableItems();
-							//show the scrollable container
-							$thumbScroller.stop().animate({'left':'0px'},animSpeed);
-						}
-					}).attr('src',$img.attr('src'));
-				});
+                //First let's create the scrollable container,
+                //after all its images are loaded
+                var cnt     = 0;
+                $thumbScroller.find('img').each(function(){
+                    var $img    = $(this);
+                    $('<img/>').load(function(){
+                        ++cnt;
+                        if(cnt == scrollerContentCnt){
+                            //one items height
+                            itemHeight = $thumbScroller.find('.content:first').height();
+                            buildScrollableItems();
+                            //show the scrollable container
+                            $thumbScroller.stop().animate({'left':'0px'},animSpeed);
+                        }
+                    }).attr('src',$img.attr('src'));
+                });
 
-				//when we click an item from the scrollable container
-				//we want to display the items content
-				//we use the index of the item in the scrollable container
-				//to know which title / image / descriptions we will show
-				$scrollerContent.bind('click',function(e){
+                //when we click an item from the scrollable container
+                //we want to display the items content
+                //we use the index of the item in the scrollable container
+                //to know which title / image / descriptions we will show
+                $scrollerContent.bind('click',function(e){
                     console.log('Clicked');
-					var $this 				= $(this);
+                    var $this               = $(this);
 
-					var idx 				= $this.index();
-					//if we click on the one shown then return
-					if(current==idx) return;
+                    var idx                 = $this.index();
+                    //if we click on the one shown then return
+                    if(current==idx) return;
 
-					//if the current image is enlarged,
-					//then we will remove it but before
-					//we animate it just like we would do with the thumb
-					var $pg_large			= $('#pg_large');
-					if($pg_large.length > 0){
-						$pg_large.animate({'left':'350px','opacity':'0'},animSpeed,function(){
-							$pg_large.remove();
-						});
-					}
+                    //if the current image is enlarged,
+                    //then we will remove it but before
+                    //we animate it just like we would do with the thumb
+                    var $pg_large           = $('#pg_large');
+                    if($pg_large.length > 0){
+                        $pg_large.animate({'left':'350px','opacity':'0'},animSpeed,function(){
+                            $pg_large.remove();
+                        });
+                    }
 
-					//get the current and clicked items elements
-					var $currentTitle 		= $pg_title.find('h1:nth-child('+(current+1)+')');
-					var $nextTitle 			= $pg_title.find('h1:nth-child('+(idx+1)+')');
-					var $currentThumb		= $pg_preview.find('img.pg_thumb:eq('+current+')');
-					var $nextThumb			= $pg_preview.find('img.pg_thumb:eq('+idx+')');
-					var $currentDesc1 		= $pg_desc1.find('div:nth-child('+(current+1)+')');
-					var $nextDesc1 			= $pg_desc1.find('div:nth-child('+(idx+1)+')');
-					var $currentDesc2 		= $pg_desc2.find('div:nth-child('+(current+1)+')');
-					var $nextDesc2 			= $pg_desc2.find('div:nth-child('+(idx+1)+')');
+                    //get the current and clicked items elements
+                    var $currentTitle       = $pg_title.find('h1:nth-child('+(current+1)+')');
+                    var $nextTitle          = $pg_title.find('h1:nth-child('+(idx+1)+')');
+                    var $currentThumb       = $pg_preview.find('img.pg_thumb:eq('+current+')');
+                    var $nextThumb          = $pg_preview.find('img.pg_thumb:eq('+idx+')');
+                    var $currentDesc1       = $pg_desc1.find('div:nth-child('+(current+1)+')');
+                    var $nextDesc1          = $pg_desc1.find('div:nth-child('+(idx+1)+')');
+                    var $currentDesc2       = $pg_desc2.find('div:nth-child('+(current+1)+')');
+                    var $nextDesc2          = $pg_desc2.find('div:nth-child('+(idx+1)+')');
 
-					//the new current is now the index of the clicked scrollable item
-					current		 			= idx;
+                    //the new current is now the index of the clicked scrollable item
+                    current                 = idx;
 
-					//animate the current title up,
-					//hide it, and animate the next one down
-					$currentTitle.stop().animate({'top':'-50px'},animSpeed,function(){
-						$(this).hide();
-						$nextTitle.show().stop().animate({'top':'25px'},animSpeed);
-					});
+                    //animate the current title up,
+                    //hide it, and animate the next one down
+                    $currentTitle.stop().animate({'top':'-50px'},animSpeed,function(){
+                        $(this).hide();
+                        $nextTitle.show().stop().animate({'top':'25px'},animSpeed);
+                    });
 
-					//show the next image,
-					//animate the current to the left and fade it out
-					//so that the next gets visible
-					$nextThumb.show();
-					$currentThumb.stop().animate({'left': '350px','opacity':'0'},animSpeed,function(){
-						$(this).hide().css({
-							'left'		: '250px',
-							'opacity'	: 1,
-							'z-index'	: 1
-						});
-						$nextThumb.css({'z-index':9999});
-					});
+                    //show the next image,
+                    //animate the current to the left and fade it out
+                    //so that the next gets visible
+                    $nextThumb.show();
+                    $currentThumb.stop().animate({'left': '350px','opacity':'0'},animSpeed,function(){
+                        $(this).hide().css({
+                            'left'      : '250px',
+                            'opacity'   : 1,
+                            'z-index'   : 1
+                        });
+                        $nextThumb.css({'z-index':9999});
+                    });
 
-					//animate both current descriptions left / right and fade them out
-					//fade in and animate the next ones right / left
-					$currentDesc1.stop().animate({'left':'205px','opacity':'0'},animSpeed,function(){
-						$(this).hide();
-						$nextDesc1.show().stop().animate({'left':'250px','opacity':'1'},animSpeed);
-					});
-					$currentDesc2.stop().animate({'left':'295px','opacity':'0'},animSpeed,function(){
-						$(this).hide();
-						$nextDesc2.show().stop().animate({'left':'250px','opacity':'1'},animSpeed);
-					});
-					e.preventDefault();
-				});
+                    //animate both current descriptions left / right and fade them out
+                    //fade in and animate the next ones right / left
+                    $currentDesc1.stop().animate({'left':'205px','opacity':'0'},animSpeed,function(){
+                        $(this).hide();
+                        $nextDesc1.show().stop().animate({'left':'250px','opacity':'1'},animSpeed);
+                    });
+                    $currentDesc2.stop().animate({'left':'295px','opacity':'0'},animSpeed,function(){
+                        $(this).hide();
+                        $nextDesc2.show().stop().animate({'left':'250px','opacity':'1'},animSpeed);
+                    });
+                    e.preventDefault();
+                });
 
-				//when we click a thumb, the thumb gets enlarged,
-				//to the sizes of the large image (fixed values).
-				//then we load the large image, and insert it after
-				//the thumb. After that we hide the thumb so that
-				//the large one gets displayed
-				$pg_preview.find('.pg_thumb').bind('click',showLargeImage);
+                //when we click a thumb, the thumb gets enlarged,
+                //to the sizes of the large image (fixed values).
+                //then we load the large image, and insert it after
+                //the thumb. After that we hide the thumb so that
+                //the large one gets displayed
+                $pg_preview.find('.pg_thumb').bind('click',showLargeImage);
 
-				//enlarges the thumb
-				function showLargeImage(){
-					//if theres a large one remove
-					$('#pg_large').remove();
-					var $thumb 		= $(this);
-					$thumb.unbind('click');
-					var large_src 	= $thumb.attr('alt');
+                //enlarges the thumb
+                function showLargeImage(){
+                    //if theres a large one remove
+                    $('#pg_large').remove();
+                    var $thumb      = $(this);
+                    $thumb.unbind('click');
+                    var large_src   = $thumb.attr('alt');
 
-					$overlay.fadeIn(200);
-					//animate width to 600px,height to 500px
-					$thumb.stop().animate({
-						'width'	: '600px',
-						'height': '500px'
-					},500,function(){
-						$('<img id="pg_large"/>').load(function(){
-							var $largeImg = $(this);
-							$largeImg.insertAfter($thumb).show();
-							$thumb.hide().css({
-								'left'		: '250px',
-								'opacity'	: 1,
-								'z-index'	: 1,
-								'width'		: '360px',
-								'height'	: '300px'
-							});
-							//when we click the large image
-							//we revert the animation
-							$largeImg.bind('click',function(){
-								$thumb.show();
-								$overlay.fadeOut(200);
-								$(this).stop().animate({
-									'width'	: '360px',
-									'height': '300px'
-								},500,function(){
-									$(this).remove();
-									$thumb.css({'z-index'	: 9999});
-									//bind again the click event
-									$thumb.bind('click',showLargeImage);
-								});
+                    $overlay.fadeIn(200);
+                    //animate width to 600px,height to 500px
+                    $thumb.stop().animate({
+                        'width' : '600px',
+                        'height': '500px'
+                    },500,function(){
+                        $('<img id="pg_large"/>').load(function(){
+                            var $largeImg = $(this);
+                            $largeImg.insertAfter($thumb).show();
+                            $thumb.hide().css({
+                                'left'      : '250px',
+                                'opacity'   : 1,
+                                'z-index'   : 1,
+                                'width'     : '360px',
+                                'height'    : '300px'
+                            });
+                            //when we click the large image
+                            //we revert the animation
+                            $largeImg.bind('click',function(){
+                                $thumb.show();
+                                $overlay.fadeOut(200);
+                                $(this).stop().animate({
+                                    'width' : '360px',
+                                    'height': '300px'
+                                },500,function(){
+                                    $(this).remove();
+                                    $thumb.css({'z-index'   : 9999});
+                                    //bind again the click event
+                                    $thumb.bind('click',showLargeImage);
+                                });
 
-							});
-						}).attr('src',large_src);
-					});
-				}
+                            });
+                        }).attr('src',large_src);
+                    });
+                }
 
-				//resize window event:
-				//the scroller container needs to update
-				//its height based on the new windows height
-				$(window).resize(function() {
-					var w_h			= $(window).height();
-					$thumbScroller.css('height',w_h);
-					sliderHeight	= w_h;
-				});
+                //resize window event:
+                //the scroller container needs to update
+                //its height based on the new windows height
+                $(window).resize(function() {
+                    var w_h         = $(window).height();
+                    $thumbScroller.css('height',w_h);
+                    sliderHeight    = w_h;
+                });
 
-				//create the scrollable container
-				//taken from Manos :
-				//http://manos.malihu.gr/jquery-thumbnail-scroller
-				function buildScrollableItems(){
-					totalContent = (scrollerContentCnt+1)*itemHeight;
-					$thumbScroller.css('height',sliderHeight)
-					.mousemove(function(e){
-						if($scrollerContainer.height()>sliderHeight){
-							var mouseCoords		= (e.pageY - this.offsetTop);
-							var mousePercentY	= mouseCoords/sliderHeight;
-							var destY			= -(((totalContent-(sliderHeight-itemHeight))-sliderHeight)*(mousePercentY));
-							var thePosA			= mouseCoords-destY;
-							var thePosB			= destY-mouseCoords;
-							if(mouseCoords==destY)
-								$scrollerContainer.stop();
-							else if(mouseCoords>destY)
-								$scrollerContainer.stop()
-							.animate({
-								top: -thePosA
-							},
-							animSpeed,
-							easeType);
-							else if(mouseCoords<destY)
-								$scrollerContainer.stop()
-							.animate({
-								top: thePosB
-							},
-							animSpeed,
-							easeType);
-						}
-					}).find('.thumb')
-					.fadeTo(fadeSpeed, 0.6)
-					.hover(
-					function(){ //mouse over
-						$(this).fadeTo(fadeSpeed, 1);
-					},
-					function(){ //mouse out
-						$(this).fadeTo(fadeSpeed, 0.6);
-					}
-				);
-				}
-			});
-		</script>
+                //create the scrollable container
+                //taken from Manos :
+                //http://manos.malihu.gr/jquery-thumbnail-scroller
+                function buildScrollableItems(){
+                    totalContent = (scrollerContentCnt+1)*itemHeight;
+                    $thumbScroller.css('height',sliderHeight)
+                    .mousemove(function(e){
+                        if($scrollerContainer.height()>sliderHeight){
+                            var mouseCoords     = (e.pageY - this.offsetTop);
+                            var mousePercentY   = mouseCoords/sliderHeight;
+                            var destY           = -(((totalContent-(sliderHeight-itemHeight))-sliderHeight)*(mousePercentY));
+                            var thePosA         = mouseCoords-destY;
+                            var thePosB         = destY-mouseCoords;
+                            if(mouseCoords==destY)
+                                $scrollerContainer.stop();
+                            else if(mouseCoords>destY)
+                                $scrollerContainer.stop()
+                            .animate({
+                                top: -thePosA
+                            },
+                            animSpeed,
+                            easeType);
+                            else if(mouseCoords<destY)
+                                $scrollerContainer.stop()
+                            .animate({
+                                top: thePosB
+                            },
+                            animSpeed,
+                            easeType);
+                        }
+                    }).find('.thumb')
+                    .fadeTo(fadeSpeed, 0.6)
+                    .hover(
+                    function(){ //mouse over
+                        $(this).fadeTo(fadeSpeed, 1);
+                    },
+                    function(){ //mouse out
+                        $(this).fadeTo(fadeSpeed, 0.6);
+                    }
+                );
+                }
+            });
+        </script>
 </body>
 </html>

@@ -423,7 +423,6 @@ td, th {
     position: relative;
     top: -4px;
 }
-<<<<<<< HEAD
 
 #gladiatorinfo {
     font-family: 'Fanwood-Text';
@@ -476,25 +475,15 @@ td, th {
     background-image: url('../assets/fire.png');
     background-size: 100%;
     background-repeat:no-repeat;
-=======
-	position:fixed;
-	top:0px;
-	left:0px;
-	bottom:0px;
-	margin:0;
-	width:175px;
-	padding:0 10px;
-	background:transparent url(../bg.png) repeat top left;
-	border-right:1px solid #f0f0f0;
-	-moz-box-shadow:-2px 0px 10px #000 inset;
-	-webkit-box-shadow:-2px 0px 10px #000 inset;
-	box-shadow:-2px 0px 10px #000 inset;
+
 }
 #thumbScroller{
 	position:relative;
 	height:600px;
 	overflow:hidden;
 	left:-180px;
+
+	
 }
 #thumbScroller .container{
 	position:relative;
@@ -586,5 +575,4 @@ img#pg_large{
     position: absolute;
     top: 0px;
     left: -300px;
->>>>>>> master
 }

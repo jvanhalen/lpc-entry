@@ -21,7 +21,7 @@ var g_victory = null;
 var g_moneyCalc = null;
 var g_playerGold = 0;
 
-var g_craftyShoppingMenus = false; // Use Crafty or plain html menus
+var g_craftyShoppingMenus = true; // Use Crafty or plain html menus
 
 var g_battleTeam = {
 
