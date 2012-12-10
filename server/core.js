@@ -291,6 +291,14 @@ var core = {
 				case "icon":
 					gladiator.icon = attributelist[item];
 					break;
+				case "experience":
+					if("+1" == attributelist[item])
+						gladiator.experience += 1;
+					else if("+2" == attributelist[item])
+						gladiator.experience += 2;
+					else
+						gladiator.experience = attributelist[item];
+					break;
 				default:
 					console.log("ERROR: core.editGladiator: invalid attribute:", item)
 			}

@@ -280,19 +280,19 @@ var api = {
 				def = shield.toblock;
 			}
 
-			// TODO: check evade ( = (nimbleness / 5) + toevade)
-
 			// TODO: check advancements
 			def += tgt.nimbleness;
 			var dice = core.rollDice("d100");
 			console.log(attackername, "rolled", dice, "while def was", def);
 			if(dice < def) {
-				// TODO: experience++ (60% propability)
+				// TODO: experience++ (100% probability?)
+				core.editGladiator(targetname, {experience: "+1"});
+
 				if(shield) {
 					console.log(targetname, "blocked the attack!");
 				}
 				else {
-					console.log(targetname, "dodged the attack!");
+					console.log(targetname, "evaded the attack!");
 				}
 
 				var msg = this.message.ATTACK_RESP.init(attackername, targetname, 0, false);
@@ -314,7 +314,7 @@ var api = {
 			// TODO: check advancements
 			var dmg = 0;
 			if(weapon) {
-				// TODO: Crush modifier
+				// TODO: Crush modifier (damage advancement)
 				dmg = core.rollDice(weapon.damage);
 			}
 			else {
@@ -350,7 +350,8 @@ var api = {
 			var descr = attackername + " hit " + targetname + " for " + dmg + " points of damage. That must have hurt!";
 			console.log(descr);
 
-			// TODO: attacker experience++ (60% propability)
+			// TODO: attacker experience++ (100% probability?)
+			core.editGladiator(attackername, {experience: "+1"});
 
 			var msg = this.message.ATTACK_RESP.init(attackername, targetname, dmg, true, descr);
 
