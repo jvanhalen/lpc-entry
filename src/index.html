@@ -84,41 +84,51 @@
       <div class="gladiator">
         <img class="face" src="../assets/portrait/thumbs/Aileen.png" alt="Aileen" />
         <div class="action">
-          <img class="battle_action melee" src="../assets/gui/melee-attack.png">
-          <img class="battle_action ranged" src="../assets/gui/ranged-attack.png">
-          <img class="battle_action defend" src="../assets/gui/defend.png"><br/>
-          <img class="battle_action cast" src="../assets/gui/spellcast.png">
+          <div class="btnp melee button-big" ><span class="bigbutton-text">Melee Attack</span><img class="battle_action" src="../assets/gui/melee-attack.png"></div>
+          <div class="btnp ranged button-big"><span class="bigbutton-text">Ranged Attack</span><img class="battle_action" src="../assets/gui/ranged-attack.png"></div>
+          <div class="btnp defend button-big"><span class="bigbutton-text">Defend Position</span><img class="battle_action" src="../assets/gui/defend.png"></div>
+          <div class="btnp cast button-big"><span class="bigbutton-text">Cast Spell</span><img class="battle_action" src="../assets/gui/spellcast.png"></div>
         </div>
       </div>
       <div class="gladiator">
         <img  class="face" src="../assets/portrait/thumbs/Bjin.png" alt="Bjin" />
         <div class="action">
-          <img class="battle_action melee" src="../assets/gui/melee-attack.png">
-          <img class="battle_action ranged" src="../assets/gui/ranged-attack.png">
-          <img class="battle_action defend" src="../assets/gui/defend.png"><br/>
-          <img class="battle_action cast" src="../assets/gui/spellcast.png">
-
+          <div class="btnp melee button-big" ><span class="bigbutton-text">Melee Attack</span><img class="battle_action" src="../assets/gui/melee-attack.png"></div>
+          <div class="btnp ranged button-big"><span class="bigbutton-text">Ranged Attack</span><img class="battle_action" src="../assets/gui/ranged-attack.png"></div>
+          <div class="btnp defend button-big"><span class="bigbutton-text">Defend Position</span><img class="battle_action" src="../assets/gui/defend.png"></div>
+          <div class="btnp cast button-big"><span class="bigbutton-text">Cast Spell</span><img class="battle_action" src="../assets/gui/spellcast.png"></div>
+    
         </div>
       </div>
       <div class="gladiator">
         <img  class="face" src="../assets/portrait/thumbs/Jonas.png" alt="Jonas" />
         <div class="action">
-          <img class="battle_action melee" src="../assets/gui/melee-attack.png">
-          <img class="battle_action ranged" src="../assets/gui/ranged-attack.png">
-          <img class="battle_action defend" src="../assets/gui/defend.png"><br/>
-          <img class="battle_action cast" src="../assets/gui/spellcast.png">
+          <div class="btnp melee button-big" ><span class="bigbutton-text">Melee Attack</span><img class="battle_action" src="../assets/gui/melee-attack.png"></div>
+          <div class="btnp ranged button-big"><span class="bigbutton-text">Ranged Attack</span><img class="battle_action" src="../assets/gui/ranged-attack.png"></div>
+          <div class="btnp defend button-big"><span class="bigbutton-text">Defend Position</span><img class="battle_action" src="../assets/gui/defend.png"></div>
+          <div class="btnp cast button-big"><span class="bigbutton-text">Cast Spell</span><img class="battle_action" src="../assets/gui/spellcast.png"></div>
+    
+    
         </div>
       </div>
       <div class="gladiator">
         <img  class="face" src="../assets/portrait/thumbs/FlareFemaleHero1.png" alt="FemaleHero1" />
         <div class="action">
-          <img class="battle_action melee" src="../assets/gui/melee-attack.png">
-          <img class="battle_action ranged" src="../assets/gui/ranged-attack.png">
-          <img class="battle_action defend" src="../assets/gui/defend.png"><br/>
-          <img class="battle_action cast" src="../assets/gui/spellcast.png">
+          <div class="btnp melee button-big" ><span class="bigbutton-text">Melee Attack</span><img class="battle_action" src="../assets/gui/melee-attack.png"></div>
+          <div class="btnp ranged button-big"><span class="bigbutton-text">Ranged Attack</span><img class="battle_action" src="../assets/gui/ranged-attack.png"></div>
+          <div class="btnp defend button-big"><span class="bigbutton-text">Defend Position</span><img class="battle_action" src="../assets/gui/defend.png"></div>
+          <div class="btnp cast button-big"><span class="bigbutton-text">Cast Spell</span><img class="battle_action" src="../assets/gui/spellcast.png"></div>
+    
+          
         </div>
       </div>
 
+    </div>
+
+    <div class="spells">
+      <div class="spells_title">Spells</div>
+      <div class="gladiator_spells">
+      </div>
     </div>
 
     <!-- battle visualization with crafty, point to highlight gladiator from UI -->
@@ -302,45 +312,49 @@
           $img.bind('click', function(e){
              hideActions();
              $(this).next()
-                .css({'top':$(this).offset().top})
+                  .css({'top':'100px'})
                 .addClass('current')
-                .animate({'left':'125px'},400, function(){});
+                  .animate({'left':($(window).width()-450)+'px'},400, function(){});
           });
       });
 
       // bindings for melee attack
-      $('#left').find('img.melee').each( function(){
+      $('#left').find('div.melee').each( function(){
           $(this).bind('click', function(e){
               var $gladiator = $(this).parent().prev('img').attr('alt');
               console.log('clicked melee on ', $gladiator );
+              hideActions();
          });
       });
       // bindings for ranged attack
-      $('#left').find('img.ranged').each( function(){
+      $('#left').find('div.ranged').each( function(){
           $(this).bind('click', function(e){
               var $gladiator = $(this).parent().prev('img').attr('alt');
               console.log('clicked ranged on ', $gladiator );
+              hideActions();
          });
       });
       // bindings for defense
-      $('#left').find('img.defend').each( function(){
+      $('#left').find('div.defend').each( function(){
           $(this).bind('click', function(e){
               var $gladiator = $(this).parent().prev('img').attr('alt');
               console.log('clicked defend on ', $gladiator );
+              hideActions();
          });
       });
       // bindings for magic
-      $('#left').find('img.cast').each( function(){
+      $('#left').find('div.cast').each( function(){
           $(this).bind('click', function(e){
               var $gladiator = $(this).parent().prev('img').attr('alt');
               console.log('clicked spellcast on ', $gladiator );
+              hideActions();
          });
       });
 
       // hides selected actions
       function hideActions(){
          $('#left').find('.current').each( function(){
-            $(this).removeClass('current').animate({'left':'-500px'},400);
+             $(this).removeClass('current').animate({'left':$(window).width()+'px'},400);
          });
       }
       

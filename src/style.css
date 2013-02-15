@@ -175,9 +175,28 @@ A.button-smaller:active {
 	color:white;
     text-decoration: none;
 }
+.button-big {
+    outline: none;
+    border: none;
+    width: 440px;
+    height:95px;
+    line-height:43px;
+    display: block;
+    background-position: 0px 0px;
+    background-image: url('../assets/gui/bigbutton.png');
+    font-size: 22pt;
+    text-shadow: 2px 2px 2px #000000;
+	text-align:left;
+	color:white;
+    text-decoration: none;
+    font-family: 'Fanwood-Text';
+}
+
 .btnp {
     display: inline-block;
     margin: 0 0 0 0;
+    position:relative;
+    top: 20px;
 }
 .gas_battle {
     bottom:-600px;
@@ -235,22 +254,26 @@ A.button-smaller:active {
 div.action {
     position:absolute;
     z-index: 1;
-    height:52px;
-    width:410px;
-    left:-500px;
+    height: 400px;
+    width:490px;
+    left:1310px;
     top:0px;
 }
 
 img.battle_action {
+    position: relative;
+    top: 11px;
     width: 70px;
     height: 70px;
+    float: right;
+    right: 40px;
 }
+
 img.battle_action.melee {
  
  
 }
 img.battle_action.ranged {
- 
  
  
 }
@@ -267,4 +290,13 @@ img.desaturate {
     -moz-filter: grayscale(100%);
     -ms-filter: grayscale(100%);
     -o-filter: grayscale(100%);
+}
+.bigbutton-text {
+    position: relative;
+    top: 20px;
+    margin-left: 60px;
+}
+.spells {
+    position: absolute;
+    top: -200px;
 }
