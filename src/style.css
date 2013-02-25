@@ -33,7 +33,9 @@ h1 {
     position: absolute;
     left: 0px;
     top: 0px;
-    width: 100%;
+    /* webkit seems to need these on BB playbook...*/
+    width: auto;
+    height: auto;
 }
 
 .gas_overlay {
