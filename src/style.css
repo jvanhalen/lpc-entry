@@ -300,3 +300,8 @@ img.desaturate {
     position: absolute;
     top: -200px;
 }
+#spell_list {
+    position: absolute;
+    left: -500px;
+    z-index: 10;
+}
