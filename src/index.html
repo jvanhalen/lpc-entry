@@ -81,22 +81,24 @@
     <div class="left" id="left">
       <div class="gladiator">
         <img class="face" src="../assets/portrait/thumbs/Aileen.png" alt="Aileen" />
-<!--        <div class="current_action" >
-          <img class="selected" src="../assets/gui/melee-attack.png" alt="melee"/>
-          <img class="selected" src="../assets/gui/ranged-attack.png" alt="ranged"/>
-          <img class="selected" src="../assets/gui/defend.png" alt="defend"/>
-          <img class="selected" src="../assets/gui/spellcast.png" alt="cast"/>
-        </div> -->
+        <img class="current_action" src=""/>
+        <img class="current_target" src=""/>
       </div>
     
       <div class="gladiator">
         <img  class="face" src="../assets/portrait/thumbs/Bjin.png" alt="Bjin" />
+        <img class="current_action" src=""/>
+        <img class="current_target" src=""/>
       </div>
       <div class="gladiator">
         <img  class="face" src="../assets/portrait/thumbs/Jonas.png" alt="Jonas" />
+        <img class="current_action" src=""/>
+        <img class="current_target" src=""/>
       </div>
       <div class="gladiator">
         <img  class="face" src="../assets/portrait/thumbs/FlareFemaleHero1.png" alt="FemaleHero1" />
+        <img class="current_action" src=""/>
+        <img class="current_target" src=""/>
       </div>
 
     </div>
@@ -297,6 +299,7 @@
           $(this).bind('click', function(e){
               var $gladiator = $('#action').data('gladiator');
               console.log('clicked melee on ', $gladiator );
+              $('img[alt="'+$gladiator+'"]').next().attr('src', '../assets/gui/melee-attack.png');
               hideActions();
          });
       });
@@ -305,6 +308,7 @@
           $(this).bind('click', function(e){
               var $gladiator = $('#action').data('gladiator');
               console.log('clicked ranged on ', $gladiator );
+              $('img[alt="'+$gladiator+'"]').next().attr('src', '../assets/gui/ranged-attack.png');
               hideActions();
          });
       });
@@ -312,6 +316,7 @@
       $('#action').find('div.defend').each( function(){
           $(this).bind('click', function(e){
               var $gladiator = $('#action').data('gladiator');
+              $('img[alt="'+$gladiator+'"]').next().attr('src', '../assets/gui/defend.png');
               console.log('clicked defend on ', $gladiator );
               hideActions();
          });
@@ -344,6 +349,18 @@
               console.log($("#action").data('gladiator'), 'casts', 
                           $("#action").data('spell'), ' on ', e.target.alt);
 
+              var spell = $("#action").data('spell');
+              var gladiator = $("#action").data('gladiator');
+
+              var spellImage = $("#"+spell).find('img').attr('src');
+
+              var targetSrc = $('img[alt="'+e.target.alt+'"]').attr('src');
+              //console.log(spellImage);
+              //console.log(targetSrc);
+
+              // update indicator images on gladiators.
+              $('img[alt="'+gladiator+'"]').next().next().attr('src',targetSrc);
+              $('img[alt="'+gladiator+'"]').next('img.current_action').attr('src',spellImage);
               hideSpells();
           });
       });

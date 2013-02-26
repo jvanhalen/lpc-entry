@@ -307,13 +307,24 @@ img.desaturate {
     left: -500px;
     z-index: 10;
 }
-.current_action {
+
+img.current_action {
+    width: 32px;
+    height: 32px;    
     position: absolute;
-    left: 100px;
-    z-index: 11;
+    bottom:2px;
+    left:0px;
+    z-index: 2;
+    
 }
-.selected {
-    width: 64px;
-    height: 64px;
-    z-index: 12;
+img.current_target {
+    idth: 32px;
+    height: 32px;    
+    position: absolute;
+    bottom:2px;
+    right:0px;
+    z-index: 2;
+}
+div.gladiator {
+    position: relative;
 }
