@@ -317,6 +317,7 @@
               console.log('clicked spellcast on ', $gladiator );
               hideActions();
               showSpells();
+              fadeOthers( $gladiator );              
          });
       });
 
@@ -327,7 +328,7 @@
               // store selected spell
               $('#action').data('spell',$(this).attr('id'));
               selectSpell($(this).attr('id'));
-              
+              unfadeAll();
           });
       });
       // bindings for enemies 
@@ -336,9 +337,24 @@
           $img.bind('click', function(e){
               console.log($("#action").data('gladiator'), 'casts', 
                           $("#action").data('spell'), ' on ', e.target.alt);
+
               hideSpells();
           });
       });
+      function fadeOthers( gladiator ){
+          $("#left").find("img.face").each(function(){
+              $img = $(this);
+              if ( $img.attr('alt') != gladiator ){
+                  $img.animate({'opacity':0.3}, 300);
+              }
+          });
+      }
+      function unfadeAll(){
+          $("#left").find("img.face").each(function(){
+              $(this).animate({'opacity':1.0}, 300);
+          });
+      }
+
       // hides selected actions
       function hideActions(){
           $('#action').animate({'left':$(window).width()+'px'},400);
@@ -360,7 +376,7 @@
                   $(this).animate({'opacity': 0.0},400, function(){
                       $(this).css({'visibility':'hidden'});
                   });
-          })
+          });
       } 
 
       // position battle start div to center
