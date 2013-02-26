@@ -307,3 +307,13 @@ img.desaturate {
     left: -500px;
     z-index: 10;
 }
+.current_action {
+    position: absolute;
+    left: 100px;
+    z-index: 11;
+}
+.selected {
+    width: 64px;
+    height: 64px;
+    z-index: 12;
+}
